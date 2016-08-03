@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
+        <title>Madori</title>
+    </head>
+    <body>
+        <nav>
+            <div class="nav-wrapper">
+                <a class="brand-logo">Madori</a>
+                <ul class="right">
+                    <li>坪 : <span id="tubo">0</span></li>
+                    <li><a id="add" href="#!">追加<i class="material-icons right">add</i></a></li>
+                </ul>
+            </div>
+        </nav>
+        <div id="form" class="modal modal-fixed-footer">
+            <div class="modal-content">
+                <div class="input-field">
+                    <label for="width">横</label>
+                    <input id="width" type="number" class="validate">
+                </div>
+                <div class="input-field">
+                    <label for="height">縦</label>
+                    <input id="height" type="number" class="validate">
+                </div>
+                <div class="input-field">
+                    <select id="unit" class="browser-default">
+                        <option value="1.00" selected>m</option>
+                        <option value="1.70" selected>畳 (団地間)</option>
+                        <option value="1.76" selected>畳 (江戸間)</option>
+                        <option value="1.82" selected>畳 (中京間)</option>
+                        <option value="1.91" selected>畳 (京間)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a id="remove" href="#!" class="waves-effect waves-light btn red">削除</a>
+                <a id="change" href="#!" class="waves-effect waves-light btn">変更</a>
+            </div>
+        </div>
+        <canvas id="madori"></canvas>
+        <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js"></script>
+        <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+        <script src="/js/main.js"></script>
+    </body>
+</html>
