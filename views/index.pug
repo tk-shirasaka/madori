@@ -1,0 +1,53 @@
+doctype html
+html
+    head
+        meta(http-equiv='Content-Type', content='text/html; charset=UTF-8')
+        meta(name='viewport', content='width=device-width, initial-scale=1.0')
+        link(rel='stylesheet', href='http://fonts.googleapis.com/icon?family=Material+Icons')
+        link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css')
+        title 間取り
+    body
+        nav
+            .nav-wrapper
+                a.brand-logo 間取り
+                ul.right
+                    li
+                        a#add(href='#!')
+                            追加
+                            i.material-icons.right add
+        .chip.right
+            span#tubo 0
+            坪
+        #form.modal.modal-fixed-footer
+            .modal-content
+                h4 間取設定
+                .row
+                    .input-field.col.s6
+                        label(for='width') 横
+                        input#width.validate(type='number')
+                    .input-field.col.s6
+                        label(for='height') 縦
+                        input#height.validate(type='number')
+                    .input-field.col.s6
+                        select#unit
+                            option(value='1.00') m
+                            option(value='1.70') 畳 (団地間)
+                            option(value='1.76') 畳 (江戸間)
+                            option(value='1.82') 畳 (中京間)
+                            option(value='1.91') 畳 (京間)
+                    .input-field.col.s6
+                        select#type
+                            option(value='BurlyWood') 洋室
+                            option(value='LimeGreen') 和室
+                            option(value='DarkGray') トイレ
+                            option(value='Aqua') お風呂
+                            option(value='Plum') 洗面所
+                            option(value='Sienna') その他
+            .modal-footer
+                a#remove.waves-effect.waves-light.btn.red(href='#!') 削除
+                a#change.waves-effect.waves-light.btn(href='#!') 変更
+        canvas#madori
+        script(src='https://code.jquery.com/jquery-3.1.0.min.js')
+        script(src='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js')
+        script(src='https://code.createjs.com/createjs-2015.11.26.min.js')
+        script(src='/js/main.js')
