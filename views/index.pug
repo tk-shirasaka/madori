@@ -12,36 +12,42 @@ html
                 a.brand-logo 間取り
                 ul.right
                     li
-                        a#add(href='#!') 追加
+                        a#export.waves-effect.waves-light.btn エクスポート
+                    li
+                        a#add.dropdown-button(href='#!') 追加
                             i.material-icons.right add
+        .file-field.input-field
+            .btn
+               span インポート
+               input#import(type='file')
+            .file-path-wrapper
+                input.file-path.validate(type='text')
         .chip.right
             span#tubo 0
             | 坪
         #form.modal.modal-fixed-footer
             .modal-content
                 h4 間取設定
-                .row
-                    .input-field.col.s6
-                        label(for='width') 横
-                        input#width.validate(type='number')
-                    .input-field.col.s6
-                        label(for='height') 縦
-                        input#height.validate(type='number')
-                    .input-field.col.s6
-                        select#unit
-                            option(value='1.00') m
-                            option(value='1.70') 畳 (団地間)
-                            option(value='1.76') 畳 (江戸間)
-                            option(value='1.82') 畳 (中京間)
-                            option(value='1.91') 畳 (京間)
-                    .input-field.col.s6
-                        select#type
-                            option(value='BurlyWood') 洋室
-                            option(value='LimeGreen') 和室
-                            option(value='DarkGray') トイレ
-                            option(value='Aqua') お風呂
-                            option(value='Plum') 洗面所
-                            option(value='Sienna') その他
+                .input-field
+                    label(for='size') 畳
+                    input#size(type='number')
+                .input-field
+                    select#type
+                        option(value='1') 洋室
+                        option(value='2') 和室
+                        option(value='3') トイレ
+                        option(value='4') お風呂
+                        option(value='5') 洗面所
+                        option(value='6') 廊下
+                        option(value='7') 階段
+                        option(value='8') 玄関
+                        option(value='9') その他
+                .input-field
+                    select#unit
+                        option(value='1.70') 畳 (団地間)
+                        option(value='1.76') 畳 (江戸間)
+                        option(value='1.82') 畳 (中京間)
+                        option(value='1.91') 畳 (京間)
             .modal-footer
                 a#remove.waves-effect.waves-light.btn.red(href='#!') 削除
                 a#change.waves-effect.waves-light.btn(href='#!') 変更
