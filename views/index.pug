@@ -12,22 +12,25 @@ html
                 a.brand-logo 間取り
                 ul.right
                     li
-                        a#export.waves-effect.waves-light.btn エクスポート
-                    li
-                        a#add.dropdown-button(href='#!') 追加
-                            i.material-icons.right add
-        .file-field.input-field
-            .btn
-               span インポート
-               input#import(type='file')
-            .file-path-wrapper
-                input.file-path.validate(type='text')
+                        a#menu(href='#!', data-activates='side')
+                            i.material-icons.right menu
+        ul#side.side-nav
+            li
+                .file-field.input-field
+                    .btn
+                       span インポート
+                       input#import(type='file')
+                    .file-path-wrapper
+                        input.file-path.validate(type='text')
+            li
+                a#export.waves-effect.waves-light.btn エクスポート
+            li
+                a#add.waves-effect.waves-light.btn 間取を追加
         .chip.right
             span#tubo 0
             | 坪
         #form.modal.modal-fixed-footer
             .modal-content
-                h4 間取設定
                 .input-field
                     label(for='size') 畳
                     input#size(type='number')
