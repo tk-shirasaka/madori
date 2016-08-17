@@ -7,13 +7,16 @@ html
         link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css')
         title 間取り
     body
-        nav
-            .nav-wrapper
-                a.brand-logo 間取り
-                ul.right
-                    li
-                        a#menu(href='#!', data-activates='side')
-                            i.material-icons.right menu
+        .navbar-fixed
+            nav
+                .nav-wrapper
+                    a.brand-logo 間取り
+                    ul.right
+                        li
+                            span#tubo.chip 0 坪
+                        li
+                            a#menu(href='#!', data-activates='side')
+                                i.material-icons.right menu
         ul#side.side-nav
             li
                 .file-field.input-field
@@ -26,9 +29,6 @@ html
                 a#export.waves-effect.waves-light.btn エクスポート
             li
                 a#add.waves-effect.waves-light.btn 間取を追加
-        .chip.right
-            span#tubo 0
-            | 坪
         #form.modal.modal-fixed-footer
             .modal-content
                 .input-field

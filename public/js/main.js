@@ -39,6 +39,7 @@ var madori = {
     remove: function(c) {
         this._clearLocate(c);
         this._stage.removeChild(c);
+        this.update();
     },
     setTubo: function() {
         var tubo = 0;
@@ -47,7 +48,7 @@ var madori = {
             var c = this._stage.children[i];
             tubo += c.size / 2 * c.unit * c.unit * (c.type == '7' ? 2 : 1);
         }
-        $('#tubo').text(Math.round(tubo / 3.30579 * 100) / 100);
+        $('#tubo').text(Math.round(tubo / 3.30579 * 100) / 100 + '坪');
     },
     getText: function(c) {
         var text = c.size
@@ -68,14 +69,14 @@ var madori = {
     _setLocate(c) {
         this._locate.x.push(c.x);
         this._locate.y.push(c.y);
-        this._locate.x.push(c.x + c.width * c.unit * this._default * this._scale);
-        this._locate.y.push(c.y + c.height * c.unit * this._default * this._scale);
+        this._locate.x.push(c.x + c.right * this._scale);
+        this._locate.y.push(c.y + c.bottom * this._scale);
     },
     _clearLocate(c) {
         this._locate.x.splice(this._locate.x.indexOf(c.x), 1);
         this._locate.y.splice(this._locate.y.indexOf(c.y), 1);
-        this._locate.x.splice(this._locate.x.indexOf(c.x + c.width * c.unit * this._default * this._scale), 1);
-        this._locate.y.splice(this._locate.y.indexOf(c.y + c.height * c.unit * this._default * this._scale), 1);
+        this._locate.x.splice(this._locate.x.indexOf(c.x + c.right * this._scale), 1);
+        this._locate.y.splice(this._locate.y.indexOf(c.y + c.bottom * this._scale), 1);
     },
     create: function(x, y, width, height, unit, type) {
         var container = new createjs.Container();
@@ -93,13 +94,11 @@ var madori = {
         container.size = width * height * 2;
         container.unit = unit;
         container.type = type;
-        obj.graphics.beginFill(this._types[type].color).drawRect(0, 0, width * unit * this._default, height * unit * this._default);
-        obj.graphics.endFill();
-        lineTop.graphics.beginStroke('Black').setStrokeStyle(3).moveTo(0, 0).lineTo(width * unit * this._default, 0).endStroke();
-        lineLeft.graphics.beginStroke('Black').setStrokeStyle(3).moveTo(0, 0).lineTo(0, height * unit * this._default).endStroke();
-        lineRight.graphics.beginStroke('Black').setStrokeStyle(3).moveTo(width * unit * this._default, 0).lineTo(width * unit * this._default, height * unit * this._default).endStroke();
-        lineBottom.graphics.beginStroke('Black').setStrokeStyle(3).moveTo(0, container.height * unit * this._default).lineTo(width * unit * this._default, height * unit * this._default).endStroke();
-        this._setLocate(container);
+        obj.name = 'field';
+        lineTop.name = 'top';
+        lineLeft.name = 'left';
+        lineRight.name = 'right';
+        lineBottom.name = 'bottom';
 
         $(container).on('mousedown', {c: container}, this.moveStart.bind(this));
         $(container).on('pressmove', {c: container}, this.move.bind(this));
@@ -121,14 +120,26 @@ var madori = {
         container.addChild(lineBottom);
         container.addChild(this.getText(container));
         this._stage.addChild(container);
-        this.update();
+        this._redraw(container);
 
         return container;
+    },
+    _redraw: function(c) {
+        if (c.right && c.bottom) this._clearLocate(c)
+        c.right = c.width * c.unit * this._default;
+        c.bottom = c.height * c.unit * this._default;
+        c.getChildByName('top').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, 0).lineTo(c.right, 0).endStroke();
+        c.getChildByName('left').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, 0).lineTo(0, c.bottom).endStroke();
+        c.getChildByName('right').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(c.right, 0).lineTo(c.right, c.bottom).endStroke();
+        c.getChildByName('bottom').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, c.bottom).lineTo(c.right, c.bottom).endStroke();
+        c.getChildByName('field').graphics.clear().beginFill(this._types[c.type].color).drawRect(0, 0, c.right, c.bottom).endFill();
+        this._setLocate(c);
+        this.update();
     },
     _resize: function(c, line, diff) {
         var offset = c.unit * 0.25 * this._default;
 
-        this._drag.lock = true;
+        this._drag.isMove = this._drag.lock = true;
         if (Math.abs(diff) > offset) {
             if (c.width < c.height && (diff > 0 || c.width > 0.25)) {
                 c.width += 0.25 * (diff > 0 ? 1 : -1);
@@ -139,12 +150,7 @@ var madori = {
                 c.height = (diff > 0 ? Math.ceil(c.height / 0.25) : Math.floor(c.height / 0.25)) * 0.25;
                 c.width = this.getLength(c.size, c.height);
             }
-            if (c.width && c.height) {
-                $(line).off('pressmove');
-                this.remove(c);
-                this.create(c.x, c.y, c.width, c.height, c.unit, c.type);
-                this._drag.lock = false;
-            }
+            if (c.width && c.height) this._redraw(c);
         }
     },
     resizeTop: function(e) {
@@ -154,10 +160,10 @@ var madori = {
         this._resize(e.data.c, e.data.line, e.data.c.x - this._stage.mouseX);
     },
     resizeRight: function(e) {
-        this._resize(e.data.c, e.data.line, this._stage.mouseX - e.data.c.x - e.data.c.width * e.data.c.unit * this._default);
+        this._resize(e.data.c, e.data.line, this._stage.mouseX - e.data.c.x - e.data.c.right);
     },
     resizeBottom: function(e) {
-        this._resize(e.data.c, e.data.line, e.data.c.y - this._stage.mouseY + e.data.c.height * e.data.c.unit * this._default);
+        this._resize(e.data.c, e.data.line, e.data.c.y - this._stage.mouseY + e.data.c.bottom);
     },
     moveStart: function(e) {
         var c = e.data.c;
@@ -177,13 +183,13 @@ var madori = {
 
         this._locate.x.find(function(elm) {
             if (Math.abs(elm - c.x) < 10) c.x = elm;
-            else if (Math.abs(elm - c.x - c.width * c.unit * this._default) < 10) c.x = elm - c.width * c.unit * this._default + 3;
+            else if (Math.abs(elm - c.x - c.right * this._scale) < 10) c.x = elm - c.right * this._scale;
             else return false;
             return true;
         }, this);
         this._locate.y.find(function(elm) {
             if (Math.abs(elm - c.y) < 10) c.y = elm;
-            else if (Math.abs(elm - c.y - c.height * c.unit * this._default) < 10) c.y = elm - c.height * c.unit * this._default + 3;
+            else if (Math.abs(elm - c.y - c.bottom * this._scale) < 10) c.y = elm - c.bottom * this._scale;
             else return false;
             return true;
         }, this);
@@ -196,6 +202,7 @@ var madori = {
 
         $('body').css('cursor', 'pointer');
         if (!this._drag.isMove && !this._drag.lock) this.change(c);
+        this._drag.isMove = this._drag.lock = false;
     },
     change: function(c) {
         $('#form').openModal();
@@ -212,7 +219,6 @@ var madori = {
         })
         $('#remove').on('click', () => {
             this.remove(c);
-            this.update();
             $('#form').closeModal();
         })
     },
