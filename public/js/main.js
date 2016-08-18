@@ -2,6 +2,7 @@ var madori = {
     version: '0.0.1',
     _default: 100,
     _scale: 1,
+    _window: {width: null, height: null, x: 0, y: 0},
     _locate: {x: [], y: []},
     _units: {'1.70': '団地間', '1.76': '江戸間', '1.82': '中京間', '1.91': '京間'},
     _types: {
@@ -21,15 +22,23 @@ var madori = {
         this._stage = new createjs.Stage('madori');
         this._stage.mouseMoveOutside = true;
         this._stage.enableMouseOver(50);
-        $('#madori').attr('width', $(document).width());
-        $('#madori').attr('height', $(document).height() * 2);
+        this._window.width = $(document).width();
+        this._window.height = $(document).height();
+        $('#madori').attr('width', this._window.width);
+        $('#madori').attr('height', this._window.height);
         $('#add').on('click', this.add.bind(this));
         $('#import').on('change', this.importFile.bind(this));
         $('#export').on('click', this.exportFile.bind(this));
+        $('#zoomIn').on('click', () => { this.setScale(this._scale + 0.1); });
+        $('#zoomOut').on('click', () => { this.setScale(this._scale - 0.1); });
+        $('#top').on('mouseenter', () => { this.shiftWindow(0, -1); });
+        $('#left').on('mouseenter', () => { this.shiftWindow(-1, 0); });
+        $('#right').on('mouseenter', () => { this.shiftWindow(1, 0); });
+        $('#bottom').on('mouseenter', () => { this.shiftWindow(0, 1); });
         $('#menu').sideNav();
         $('select').material_select();
 
-        if (this._default > $(document).width() / 15) this._scale = $(document).width() / 15 / this._default;
+        this.setScale($(document).width() / 15 / this._default);
         if (createjs.Touch.isSupported()) createjs.Touch.enable(this._stage);
     },
     update: function() {
@@ -48,6 +57,16 @@ var madori = {
             tubo += c.size / 2 * c.unit * c.unit * (c.type == '7' ? 2 : 1);
         });
         $('#tubo').text(Math.round(tubo / 3.30579 * 100) / 100 + '坪');
+    },
+    setScale: function(scale) {
+        var json = this.toJson();
+        scale = Math.round(scale * 10) / 10;
+
+        $('#zoomLevel').text(Math.round(scale * 100) + '%');
+        this._scale = scale;
+        this.restore(json);
+    },
+    shiftWindow: function(x, y) {
     },
     getText: function(c) {
         var text = c.size
@@ -71,21 +90,21 @@ var madori = {
             if (c.size) callback.call(this, c);
         }
     },
-    _setLocate(c) {
+    _setLocate: function(c) {
         this._locate.x.push(c.x);
         this._locate.y.push(c.y);
         this._locate.x.push(c.x + c.right * this._scale);
         this._locate.y.push(c.y + c.bottom * this._scale);
         this._changeLocale();
     },
-    _clearLocate(c) {
+    _clearLocate: function(c) {
         this._locate.x.splice(this._locate.x.indexOf(c.x), 1);
         this._locate.y.splice(this._locate.y.indexOf(c.y), 1);
         this._locate.x.splice(this._locate.x.indexOf(c.x + c.right * this._scale), 1);
         this._locate.y.splice(this._locate.y.indexOf(c.y + c.bottom * this._scale), 1);
         this._changeLocale();
     },
-    _changeLocale() {
+    _changeLocale: function() {
         var width, height, line, text, locate;
         locate = {
             x: {min: Math.min(...this._locate.x), max: Math.max(...this._locate.x)},
@@ -123,6 +142,15 @@ var madori = {
         width.getChildByName('line').graphics.clear().beginStroke('#bdbdbd').setStrokeDash([5, 5]).setStrokeStyle(2).moveTo(0, 5).lineTo(locate.x.max - locate.x.min, 5).endStroke();
         height.getChildByName('text').text = Math.round((locate.y.max - locate.y.min) / this._scale * 10) + 'mm';
         height.getChildByName('line').graphics.clear().beginStroke('#bdbdbd').setStrokeDash([5, 5]).setStrokeStyle(2).moveTo(5, 0).lineTo(5, locate.y.max - locate.y.min).endStroke();
+
+        if (this._window.y + locate.y.min < 0 && $('#top').hasClass('disabled')) $('#top').removeClass('disabled');
+        if (this._window.y + locate.y.min > 0 && !$('#top').hasClass('disabled')) $('#top').addClass('disabled');
+        if (this._window.x + locate.x.min < 0 && $('#left').hasClass('disabled')) $('#left').removeClass('disabled');
+        if (this._window.x + locate.x.min > 0 && !$('#left').hasClass('disabled')) $('#left').addClass('disabled');
+        if (this._window.x + locate.x.max > this._window.width && $('#right').hasClass('disabled')) $('#right').removeClass('disabled');
+        if (this._window.x + locate.x.max < this._window.width && !$('#right').hasClass('disabled')) $('#right').addClass('disabled');
+        if (this._window.y + locate.y.max > this._window.height && $('#bottom').hasClass('disabled')) $('#bottom').removeClass('disabled');
+        if (this._window.y + locate.y.max < this._window.height && !$('#bottom').hasClass('disabled')) $('#bottom').addClass('disabled');
     },
     create: function(x, y, width, height, unit, type) {
         var container = new createjs.Container();
@@ -229,7 +257,7 @@ var madori = {
         this._drag.isMove = false;
     },
     move: function(e) {
-        if (e.originalEvent.pointerID < 2) this._move(e.data.c);
+        if (e.originalEvent.pointerID < 1) this._move(e.data.c);
         else this._pinch(e.data.c);
     },
     _move: function(c) {
@@ -291,26 +319,30 @@ var madori = {
             $('#form').closeModal();
         })
     },
+    toJson: function() {
+        var json = {version: this.version, data: []};
+        this.eachStage((c) => {
+            json.data.push({x: c.x / this._scale, y: c.y / this._scale, width: c.width, height: c.height, unit: c.unit, type: c.type});
+        });
+        return json;
+    },
+    restore: function(json) {
+        this.eachStage((c) => { this.remove(c); });
+        for (var i = 0; i < json.data.length; i++) {
+            this.create(json.data[i].x * this._scale, json.data[i].y * this._scale, json.data[i].width, json.data[i].height, json.data[i].unit, json.data[i].type);
+        }
+    },
     importFile: function(e) {
         var file = new FileReader();
         file.readAsText(e.target.files[0]);
 
         file.onload = () => {
-            var json = JSON.parse(file.result);
-
-            this.eachStage((c) => { this.remove(c); });
-            for (var i = 0; i < json.data.length; i++) {
-                this.create(json.data[i].x * this._scale, json.data[i].y * this._scale, json.data[i].width, json.data[i].height, json.data[i].unit, json.data[i].type);
-            }
+            this.restore(JSON.parse(file.result));
             $('#side').sideNav('hide');
         }
     },
     exportFile: function() {
-        var json = {version: this.version, data: []};
-        this.eachStage((c) => {
-            json.data.push({x: c.x / this._scale, y: c.y / this._scale, width: c.width, height: c.height, unit: c.unit, type: c.type});
-        });
-        window.location.href = window.URL.createObjectURL(new Blob([JSON.stringify(json)], {type: 'application/octet-stream'}));
+        window.location.href = window.URL.createObjectURL(new Blob([JSON.stringify(this.toJson())], {type: 'application/octet-stream'}));
     }
 }
 

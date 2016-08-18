@@ -19,6 +19,18 @@ html
                                 i.material-icons.right menu
         ul#side.side-nav
             li
+                table.centered
+                    thead
+                        tr
+                            th
+                                a#zoomOut(href='#!')
+                                    i.material-icons zoom_out
+                            th
+                                span#zoomLevel
+                            th
+                                a#zoomIn(href='#!')
+                                    i.material-icons zoom_in
+            li
                 .file-field.input-field
                     .btn
                        span インポート
@@ -52,9 +64,17 @@ html
                         option(value='1.82') 畳 (中京間)
                         option(value='1.91') 畳 (京間)
             .modal-footer
-                a#remove.waves-effect.waves-light.btn.red(href='#!') 削除
-                a#change.waves-effect.waves-light.btn(href='#!') 変更
+                a#remove.waves-effect.waves-light.btn.red 削除
+                a#change.waves-effect.waves-light.btn 変更
         canvas#madori
+        a#left.btn-floating.disabled(style='position:fixed; left: 5px; top:50%;')
+            i.material-icons arrow_back
+        a#top.btn-floating.disabled(style='position:fixed; left: 50%; top:70px; margin-left: -18.5px')
+            i.material-icons arrow_upward
+        a#bottom.btn-floating.disabled(style='position:fixed; left: 50%; bottom:5px; margin-left: -18.5px')
+            i.material-icons arrow_downward
+        a#right.btn-floating.disabled(style='position:fixed; top:50%; right: 5px')
+            i.material-icons arrow_forward
         script(src='https://code.jquery.com/jquery-3.1.0.min.js')
         script(src='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js')
         script(src='https://code.createjs.com/createjs-2015.11.26.min.js')
