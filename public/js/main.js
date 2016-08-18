@@ -46,6 +46,7 @@ var madori = {
 
         for (var i = 0; i < this._stage.children.length; i++) {
             var c = this._stage.children[i];
+            if (!c.size) continue;
             tubo += c.size / 2 * c.unit * c.unit * (c.type == '7' ? 2 : 1);
         }
         $('#tubo').text(Math.round(tubo / 3.30579 * 100) / 100 + '坪');
@@ -71,12 +72,53 @@ var madori = {
         this._locate.y.push(c.y);
         this._locate.x.push(c.x + c.right * this._scale);
         this._locate.y.push(c.y + c.bottom * this._scale);
+        this._changeLocale();
     },
     _clearLocate(c) {
         this._locate.x.splice(this._locate.x.indexOf(c.x), 1);
         this._locate.y.splice(this._locate.y.indexOf(c.y), 1);
         this._locate.x.splice(this._locate.x.indexOf(c.x + c.right * this._scale), 1);
         this._locate.y.splice(this._locate.y.indexOf(c.y + c.bottom * this._scale), 1);
+        this._changeLocale();
+    },
+    _changeLocale() {
+        var width, height, line, text, locate;
+        locate = {
+            x: {min: Math.min(...this._locate.x), max: Math.max(...this._locate.x)},
+            y: {min: Math.min(...this._locate.y), max: Math.max(...this._locate.y)}
+        };
+        if (!(width = this._stage.getChildByName('width'))) {
+            width = new createjs.Container();
+            line = new createjs.Shape();
+            text = new createjs.Text('', '15px sans-serif');
+            width.name = 'width';
+            line.name = 'line';
+            text.name = 'text';
+            text.textBaseline = 'bottom';
+            width.addChild(line);
+            width.addChild(text);
+            this._stage.addChild(width);
+        }
+        if (!(height = this._stage.getChildByName('height'))) {
+            height = new createjs.Container();
+            line = new createjs.Shape();
+            text = new createjs.Text('', '15px sans-serif');
+            height.name = 'height';
+            line.name = 'line';
+            text.name = 'text';
+            text.textAlign = 'right';
+            height.addChild(line);
+            height.addChild(text);
+            this._stage.addChild(height);
+        }
+        width.x = locate.x.min;
+        width.y = locate.y.min - 15;
+        height.x = locate.x.min - 15;
+        height.y = locate.y.min;
+        width.getChildByName('text').text = Math.round((locate.x.max - locate.x.min) / this._scale * 10) + 'mm';
+        width.getChildByName('line').graphics.clear().beginStroke('#bdbdbd').setStrokeDash([5, 5]).setStrokeStyle(2).moveTo(0, 5).lineTo(locate.x.max - locate.x.min, 5).endStroke();
+        height.getChildByName('text').text = Math.round((locate.y.max - locate.y.min) / this._scale * 10) + 'mm';
+        height.getChildByName('line').graphics.clear().beginStroke('#bdbdbd').setStrokeDash([5, 5]).setStrokeStyle(2).moveTo(5, 0).lineTo(5, locate.y.max - locate.y.min).endStroke();
     },
     create: function(x, y, width, height, unit, type) {
         var container = new createjs.Container();
@@ -107,8 +149,8 @@ var madori = {
         $(lineLeft).on('pressmove', {c: container, line: lineLeft}, this.resizeLeft.bind(this));
         $(lineRight).on('pressmove', {c: container, line: lineRight}, this.resizeRight.bind(this));
         $(lineBottom).on('pressmove', {c: container, line: lineBottom}, this.resizeBottom.bind(this));
-        obj.on('mouseover', () => { $('body').css('cursor', 'pointer') });
-        obj.on('mouseout', () => { $('body').css('cursor', '') });
+        obj.on('mouseover', () => { if (!this._drag.isMove && !this._drag.lock) $('body').css('cursor', 'pointer') });
+        obj.on('mouseout', () => { if (!this._drag.isMove && !this._drag.lock) $('body').css('cursor', '') });
         lineTop.on('mouseover', () => { $('body').css('cursor', 'row-resize') });
         lineLeft.on('mouseover', () => { $('body').css('cursor', 'col-resize') });
         lineRight.on('mouseover', () => { $('body').css('cursor', 'col-resize') });
@@ -143,11 +185,11 @@ var madori = {
         if (Math.abs(diff) > offset) {
             if (c.width < c.height && (diff > 0 || c.width > 0.25)) {
                 c.width += 0.25 * (diff > 0 ? 1 : -1);
-                c.width = (diff > 0 ? Math.ceil(c.width / 0.25) : Math.floor(c.width / 0.25)) * 0.25;
+                c.width = (diff > 0 ? Math.ceil(c.width / 0.25) : Math.ceil(c.width / 0.25)) * 0.25;
                 c.height = this.getLength(c.size, c.width);
             } else if (c.width >= c.height && (diff < 0 || c.height > 0.25)) {
                 c.height += 0.25 * (diff > 0 ? -1 : 1);
-                c.height = (diff > 0 ? Math.ceil(c.height / 0.25) : Math.floor(c.height / 0.25)) * 0.25;
+                c.height = (diff > 0 ? Math.ceil(c.height / 0.25) : Math.ceil(c.height / 0.25)) * 0.25;
                 c.width = this.getLength(c.size, c.height);
             }
             if (c.width && c.height) this._redraw(c);
@@ -217,6 +259,7 @@ var madori = {
             $('#form').closeModal();
             $('#side').sideNav('hide');
         })
+        $('#remove').off('click');
         $('#remove').on('click', () => {
             this.remove(c);
             $('#form').closeModal();
