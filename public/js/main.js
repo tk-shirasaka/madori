@@ -44,11 +44,9 @@ var madori = {
     setTubo: function() {
         var tubo = 0;
 
-        for (var i = 0; i < this._stage.children.length; i++) {
-            var c = this._stage.children[i];
-            if (!c.size) continue;
+        this.eachStage((c) => {
             tubo += c.size / 2 * c.unit * c.unit * (c.type == '7' ? 2 : 1);
-        }
+        });
         $('#tubo').text(Math.round(tubo / 3.30579 * 100) / 100 + '坪');
     },
     getText: function(c) {
@@ -66,6 +64,12 @@ var madori = {
     },
     add: function() {
         this.change({x: 100, y: 100, size: 1, height: 1, width: 0.5, unit: '1.82', type: 1, _init: true});
+    },
+    eachStage: function(callback) {
+        for (var i = this._stage.children.length - 1; i >= 0; i--) {
+            var c = this._stage.children[i];
+            if (c.size) callback.call(this, c);
+        }
     },
     _setLocate(c) {
         this._locate.x.push(c.x);
@@ -145,10 +149,10 @@ var madori = {
         $(container).on('mousedown', {c: container}, this.moveStart.bind(this));
         $(container).on('pressmove', {c: container}, this.move.bind(this));
         $(container).on('pressup', {c: container}, this.moveEnd.bind(this));
-        $(lineTop).on('pressmove', {c: container, line: lineTop}, this.resizeTop.bind(this));
-        $(lineLeft).on('pressmove', {c: container, line: lineLeft}, this.resizeLeft.bind(this));
-        $(lineRight).on('pressmove', {c: container, line: lineRight}, this.resizeRight.bind(this));
-        $(lineBottom).on('pressmove', {c: container, line: lineBottom}, this.resizeBottom.bind(this));
+        $(lineTop).on('pressmove', {c: container}, this.resizeTop.bind(this));
+        $(lineLeft).on('pressmove', {c: container}, this.resizeLeft.bind(this));
+        $(lineRight).on('pressmove', {c: container}, this.resizeRight.bind(this));
+        $(lineBottom).on('pressmove', {c: container}, this.resizeBottom.bind(this));
         obj.on('mouseover', () => { if (!this._drag.isMove && !this._drag.lock) $('body').css('cursor', 'pointer') });
         obj.on('mouseout', () => { if (!this._drag.isMove && !this._drag.lock) $('body').css('cursor', '') });
         lineTop.on('mouseover', () => { $('body').css('cursor', 'row-resize') });
@@ -176,42 +180,45 @@ var madori = {
         this._setLocate(c);
         this.update();
     },
-    _resize: function(c, line, diff) {
-        var offset = c.unit * 0.25 * this._default;
+    _resize: function(c, diff) {
+        var offset = c.unit * 0.25 * this._default * this._scale;
 
         this._drag.isMove = this._drag.lock = true;
         if (Math.abs(diff) > offset) {
+            this._clearLocate(c);
             if (c.width < c.height && (diff > 0 || c.width > 0.25)) {
-                c.x += c.width * c.unit * this._default / 2;
-                c.y += c.height * c.unit * this._default / 2;
+                c.x += c.width * c.unit * this._default * this._scale / 2;
+                c.y += c.height * c.unit * this._default * this._scale / 2;
                 c.width += 0.25 * (diff > 0 ? 1 : -1);
                 c.width = (diff > 0 ? Math.floor(c.width / 0.25) : Math.floor(c.width / 0.25)) * 0.25;
                 c.height = this.getLength(c.size, c.width);
-                c.x -= c.width * c.unit * this._default / 2;
-                c.y -= c.height * c.unit * this._default / 2;
+                c.x -= c.width * c.unit * this._default * this._scale / 2;
+                c.y -= c.height * c.unit * this._default * this._scale / 2;
             } else if (c.width >= c.height && (diff < 0 || c.height > 0.25)) {
-                c.x += c.width * c.unit * this._default / 2;
-                c.y += c.height * c.unit * this._default / 2;
+                c.x += c.width * c.unit * this._default * this._scale / 2;
+                c.y += c.height * c.unit * this._default * this._scale / 2;
                 c.height += 0.25 * (diff > 0 ? -1 : 1);
                 c.height = (diff > 0 ? Math.floor(c.height / 0.25) : Math.floor(c.height / 0.25)) * 0.25;
                 c.width = this.getLength(c.size, c.height);
-                c.x -= c.width * c.unit * this._default / 2;
-                c.y -= c.height * c.unit * this._default / 2;
-            }
-            if (c.width && c.height) this._redraw(c);
+                c.x -= c.width * c.unit * this._default * this._scale / 2;
+                c.y -= c.height * c.unit * this._default * this._scale / 2;
+            } else
+                return;
+            c.right = c.bottom = null;
+            this._redraw(c);
         }
     },
     resizeTop: function(e) {
-        this._resize(e.data.c, e.data.line, this._stage.mouseY - e.data.c.y);
+        this._resize(e.data.c, this._stage.mouseY - e.data.c.y);
     },
     resizeLeft: function(e) {
-        this._resize(e.data.c, e.data.line, e.data.c.x - this._stage.mouseX);
+        this._resize(e.data.c, e.data.c.x - this._stage.mouseX);
     },
     resizeRight: function(e) {
-        this._resize(e.data.c, e.data.line, this._stage.mouseX - e.data.c.x - e.data.c.right);
+        this._resize(e.data.c, this._stage.mouseX - e.data.c.x - e.data.c.right);
     },
     resizeBottom: function(e) {
-        this._resize(e.data.c, e.data.line, e.data.c.y - this._stage.mouseY + e.data.c.bottom);
+        this._resize(e.data.c, e.data.c.y - this._stage.mouseY + e.data.c.bottom);
     },
     moveStart: function(e) {
         var c = e.data.c;
@@ -222,8 +229,10 @@ var madori = {
         this._drag.isMove = false;
     },
     move: function(e) {
-        var c = e.data.c;
-
+        if (e.originalEvent.pointerID < 2) this._move(e.data.c);
+        else this._pinch(e.data.c);
+    },
+    _move: function(c) {
         if (this._drag.lock) return;
         this._clearLocate(c);
         c.x = this._stage.mouseX - this._drag.x;
@@ -244,6 +253,17 @@ var madori = {
         this._setLocate(c);
         this._drag.isMove = true;
         this.update();
+    },
+    _pinch: function(c) {
+        var diffx = Math.abs(this._stage.mouseX - this._drag.x - c.x);
+        var diffy = Math.abs(this._stage.mouseY - this._drag.y - c.y);
+
+        if (diffx > diffy) this._resize(c, this._stage.mouseX - this._drag.x - c.x);
+        if (diffx < diffy) this._resize(c, this._stage.mouseY - this._drag.y - c.y);
+        if (diffx != diffy && Math.max(diffx, diffy) > c.unit * 0.25 * this._default * this._scale) {
+            this._drag.x = this._stage.mouseX - c.x;
+            this._drag.y = this._stage.mouseY - c.y;
+        }
     },
     moveEnd: function(e) {
         var c = e.data.c;
@@ -278,9 +298,7 @@ var madori = {
         file.onload = () => {
             var json = JSON.parse(file.result);
 
-            for (var i = this._stage.children.length - 1; i >= 0; i--) {
-                this.remove(this._stage.children[i]);
-            }
+            this.eachStage((c) => { this.remove(c); });
             for (var i = 0; i < json.data.length; i++) {
                 this.create(json.data[i].x * this._scale, json.data[i].y * this._scale, json.data[i].width, json.data[i].height, json.data[i].unit, json.data[i].type);
             }
@@ -289,10 +307,9 @@ var madori = {
     },
     exportFile: function() {
         var json = {version: this.version, data: []};
-        for (var i = 0; i < this._stage.children.length; i++) {
-            var c = this._stage.children[i];
+        this.eachStage((c) => {
             json.data.push({x: c.x / this._scale, y: c.y / this._scale, width: c.width, height: c.height, unit: c.unit, type: c.type});
-        }
+        });
         window.location.href = window.URL.createObjectURL(new Blob([JSON.stringify(json)], {type: 'application/octet-stream'}));
     }
 }
