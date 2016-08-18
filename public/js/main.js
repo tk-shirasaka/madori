@@ -3,7 +3,7 @@ var madori = {
     _default: 100,
     _scale: 1,
     _locate: {x: [], y: []},
-    _units: {1.70: '団地間', 1.76: '江戸間', 1.82: '中京間', 1.91: '京間'},
+    _units: {'1.70': '団地間', '1.76': '江戸間', '1.82': '中京間', '1.91': '京間'},
     _types: {
         1: {name: '洋室', color: '#bcaaa4'},
         2: {name: '和室', color: '#8bc34a'},
@@ -163,8 +163,6 @@ var madori = {
         container.addChild(this.getText(container));
         this._stage.addChild(container);
         this._redraw(container);
-
-        return container;
     },
     _redraw: function(c) {
         if (c.right && c.bottom) this._clearLocate(c)
@@ -184,13 +182,21 @@ var madori = {
         this._drag.isMove = this._drag.lock = true;
         if (Math.abs(diff) > offset) {
             if (c.width < c.height && (diff > 0 || c.width > 0.25)) {
+                c.x += c.width * c.unit * this._default / 2;
+                c.y += c.height * c.unit * this._default / 2;
                 c.width += 0.25 * (diff > 0 ? 1 : -1);
-                c.width = (diff > 0 ? Math.ceil(c.width / 0.25) : Math.ceil(c.width / 0.25)) * 0.25;
+                c.width = (diff > 0 ? Math.floor(c.width / 0.25) : Math.floor(c.width / 0.25)) * 0.25;
                 c.height = this.getLength(c.size, c.width);
+                c.x -= c.width * c.unit * this._default / 2;
+                c.y -= c.height * c.unit * this._default / 2;
             } else if (c.width >= c.height && (diff < 0 || c.height > 0.25)) {
+                c.x += c.width * c.unit * this._default / 2;
+                c.y += c.height * c.unit * this._default / 2;
                 c.height += 0.25 * (diff > 0 ? -1 : 1);
-                c.height = (diff > 0 ? Math.ceil(c.height / 0.25) : Math.ceil(c.height / 0.25)) * 0.25;
+                c.height = (diff > 0 ? Math.floor(c.height / 0.25) : Math.floor(c.height / 0.25)) * 0.25;
                 c.width = this.getLength(c.size, c.height);
+                c.x -= c.width * c.unit * this._default / 2;
+                c.y -= c.height * c.unit * this._default / 2;
             }
             if (c.width && c.height) this._redraw(c);
         }
