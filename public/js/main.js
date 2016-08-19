@@ -19,13 +19,12 @@ var madori = {
     _drag: {x: 0, y: 0, isMove: false, lock: false},
     _stage: null,
     init: function() {
+        var timer = null;
+
         this._stage = new createjs.Stage('madori');
         this._stage.mouseMoveOutside = true;
         this._stage.enableMouseOver(50);
-        this._window.width = $(document).width();
-        this._window.height = $(document).height() - $('.navbar-fixed').height();
-        $('#madori').attr('width', this._window.width);
-        $('#madori').attr('height', this._window.height);
+        this.setWindowSize();
         $('#add').on('click', this.add.bind(this));
         $('#import').on('change', this.importFile.bind(this));
         $('#export').on('click', this.exportFile.bind(this));
@@ -41,9 +40,24 @@ var madori = {
         $('#bottom').on('mouseleave', () => { this.shiftEnd(); });
         $('#menu').sideNav();
         $('select').material_select();
+        $(window).on('resize', () => {
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(() => {
+                this.setWindowSize();
+                this._changeLocale();
+                timer = null;
+            });
+        });
 
         this.setScale($(document).width() / 15 / this._default);
         if (createjs.Touch.isSupported()) createjs.Touch.enable(this._stage);
+    },
+    setWindowSize: function() {
+        this._window.width = $(window).width();
+        this._window.height = $(window).height() - $('.navbar-fixed').height();
+        $('#madori').attr('width', this._window.width);
+        $('#madori').attr('height', this._window.height);
+        this.update();
     },
     update: function() {
         this._stage.update();
@@ -240,8 +254,8 @@ var madori = {
 
         this._drag.isMove = this._drag.lock = true;
         if (Math.abs(diff) > offset) {
-            this._clearLocate(c);
             if (c.width < c.height && (diff > 0 || c.width > 0.25)) {
+                this._clearLocate(c);
                 c.x += c.width * c.unit * this._default * this._scale / 2;
                 c.y += c.height * c.unit * this._default * this._scale / 2;
                 c.width += 0.25 * (diff > 0 ? 1 : -1);
@@ -250,6 +264,7 @@ var madori = {
                 c.x -= c.width * c.unit * this._default * this._scale / 2;
                 c.y -= c.height * c.unit * this._default * this._scale / 2;
             } else if (c.width >= c.height && (diff < 0 || c.height > 0.25)) {
+                this._clearLocate(c);
                 c.x += c.width * c.unit * this._default * this._scale / 2;
                 c.y += c.height * c.unit * this._default * this._scale / 2;
                 c.height += 0.25 * (diff > 0 ? -1 : 1);
@@ -264,16 +279,16 @@ var madori = {
         }
     },
     resizeTop: function(e) {
-        this._resize(e.data.c, this._stage.mouseY - e.data.c.y);
+        this._resize(e.data.c, this._stage.mouseY - e.data.c.y - this._stage.y);
     },
     resizeLeft: function(e) {
-        this._resize(e.data.c, e.data.c.x - this._stage.mouseX);
+        this._resize(e.data.c, e.data.c.x - this._stage.mouseX + this._stage.x);
     },
     resizeRight: function(e) {
-        this._resize(e.data.c, this._stage.mouseX - e.data.c.x - e.data.c.right);
+        this._resize(e.data.c, this._stage.mouseX - e.data.c.x - e.data.c.right - this._stage.x);
     },
     resizeBottom: function(e) {
-        this._resize(e.data.c, e.data.c.y - this._stage.mouseY + e.data.c.bottom);
+        this._resize(e.data.c, e.data.c.y - this._stage.mouseY + e.data.c.bottom + this._stage.y);
     },
     moveStart: function(e) {
         var c = e.data.c;
