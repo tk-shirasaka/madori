@@ -2,7 +2,7 @@ var madori = {
     version: '0.0.1',
     _default: 100,
     _scale: 1,
-    _window: {width: null, height: null, x: 0, y: 0},
+    _window: {width: null, height: null, shift: null},
     _locate: {x: [], y: []},
     _units: {'1.70': '団地間', '1.76': '江戸間', '1.82': '中京間', '1.91': '京間'},
     _types: {
@@ -23,7 +23,7 @@ var madori = {
         this._stage.mouseMoveOutside = true;
         this._stage.enableMouseOver(50);
         this._window.width = $(document).width();
-        this._window.height = $(document).height();
+        this._window.height = $(document).height() - $('.navbar-fixed').height();
         $('#madori').attr('width', this._window.width);
         $('#madori').attr('height', this._window.height);
         $('#add').on('click', this.add.bind(this));
@@ -31,10 +31,14 @@ var madori = {
         $('#export').on('click', this.exportFile.bind(this));
         $('#zoomIn').on('click', () => { this.setScale(this._scale + 0.1); });
         $('#zoomOut').on('click', () => { this.setScale(this._scale - 0.1); });
-        $('#top').on('mouseenter', () => { this.shiftWindow(0, -1); });
-        $('#left').on('mouseenter', () => { this.shiftWindow(-1, 0); });
-        $('#right').on('mouseenter', () => { this.shiftWindow(1, 0); });
-        $('#bottom').on('mouseenter', () => { this.shiftWindow(0, 1); });
+        $('#top').on('mouseenter', () => { this.shiftWindow(0, 5); });
+        $('#top').on('mouseleave', () => { this.shiftEnd(); });
+        $('#left').on('mouseenter', () => { this.shiftWindow(5, 0); });
+        $('#left').on('mouseleave', () => { this.shiftEnd(); });
+        $('#right').on('mouseenter', () => { this.shiftWindow(-5, 0); });
+        $('#right').on('mouseleave', () => { this.shiftEnd(); });
+        $('#bottom').on('mouseenter', () => { this.shiftWindow(0, -5); });
+        $('#bottom').on('mouseleave', () => { this.shiftEnd(); });
         $('#menu').sideNav();
         $('select').material_select();
 
@@ -67,6 +71,26 @@ var madori = {
         this.restore(json);
     },
     shiftWindow: function(x, y) {
+        if (this._window_shift) return;
+
+        var locate = this._getLimitLocate();
+        this._window.shift = setInterval(() => {
+            if ((x > 0 && this._stage.x + locate.x.min > 10 && this._stage.x >= 0) ||
+                (y > 0 && this._stage.y + locate.y.min > 10 && this._stage.y >= 0) ||
+                (x < 0 && this._stage.x + locate.x.max + 10 < this._window.width) ||
+                (y < 0 && this._stage.y + locate.y.max + 10 < this._window.height)) {
+                this.shiftEnd();
+            } else {
+                this._stage.x += x;
+                this._stage.y += y;
+                this.update();
+            }
+        }, 10);
+    },
+    shiftEnd: function() {
+        clearInterval(this._window.shift);
+        this._changeLocale();
+        this._window.shift = false;
     },
     getText: function(c) {
         var text = c.size
@@ -90,6 +114,12 @@ var madori = {
             if (c.size) callback.call(this, c);
         }
     },
+    _getLimitLocate: function() {
+        return {
+            x: {min: Math.min(...this._locate.x), max: Math.max(...this._locate.x)},
+            y: {min: Math.min(...this._locate.y), max: Math.max(...this._locate.y)}
+        };
+    },
     _setLocate: function(c) {
         this._locate.x.push(c.x);
         this._locate.y.push(c.y);
@@ -105,11 +135,8 @@ var madori = {
         this._changeLocale();
     },
     _changeLocale: function() {
-        var width, height, line, text, locate;
-        locate = {
-            x: {min: Math.min(...this._locate.x), max: Math.max(...this._locate.x)},
-            y: {min: Math.min(...this._locate.y), max: Math.max(...this._locate.y)}
-        };
+        var width, height, line, text;
+        var locate = this._getLimitLocate();
         if (!(width = this._stage.getChildByName('width'))) {
             width = new createjs.Container();
             line = new createjs.Shape();
@@ -143,14 +170,14 @@ var madori = {
         height.getChildByName('text').text = Math.round((locate.y.max - locate.y.min) / this._scale * 10) + 'mm';
         height.getChildByName('line').graphics.clear().beginStroke('#bdbdbd').setStrokeDash([5, 5]).setStrokeStyle(2).moveTo(5, 0).lineTo(5, locate.y.max - locate.y.min).endStroke();
 
-        if (this._window.y + locate.y.min < 0 && $('#top').hasClass('disabled')) $('#top').removeClass('disabled');
-        if (this._window.y + locate.y.min > 0 && !$('#top').hasClass('disabled')) $('#top').addClass('disabled');
-        if (this._window.x + locate.x.min < 0 && $('#left').hasClass('disabled')) $('#left').removeClass('disabled');
-        if (this._window.x + locate.x.min > 0 && !$('#left').hasClass('disabled')) $('#left').addClass('disabled');
-        if (this._window.x + locate.x.max > this._window.width && $('#right').hasClass('disabled')) $('#right').removeClass('disabled');
-        if (this._window.x + locate.x.max < this._window.width && !$('#right').hasClass('disabled')) $('#right').addClass('disabled');
-        if (this._window.y + locate.y.max > this._window.height && $('#bottom').hasClass('disabled')) $('#bottom').removeClass('disabled');
-        if (this._window.y + locate.y.max < this._window.height && !$('#bottom').hasClass('disabled')) $('#bottom').addClass('disabled');
+        if (this._stage.y + locate.y.min < 0 && $('#top').hasClass('hide')) $('#top').removeClass('hide');
+        if (this._stage.y + locate.y.min > 0 && !$('#top').hasClass('hide')) $('#top').addClass('hide');
+        if (this._stage.x + locate.x.min < 0 && $('#left').hasClass('hide')) $('#left').removeClass('hide');
+        if (this._stage.x + locate.x.min > 0 && !$('#left').hasClass('hide')) $('#left').addClass('hide');
+        if (this._stage.x + locate.x.max > this._window.width && $('#right').hasClass('hide')) $('#right').removeClass('hide');
+        if (this._stage.x + locate.x.max < this._window.width && !$('#right').hasClass('hide')) $('#right').addClass('hide');
+        if (this._stage.y + locate.y.max > this._window.height && $('#bottom').hasClass('hide')) $('#bottom').removeClass('hide');
+        if (this._stage.y + locate.y.max < this._window.height && !$('#bottom').hasClass('hide')) $('#bottom').addClass('hide');
     },
     create: function(x, y, width, height, unit, type) {
         var container = new createjs.Container();
