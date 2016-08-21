@@ -207,7 +207,7 @@ function Madori (canvas, objEvent) {
         this.forEach((container) => {
             tubo += container.size / 2 * container.unit * container.unit * (container.type == '7' ? 2 : 1);
         });
-        return tubo;
+        return Math.round(tubo / 3.30579 * 100) / 100;
     };
     this.getLength = (size, length) => {
         return size / length / 2;

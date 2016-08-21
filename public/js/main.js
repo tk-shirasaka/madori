@@ -31,6 +31,7 @@ $(document).ready(function() {
 
         $('#form').closeModal();
         $('#side').sideNav('hide');
+        $('#tubo').text(madori.getTubo() + '坪');
     }
     function setEvent(container) {
         container.on('mousedown', moveStart);
