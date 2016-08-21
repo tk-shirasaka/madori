@@ -1,393 +1,181 @@
-var madori = {
-    version: '0.0.1',
-    _default: 100,
-    _scale: 1,
-    _window: {width: null, height: null, shift: null},
-    _locate: {x: [], y: []},
-    _units: {'1.70': '団地間', '1.76': '江戸間', '1.82': '中京間', '1.91': '京間'},
-    _types: {
-        1: {name: '洋室', color: '#bcaaa4'},
-        2: {name: '和室', color: '#8bc34a'},
-        3: {name: 'トイレ', color: '#bdbdbd'},
-        4: {name: 'お風呂', color: '#81d4fa'},
-        5: {name: '洗面所', color: '#009688'},
-        6: {name: '廊下', color: '#795548'},
-        7: {name: '階段', color: '#ffff8d'},
-        8: {name: '玄関', color: '#ce93d8'},
-        9: {name: 'その他', color: '#f44336'},
-    },
-    _drag: {x: 0, y: 0, isMove: false, lock: false},
-    _stage: null,
-    init: function() {
-        var timer = null;
+$(document).ready(function() {
+    var madori = new Madori('madori', setEvent);
+    var winSize = {width: null, height: null};
+    var drag = {x: null, y: null};
+    var container, resize, shift, move, lock;
 
-        this._stage = new createjs.Stage('madori');
-        this._stage.mouseMoveOutside = true;
-        this._stage.enableMouseOver(50);
-        this.setWindowSize();
-        $('#add').on('click', this.add.bind(this));
-        $('#import').on('change', this.importFile.bind(this));
-        $('#export').on('click', this.exportFile.bind(this));
-        $('#zoomIn').on('click', () => { this.setScale(this._scale + 0.1); });
-        $('#zoomOut').on('click', () => { this.setScale(this._scale - 0.1); });
-        $('#top').on('mouseenter', () => { this.shiftWindow(0, 5); });
-        $('#top').on('mouseleave', () => { this.shiftEnd(); });
-        $('#left').on('mouseenter', () => { this.shiftWindow(5, 0); });
-        $('#left').on('mouseleave', () => { this.shiftEnd(); });
-        $('#right').on('mouseenter', () => { this.shiftWindow(-5, 0); });
-        $('#right').on('mouseleave', () => { this.shiftEnd(); });
-        $('#bottom').on('mouseenter', () => { this.shiftWindow(0, -5); });
-        $('#bottom').on('mouseleave', () => { this.shiftEnd(); });
-        $('#menu').sideNav();
-        $('select').material_select();
-        $(window).on('resize', () => {
-            if (timer) clearTimeout(timer);
-            timer = setTimeout(() => {
-                this.setWindowSize();
-                this._changeLocale();
-                timer = null;
-            });
-        });
+    setWindowSize();
+    setZoom(0);
+    $('#add').on('click', add);
+    $('#change').on('click', change);
+    $('#remove').on('click', remove)
+    $('#import').on('change', importFile);
+    $('#export').on('click', exportFile);
+    $('#zoomIn').on('click', zoomIn);
+    $('#zoomOut').on('click', zoomOut);
+    $('#top').on('mouseenter', shiftTop);
+    $('#left').on('mouseenter', shiftLeft);
+    $('#right').on('mouseenter', shiftRight);
+    $('#bottom').on('mouseenter', shiftBottom);
+    $('#top, #left, #right, #bottom').on('mouseleave', shiftEnd);
+    $('#menu').sideNav();
+    $('select').material_select();
+    $(window).on('resize', resize);
 
-        this.setScale($(document).width() / 15 / this._default);
-        if (createjs.Touch.isSupported()) createjs.Touch.enable(this._stage);
-    },
-    setWindowSize: function() {
-        this._window.width = $(window).width();
-        this._window.height = $(window).height() - $('.navbar-fixed').height();
-        $('#madori').attr('width', this._window.width);
-        $('#madori').attr('height', this._window.height);
-        this.update();
-    },
-    update: function() {
-        this._stage.update();
-        this.setTubo();
-    },
-    remove: function(c) {
-        this._clearLocate(c);
-        this._stage.removeChild(c);
-        this.update();
-    },
-    setTubo: function() {
-        var tubo = 0;
+    function add() {
+        setForm({x: 100, y: 100, size: 1, height: 1, width: 0.5, unit: '1.82', type: 1, _init: true});
+    }
+    function change() {
+        if (!container._init) madori.remove(container);
+        madori.create(container.x, container.y, madori.getLength($('#size').val(), container.height), container.height, $('#unit').val(), $('#type').val());
 
-        this.eachStage((c) => {
-            tubo += c.size / 2 * c.unit * c.unit * (c.type == '7' ? 2 : 1);
-        });
-        $('#tubo').text(Math.round(tubo / 3.30579 * 100) / 100 + '坪');
-    },
-    setScale: function(scale) {
-        var json = this.toJson();
-        scale = Math.round(scale * 10) / 10;
-
-        $('#zoomLevel').text(Math.round(scale * 100) + '%');
-        this._scale = scale;
-        this.restore(json);
-    },
-    shiftWindow: function(x, y) {
-        if (this._window_shift) return;
-
-        var locate = this._getLimitLocate();
-        this._window.shift = setInterval(() => {
-            if ((x > 0 && this._stage.x + locate.x.min > 10 && this._stage.x >= 0) ||
-                (y > 0 && this._stage.y + locate.y.min > 10 && this._stage.y >= 0) ||
-                (x < 0 && this._stage.x + locate.x.max + 10 < this._window.width) ||
-                (y < 0 && this._stage.y + locate.y.max + 10 < this._window.height)) {
-                this.shiftEnd();
-            } else {
-                this._stage.x += x;
-                this._stage.y += y;
-                this.update();
-            }
-        }, 10);
-    },
-    shiftEnd: function() {
-        clearInterval(this._window.shift);
-        this._changeLocale();
-        this._window.shift = false;
-    },
-    getText: function(c) {
-        var text = c.size
-                 + '畳 (' + this._units[c.unit] + ')\n'
-                 + this._types[c.type].name;
-
-        if (this._scale < 0.5) text = '';
-        var obj = new createjs.Text(text, '15px sans-serif');
-        obj.x = obj.y = 10;
-        return obj;
-    },
-    getLength(size, length) {
-        return size / length / 2;
-    },
-    add: function() {
-        this.change({x: 100, y: 100, size: 1, height: 1, width: 0.5, unit: '1.82', type: 1, _init: true});
-    },
-    eachStage: function(callback) {
-        for (var i = this._stage.children.length - 1; i >= 0; i--) {
-            var c = this._stage.children[i];
-            if (c.size) callback.call(this, c);
-        }
-    },
-    _getLimitLocate: function() {
-        return {
-            x: {min: Math.min(...this._locate.x), max: Math.max(...this._locate.x)},
-            y: {min: Math.min(...this._locate.y), max: Math.max(...this._locate.y)}
-        };
-    },
-    _setLocate: function(c) {
-        this._locate.x.push(c.x);
-        this._locate.y.push(c.y);
-        this._locate.x.push(c.x + c.right * this._scale);
-        this._locate.y.push(c.y + c.bottom * this._scale);
-        this._changeLocale();
-    },
-    _clearLocate: function(c) {
-        this._locate.x.splice(this._locate.x.indexOf(c.x), 1);
-        this._locate.y.splice(this._locate.y.indexOf(c.y), 1);
-        this._locate.x.splice(this._locate.x.indexOf(c.x + c.right * this._scale), 1);
-        this._locate.y.splice(this._locate.y.indexOf(c.y + c.bottom * this._scale), 1);
-        this._changeLocale();
-    },
-    _changeLocale: function() {
-        var width, height, line, text;
-        var locate = this._getLimitLocate();
-        if (!(width = this._stage.getChildByName('width'))) {
-            width = new createjs.Container();
-            line = new createjs.Shape();
-            text = new createjs.Text('', '15px sans-serif');
-            width.name = 'width';
-            line.name = 'line';
-            text.name = 'text';
-            text.textBaseline = 'bottom';
-            width.addChild(line);
-            width.addChild(text);
-            this._stage.addChild(width);
-        }
-        if (!(height = this._stage.getChildByName('height'))) {
-            height = new createjs.Container();
-            line = new createjs.Shape();
-            text = new createjs.Text('', '15px sans-serif');
-            height.name = 'height';
-            line.name = 'line';
-            text.name = 'text';
-            text.textAlign = 'right';
-            height.addChild(line);
-            height.addChild(text);
-            this._stage.addChild(height);
-        }
-        width.x = locate.x.min;
-        width.y = locate.y.min - 15;
-        height.x = locate.x.min - 15;
-        height.y = locate.y.min;
-        width.getChildByName('text').text = Math.round((locate.x.max - locate.x.min) / this._scale * 10) + 'mm';
-        width.getChildByName('line').graphics.clear().beginStroke('#bdbdbd').setStrokeDash([5, 5]).setStrokeStyle(2).moveTo(0, 5).lineTo(locate.x.max - locate.x.min, 5).endStroke();
-        height.getChildByName('text').text = Math.round((locate.y.max - locate.y.min) / this._scale * 10) + 'mm';
-        height.getChildByName('line').graphics.clear().beginStroke('#bdbdbd').setStrokeDash([5, 5]).setStrokeStyle(2).moveTo(5, 0).lineTo(5, locate.y.max - locate.y.min).endStroke();
-
-        if (this._stage.y + locate.y.min < 0 && $('#top').hasClass('hide')) $('#top').removeClass('hide');
-        if (this._stage.y + locate.y.min > 0 && !$('#top').hasClass('hide')) $('#top').addClass('hide');
-        if (this._stage.x + locate.x.min < 0 && $('#left').hasClass('hide')) $('#left').removeClass('hide');
-        if (this._stage.x + locate.x.min > 0 && !$('#left').hasClass('hide')) $('#left').addClass('hide');
-        if (this._stage.x + locate.x.max > this._window.width && $('#right').hasClass('hide')) $('#right').removeClass('hide');
-        if (this._stage.x + locate.x.max < this._window.width && !$('#right').hasClass('hide')) $('#right').addClass('hide');
-        if (this._stage.y + locate.y.max > this._window.height && $('#bottom').hasClass('hide')) $('#bottom').removeClass('hide');
-        if (this._stage.y + locate.y.max < this._window.height && !$('#bottom').hasClass('hide')) $('#bottom').addClass('hide');
-    },
-    create: function(x, y, width, height, unit, type) {
-        var container = new createjs.Container();
-        var obj = new createjs.Shape();
-        var lineTop = new createjs.Shape();
-        var lineLeft = new createjs.Shape();
-        var lineRight = new createjs.Shape();
-        var lineBottom = new createjs.Shape();
-
-        container.scaleX = container.scaleY = this._scale;
-        container.x = x;
-        container.y = y;
-        container.width = width;
-        container.height = height;
-        container.size = width * height * 2;
-        container.unit = unit;
-        container.type = type;
-        obj.name = 'field';
-        lineTop.name = 'top';
-        lineLeft.name = 'left';
-        lineRight.name = 'right';
-        lineBottom.name = 'bottom';
-
-        $(container).on('mousedown', {c: container}, this.moveStart.bind(this));
-        $(container).on('pressmove', {c: container}, this.move.bind(this));
-        $(container).on('pressup', {c: container}, this.moveEnd.bind(this));
-        $(lineTop).on('pressmove', {c: container}, this.resizeTop.bind(this));
-        $(lineLeft).on('pressmove', {c: container}, this.resizeLeft.bind(this));
-        $(lineRight).on('pressmove', {c: container}, this.resizeRight.bind(this));
-        $(lineBottom).on('pressmove', {c: container}, this.resizeBottom.bind(this));
-        obj.on('mouseover', () => { if (!this._drag.isMove && !this._drag.lock) $('body').css('cursor', 'pointer') });
-        obj.on('mouseout', () => { if (!this._drag.isMove && !this._drag.lock) $('body').css('cursor', '') });
-        lineTop.on('mouseover', () => { $('body').css('cursor', 'row-resize') });
-        lineLeft.on('mouseover', () => { $('body').css('cursor', 'col-resize') });
-        lineRight.on('mouseover', () => { $('body').css('cursor', 'col-resize') });
-        lineBottom.on('mouseover', () => { $('body').css('cursor', 'row-resize') });
-        container.addChild(obj);
-        container.addChild(lineTop);
-        container.addChild(lineLeft);
-        container.addChild(lineRight);
-        container.addChild(lineBottom);
-        container.addChild(this.getText(container));
-        this._stage.addChild(container);
-        this._redraw(container);
-    },
-    _redraw: function(c) {
-        if (c.right && c.bottom) this._clearLocate(c)
-        c.right = c.width * c.unit * this._default;
-        c.bottom = c.height * c.unit * this._default;
-        c.getChildByName('top').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, 0).lineTo(c.right, 0).endStroke();
-        c.getChildByName('left').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, 0).lineTo(0, c.bottom).endStroke();
-        c.getChildByName('right').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(c.right, 0).lineTo(c.right, c.bottom).endStroke();
-        c.getChildByName('bottom').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, c.bottom).lineTo(c.right, c.bottom).endStroke();
-        c.getChildByName('field').graphics.clear().beginFill(this._types[c.type].color).drawRect(0, 0, c.right, c.bottom).endFill();
-        this._setLocate(c);
-        this.update();
-    },
-    _resize: function(c, diff) {
-        var offset = c.unit * 0.25 * this._default * this._scale;
-
-        this._drag.isMove = this._drag.lock = true;
-        if (Math.abs(diff) > offset) {
-            if (c.width < c.height && (diff > 0 || c.width > 0.25)) {
-                this._clearLocate(c);
-                c.x += c.width * c.unit * this._default * this._scale / 2;
-                c.y += c.height * c.unit * this._default * this._scale / 2;
-                c.width += 0.25 * (diff > 0 ? 1 : -1);
-                c.width = (diff > 0 ? Math.floor(c.width / 0.25) : Math.floor(c.width / 0.25)) * 0.25;
-                c.height = this.getLength(c.size, c.width);
-                c.x -= c.width * c.unit * this._default * this._scale / 2;
-                c.y -= c.height * c.unit * this._default * this._scale / 2;
-            } else if (c.width >= c.height && (diff < 0 || c.height > 0.25)) {
-                this._clearLocate(c);
-                c.x += c.width * c.unit * this._default * this._scale / 2;
-                c.y += c.height * c.unit * this._default * this._scale / 2;
-                c.height += 0.25 * (diff > 0 ? -1 : 1);
-                c.height = (diff > 0 ? Math.floor(c.height / 0.25) : Math.floor(c.height / 0.25)) * 0.25;
-                c.width = this.getLength(c.size, c.height);
-                c.x -= c.width * c.unit * this._default * this._scale / 2;
-                c.y -= c.height * c.unit * this._default * this._scale / 2;
-            } else
-                return;
-            c.right = c.bottom = null;
-            this._redraw(c);
-        }
-    },
-    resizeTop: function(e) {
-        this._resize(e.data.c, this._stage.mouseY - e.data.c.y - this._stage.y);
-    },
-    resizeLeft: function(e) {
-        this._resize(e.data.c, e.data.c.x - this._stage.mouseX + this._stage.x);
-    },
-    resizeRight: function(e) {
-        this._resize(e.data.c, this._stage.mouseX - e.data.c.x - e.data.c.right - this._stage.x);
-    },
-    resizeBottom: function(e) {
-        this._resize(e.data.c, e.data.c.y - this._stage.mouseY + e.data.c.bottom + this._stage.y);
-    },
-    moveStart: function(e) {
-        var c = e.data.c;
+        $('#form').closeModal();
+        $('#side').sideNav('hide');
+    }
+    function setEvent(container) {
+        container.on('mousedown', moveStart);
+        container.on('pressmove', move);
+        container.on('pressup', moveEnd);
+        container.getChildByName('top').on('pressmove', resizeTop);
+        container.getChildByName('left').on('pressmove', resizeLeft);
+        container.getChildByName('right').on('pressmove', resizeRight);
+        container.getChildByName('bottom').on('pressmove', resizeBottom);
+        container.getChildByName('field').on('mouseover', () => { if (!move && !lock) $('body').css('cursor', 'pointer') });
+        container.getChildByName('field').on('mouseout', () => { if (!move && !lock) $('body').css('cursor', '') });
+        container.getChildByName('top').on('mouseover', () => { $('body').css('cursor', 'row-resize') });
+        container.getChildByName('left').on('mouseover', () => { $('body').css('cursor', 'col-resize') });
+        container.getChildByName('right').on('mouseover', () => { $('body').css('cursor', 'col-resize') });
+        container.getChildByName('bottom').on('mouseover', () => { $('body').css('cursor', 'row-resize') });
+        checkOverFlow();
+    }
+    function remove() {
+        madori.remove(c);
+        checkOverFlow();
+        $('#tubo').text(madori.getTubo() + '坪');
+        $('#form').closeModal();
+    }
+    function moveStart() {
+        drag.x = madori.getMouse('x') - this.x;
+        drag.y = madori.getMouse('y') - this.y;
+        move = false;
 
         $('body').css('cursor', 'move');
-        this._drag.x = this._stage.mouseX - c.x;
-        this._drag.y = this._stage.mouseY - c.y;
-        this._drag.isMove = false;
-    },
-    move: function(e) {
-        if (e.originalEvent.pointerID < 1) this._move(e.data.c);
-        else this._pinch(e.data.c);
-    },
-    _move: function(c) {
-        if (this._drag.lock) return;
-        this._clearLocate(c);
-        c.x = this._stage.mouseX - this._drag.x;
-        c.y = this._stage.mouseY - this._drag.y;
-
-        this._locate.x.find(function(elm) {
-            if (Math.abs(elm - c.x) < 10) c.x = elm;
-            else if (Math.abs(elm - c.x - c.right * this._scale) < 10) c.x = elm - c.right * this._scale;
-            else return false;
-            return true;
-        }, this);
-        this._locate.y.find(function(elm) {
-            if (Math.abs(elm - c.y) < 10) c.y = elm;
-            else if (Math.abs(elm - c.y - c.bottom * this._scale) < 10) c.y = elm - c.bottom * this._scale;
-            else return false;
-            return true;
-        }, this);
-        this._setLocate(c);
-        this._drag.isMove = true;
-        this.update();
-    },
-    _pinch: function(c) {
-        var diffx = Math.abs(this._stage.mouseX - this._drag.x - c.x);
-        var diffy = Math.abs(this._stage.mouseY - this._drag.y - c.y);
-
-        if (diffx > diffy) this._resize(c, this._stage.mouseX - this._drag.x - c.x);
-        if (diffx < diffy) this._resize(c, this._stage.mouseY - this._drag.y - c.y);
-        if (diffx != diffy && Math.max(diffx, diffy) > c.unit * 0.25 * this._default * this._scale) {
-            this._drag.x = this._stage.mouseX - c.x;
-            this._drag.y = this._stage.mouseY - c.y;
-        }
-    },
-    moveEnd: function(e) {
-        var c = e.data.c;
-
+    }
+    function move(e) {
+        move = true;
+        if (e.pointerID < 1 && !lock) madori.move(this, drag);
+        else if (e.pointerID >= 1) madori.pinch(this, drag);
+        checkOverFlow();
+    }
+    function moveEnd() {
+        if (!move && !lock) setForm(this);
         $('body').css('cursor', 'pointer');
-        if (!this._drag.isMove && !this._drag.lock) this.change(c);
-        this._drag.isMove = this._drag.lock = false;
-    },
-    change: function(c) {
+
+        move = lock = false;
+        checkOverFlow();
+    }
+    function resizeTop() {
+        madori.resize(this.parent, madori.getMouse('y') - this.parent.y - madori.getStagePtr().y);
+        checkOverFlow();
+        lock = true;
+    }
+    function resizeLeft() {
+        madori.resize(this.parent, this.parent.x - madori.getMouse('x') + madori.getStagePtr().x);
+        checkOverFlow();
+        lock = true;
+    }
+    function resizeRight() {
+        madori.resize(this.parent, madori.getMouse('x') - this.parent.x - this.parent.right - madori.getStagePtr().x);
+        checkOverFlow();
+        lock = true;
+    }
+    function resizeBottom() {
+        madori.resize(this.parent, this.parent.y - madori.getMouse('y') + this.parent.bottom + madori.getStagePtr().y);
+        checkOverFlow();
+        lock = true;
+    }
+    function setForm(c) {
+        container = c;
         $('#form').openModal();
-        $('#size').val(c.size);
-        $('#unit').val(c.unit);
-        $('#type').val(c.type);
+        $('#size').val(container.size);
+        $('#unit').val(container.unit);
+        $('#type').val(container.type);
         $('select').material_select('update');
-        $('#change').off('click');
-        $('#change').on('click', () => {
-            if (!c._init) this.remove(c);
-            this.create(c.x, c.y, this.getLength($('#size').val(), c.height), c.height, $('#unit').val(), $('#type').val());
-            $('#form').closeModal();
-            $('#side').sideNav('hide');
-        })
-        $('#remove').off('click');
-        $('#remove').on('click', () => {
-            this.remove(c);
-            $('#form').closeModal();
-        })
-    },
-    toJson: function() {
-        var json = {version: this.version, data: []};
-        this.eachStage((c) => {
-            json.data.push({x: c.x / this._scale, y: c.y / this._scale, width: c.width, height: c.height, unit: c.unit, type: c.type});
-        });
-        return json;
-    },
-    restore: function(json) {
-        this.eachStage((c) => { this.remove(c); });
-        for (var i = 0; i < json.data.length; i++) {
-            this.create(json.data[i].x * this._scale, json.data[i].y * this._scale, json.data[i].width, json.data[i].height, json.data[i].unit, json.data[i].type);
+    }
+    function zoomIn() {
+        setZoom(0.1);
+    }
+    function zoomOut() {
+        setZoom(-0.1);
+    }
+    function setZoom(scale) {
+        madori.setScale(scale);
+        $('#zoomLevel').text(Math.round(madori.getScale() * 100) + '%');
+        checkOverFlow();
+    }
+    function setWindowSize() {
+        winSize.width = $(window).width();
+        winSize.height = $(window).height() - $('.navbar-fixed').height();
+        $('#madori').attr('width', winSize.width);
+        $('#madori').attr('height', winSize.height);
+        checkOverFlow();
+        madori.update();
+    }
+    function shiftTop() {
+        shiftWindow(0, 5);
+    }
+    function shiftLeft() {
+        shiftWindow(5, 0);
+    }
+    function shiftRight() {
+        shiftWindow(-5, 0);
+    }
+    function shiftBottom() {
+        shiftWindow(0, -5);
+    }
+    function shiftWindow(x, y) {
+        if (shift) return;
+
+        shift = madori.shiftWindow(x, y, winSize, shiftEnd);
+    }
+    function shiftEnd() {
+        if (shift) {
+            checkOverFlow();
+            clearInterval(shift);
+            shift = false;
         }
-    },
-    importFile: function(e) {
+    }
+    function resize() {
+        if (resize) clearTimeout(resize);
+        resize = setTimeout(() => {
+            setWindowSize();
+            madori.changeLocale();
+            resize = null;
+        });
+    }
+    function checkOverFlow() {
+        var ptr = madori.getStagePtr();
+        var locate = madori.getLimitLocate();
+        if (ptr.y + locate.y.min < 50 && $('#top').hasClass('hide')) $('#top').removeClass('hide');
+        if (ptr.y + locate.y.min > 50 && !$('#top').hasClass('hide')) $('#top').addClass('hide');
+        if (ptr.x + locate.x.min < 100 && $('#left').hasClass('hide')) $('#left').removeClass('hide');
+        if (ptr.x + locate.x.min > 100 && !$('#left').hasClass('hide')) $('#left').addClass('hide');
+        if (ptr.x + locate.x.max > winSize.width && $('#right').hasClass('hide')) $('#right').removeClass('hide');
+        if (ptr.x + locate.x.max < winSize.width && !$('#right').hasClass('hide')) $('#right').addClass('hide');
+        if (ptr.y + locate.y.max > winSize.height && $('#bottom').hasClass('hide')) $('#bottom').removeClass('hide');
+        if (ptr.y + locate.y.max < winSize.height && !$('#bottom').hasClass('hide')) $('#bottom').addClass('hide');
+    }
+    function importFile(e) {
         var file = new FileReader();
         file.readAsText(e.target.files[0]);
 
         file.onload = () => {
-            this.restore(JSON.parse(file.result));
+            madori.setJson(JSON.parse(file.result));
+            $('#tubo').text(madori.getTubo() + '坪');
             $('#side').sideNav('hide');
         }
-    },
-    exportFile: function() {
-        window.location.href = window.URL.createObjectURL(new Blob([JSON.stringify(this.toJson())], {type: 'application/octet-stream'}));
     }
-}
-
-$(document).ready(function() {
-    madori.init();
+    function exportFile() {
+        window.location.href = window.URL.createObjectURL(new Blob([JSON.stringify(madori.getJson())], {type: 'application/octet-stream'}));
+    }
 })
