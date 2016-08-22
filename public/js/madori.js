@@ -4,6 +4,7 @@ function Madori (canvas, objEvent) {
     var font = '15px sans-serif'
     var picsel = 100;
     var scale = 1;
+    var floor = 1;
     var objEvent = objEvent;
     var locate = {x: [], y: []};
     var units = {'1.70': '団地間', '1.76': '江戸間', '1.82': '中京間', '1.91': '京間'};
@@ -34,8 +35,10 @@ function Madori (canvas, objEvent) {
 
         return obj;
     };
-    this.create = (x, y, width, height, unit, type) => {
-        var property = {scaleX: scale, scaleY: scale, x: x, y: y, width: width, height: height, size: width * height * 2, unit: unit, type: type};
+    this.create = (x, y, width, height, unit, type, floor) => {
+        if (!floor) floor = this.getFloor();
+
+        var property = {scaleX: scale, scaleY: scale, x: x, y: y, width: width, height: height, size: width * height * 2, unit: unit, type: type, floor: floor};
         var text = (scale < 0.5) ? '' : property.size + '畳 (' + units[unit] + ')\n' + types[type].name;
         var container = this.createObject('Container', property);
         container.addChild(this.createObject('Shape', {name: 'field'}));
@@ -53,11 +56,21 @@ function Madori (canvas, objEvent) {
         if (container.right && container.bottom) this.clearLocate(container)
         container.right = container.width * container.unit * picsel;
         container.bottom = container.height * container.unit * picsel;
-        container.getChildByName('top').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, 0).lineTo(container.right, 0).endStroke();
-        container.getChildByName('left').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, 0).lineTo(0, container.bottom).endStroke();
-        container.getChildByName('right').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(container.right, 0).lineTo(container.right, container.bottom).endStroke();
-        container.getChildByName('bottom').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, container.bottom).lineTo(container.right, container.bottom).endStroke();
-        container.getChildByName('field').graphics.clear().beginFill(types[container.type].color).drawRect(0, 0, container.right, container.bottom).endFill();
+
+        if (this.checkFloor(container)) {
+            container.getChildByName('top').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, 0).lineTo(container.right, 0).endStroke();
+            container.getChildByName('left').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, 0).lineTo(0, container.bottom).endStroke();
+            container.getChildByName('right').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(container.right, 0).lineTo(container.right, container.bottom).endStroke();
+            container.getChildByName('bottom').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, container.bottom).lineTo(container.right, container.bottom).endStroke();
+            container.getChildByName('field').graphics.clear().beginFill(types[container.type].color).drawRect(0, 0, container.right, container.bottom).endFill();
+        } else {
+            container.getChildByName('top').graphics.clear();
+            container.getChildByName('left').graphics.clear();
+            container.getChildByName('right').graphics.clear();
+            container.getChildByName('bottom').graphics.clear();
+            container.getChildByName('text').text = '';
+            container.getChildByName('field').graphics.clear().beginFill('#9e9e9e').drawRect(0, 0, container.right, container.bottom).endFill();
+        }
         this.setLocate(container);
         stage.update();
     };
@@ -129,8 +142,16 @@ function Madori (canvas, objEvent) {
         }
     };
     this.setScale = (value) => {
+        if (scale + value < 0.1) return;
         var json = this.getJson();
         scale += Math.round(value * 10) / 10;
+
+        this.setJson(json);
+    };
+    this.setFloor = (value) => {
+        if (floor + value < 1) return;
+        var json = this.getJson();
+        floor += value;
 
         this.setJson(json);
     };
@@ -172,10 +193,18 @@ function Madori (canvas, objEvent) {
         height.getChildByName('text').text = Math.round((locate.y.max - locate.y.min) / scale * 10) + 'mm';
         height.getChildByName('line').graphics.clear().beginStroke('#bdbdbd').setStrokeDash([5, 5]).setStrokeStyle(2).moveTo(5, 0).lineTo(5, locate.y.max - locate.y.min).endStroke();
     };
+    this.checkFloor = (container) => {
+        if (floor === container.floor + 1 && container.type == 7) return true;
+        if (floor === container.floor) return true;
+        return false;
+    };
     this.setJson = (json) => {
         this.forEach((container) => { this.remove(container); });
         for (var i = 0; i < json.data.length; i++) {
-            this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].unit, json.data[i].type);
+            if (!this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].unit, json.data[i].type, json.data[i].floor);
+        }
+        for (var i = 0; i < json.data.length; i++) {
+            if (this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].unit, json.data[i].type, json.data[i].floor);
         }
     };
     this.getMouse = (type) => {
@@ -184,16 +213,19 @@ function Madori (canvas, objEvent) {
     };
     this.getStagePtr = () => {
         return {x: stage.x, y: stage.y};
-    }
+    };
     this.getJson = () => {
         var json = {version: this.version, data: []};
         this.forEach((container) => {
-            json.data.push({x: container.x / scale, y: container.y / scale, width: container.width, height: container.height, unit: container.unit, type: container.type});
+            json.data.push({x: container.x / scale, y: container.y / scale, width: container.width, height: container.height, unit: container.unit, type: container.type, floor: container.floor});
         });
         return json;
     };
     this.getScale = () => {
         return scale;
+    };
+    this.getFloor = () => {
+        return floor;
     };
     this.getLimitLocate = () => {
         return {

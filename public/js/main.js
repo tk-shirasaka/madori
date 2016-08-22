@@ -2,17 +2,20 @@ $(document).ready(function() {
     var madori = new Madori('madori', setEvent);
     var winSize = {width: null, height: null};
     var drag = {x: null, y: null};
-    var container, resize, shift, move, lock;
+    var container, resize, shift, moving, lock;
 
     setWindowSize();
     setZoom(0);
-    $('#add').on('click', add);
-    $('#change').on('click', change);
+    setFloor(0);
+    $('#open').on('click', setForm);
+    $('#add, #change').on('click', submit);
     $('#remove').on('click', remove)
     $('#import').on('change', importFile);
     $('#export').on('click', exportFile);
     $('#zoomIn').on('click', zoomIn);
     $('#zoomOut').on('click', zoomOut);
+    $('#floorUp').on('click', floorUp);
+    $('#floorDown').on('click', floorDown);
     $('#top').on('mouseenter', shiftTop);
     $('#left').on('mouseenter', shiftLeft);
     $('#right').on('mouseenter', shiftRight);
@@ -22,10 +25,7 @@ $(document).ready(function() {
     $('select').material_select();
     $(window).on('resize', resize);
 
-    function add() {
-        setForm({x: 100, y: 100, size: 1, height: 1, width: 0.5, unit: '1.82', type: 1, _init: true});
-    }
-    function change() {
+    function submit() {
         if (!container._init) madori.remove(container);
         madori.create(container.x, container.y, madori.getLength($('#size').val(), container.height), container.height, $('#unit').val(), $('#type').val());
 
@@ -34,6 +34,8 @@ $(document).ready(function() {
         $('#tubo').text(madori.getTubo() + '坪');
     }
     function setEvent(container) {
+        if (!madori.checkFloor(container)) return;
+
         container.on('mousedown', moveStart);
         container.on('pressmove', move);
         container.on('pressup', moveEnd);
@@ -41,8 +43,8 @@ $(document).ready(function() {
         container.getChildByName('left').on('pressmove', resizeLeft);
         container.getChildByName('right').on('pressmove', resizeRight);
         container.getChildByName('bottom').on('pressmove', resizeBottom);
-        container.getChildByName('field').on('mouseover', () => { if (!move && !lock) $('body').css('cursor', 'pointer') });
-        container.getChildByName('field').on('mouseout', () => { if (!move && !lock) $('body').css('cursor', '') });
+        container.getChildByName('field').on('mouseover', () => { if (!moving && !lock) $('body').css('cursor', 'pointer') });
+        container.getChildByName('field').on('mouseout', () => { if (!moving && !lock) $('body').css('cursor', '') });
         container.getChildByName('top').on('mouseover', () => { $('body').css('cursor', 'row-resize') });
         container.getChildByName('left').on('mouseover', () => { $('body').css('cursor', 'col-resize') });
         container.getChildByName('right').on('mouseover', () => { $('body').css('cursor', 'col-resize') });
@@ -50,7 +52,7 @@ $(document).ready(function() {
         checkOverFlow();
     }
     function remove() {
-        madori.remove(c);
+        madori.remove(container);
         checkOverFlow();
         $('#tubo').text(madori.getTubo() + '坪');
         $('#form').closeModal();
@@ -58,21 +60,21 @@ $(document).ready(function() {
     function moveStart() {
         drag.x = madori.getMouse('x') - this.x;
         drag.y = madori.getMouse('y') - this.y;
-        move = false;
+        moving = false;
 
         $('body').css('cursor', 'move');
     }
     function move(e) {
-        move = true;
+        moving = true;
         if (e.pointerID < 1 && !lock) madori.move(this, drag);
         else if (e.pointerID >= 1) madori.pinch(this, drag);
         checkOverFlow();
     }
     function moveEnd() {
-        if (!move && !lock) setForm(this);
+        if (!moving && !lock) setForm(this, true);
         $('body').css('cursor', 'pointer');
 
-        move = lock = false;
+        moving = lock = false;
         checkOverFlow();
     }
     function resizeTop() {
@@ -95,12 +97,21 @@ $(document).ready(function() {
         checkOverFlow();
         lock = true;
     }
-    function setForm(c) {
+    function setForm(c, isChange) {
         container = c;
         $('#form').openModal();
-        $('#size').val(container.size);
-        $('#unit').val(container.unit);
-        $('#type').val(container.type);
+
+        if (isChange) {
+            $('#add').addClass('hide');
+            $('#remove, #change').removeClass('hide');
+        } else {
+            container = {x: 100, y: 100, size: 1, height: 1, unit: '1.82', type: 1, _init: true};
+            $('#add').removeClass('hide');
+            $('#remove, #change').addClass('hide');
+        }
+        $('#size').val(container.size).trigger('change');
+        $('#unit').val(container.unit).trigger('change');
+        $('#type').val(container.type).trigger('change');
         $('select').material_select('update');
     }
     function zoomIn() {
@@ -113,6 +124,16 @@ $(document).ready(function() {
         madori.setScale(scale);
         $('#zoomLevel').text(Math.round(madori.getScale() * 100) + '%');
         checkOverFlow();
+    }
+    function floorUp() {
+        setFloor(1);
+    }
+    function floorDown() {
+        setFloor(-1);
+    }
+    function setFloor(floor) {
+        madori.setFloor(floor);
+        $('#floor').text(madori.getFloor() + '階');
     }
     function setWindowSize() {
         winSize.width = $(window).width();

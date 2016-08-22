@@ -19,17 +19,26 @@ html
                                 i.material-icons.right menu
         ul#side.side-nav
             li
-                table.centered
-                    thead
+                table.centered.bordered
+                    tbody
                         tr
-                            th
+                            td
                                 a#zoomOut(href='#!')
                                     i.material-icons zoom_out
-                            th
+                            td
                                 span#zoomLevel
-                            th
+                            td
                                 a#zoomIn(href='#!')
                                     i.material-icons zoom_in
+                        tr
+                            td
+                                a#floorDown(href='#!')
+                                    i.material-icons keyboard_arrow_left
+                            td
+                                span#floor
+                            td
+                                a#floorUp(href='#!')
+                                    i.material-icons keyboard_arrow_right
             li
                 .file-field.input-field
                     .btn
@@ -40,7 +49,7 @@ html
             li
                 a#export.waves-effect.waves-light.btn エクスポート
             li
-                a#add.waves-effect.waves-light.btn 間取を追加
+                a#open.waves-effect.waves-light.btn.red 間取を追加
         #form.modal.modal-fixed-footer
             .modal-content
                 .input-field
@@ -64,6 +73,7 @@ html
                         option(value='1.82') 畳 (中京間)
                         option(value='1.91') 畳 (京間)
             .modal-footer
+                a#add.waves-effect.waves-light.btn 追加
                 a#remove.waves-effect.waves-light.btn.red 削除
                 a#change.waves-effect.waves-light.btn 変更
         canvas#madori
