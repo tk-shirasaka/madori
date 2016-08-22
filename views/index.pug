@@ -49,8 +49,10 @@ html
             li
                 a#export.waves-effect.waves-light.btn エクスポート
             li
-                a#open.waves-effect.waves-light.btn.red 間取を追加
-        #form.modal.modal-fixed-footer
+                a#toti.waves-effect.waves-light.btn 土地情報設定
+            li
+                a#madori.waves-effect.waves-light.btn.red 間取を追加
+        #madoriForm.modal.modal-fixed-footer
             .modal-content
                 .input-field
                     label(for='size') 畳
@@ -73,10 +75,20 @@ html
                         option(value='1.82') 畳 (中京間)
                         option(value='1.91') 畳 (京間)
             .modal-footer
-                a#add.waves-effect.waves-light.btn 追加
-                a#remove.waves-effect.waves-light.btn.red 削除
-                a#change.waves-effect.waves-light.btn 変更
-        canvas#madori
+                a#add.modal-close.waves-effect.waves-light.btn 追加
+                a#remove.modal-close.waves-effect.waves-light.btn.red 削除
+                a#change.modal-close.waves-effect.waves-light.btn 変更
+        #totiForm.modal.modal-fixed-footer
+            .modal-content
+                .input-field
+                    label(for='width') 横幅(m)
+                    input#width(type='number')
+                .input-field
+                    label(for='height') 縦幅(m)
+                    input#height(type='number')
+            .modal-footer
+                a#setting.modal-close.waves-effect.waves-light.btn 適用
+        canvas#canvas
         a#left.btn-floating.hide(style='position:fixed; left: 5px; top:50%;')
             i.material-icons arrow_back
         a#top.btn-floating.hide(style='position:fixed; left: 50%; top:70px; margin-left: -18.5px')
