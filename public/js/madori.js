@@ -2,11 +2,11 @@ function Madori (canvas, objEvent) {
     var version = '0.0.1';
     var stage = new createjs.Stage(canvas);
     var font = '15px sans-serif'
-    var picsel = 100;
+    var picsel = 150;
     var scale = 1;
     var floor = 1;
-    var objEvent = objEvent;
     var locate = {x: [], y: []};
+    var setting = {unit: '1.82', width: null, height: null};
     var units = {'1.70': '団地間', '1.76': '江戸間', '1.82': '中京間', '1.91': '京間'};
     var types = {
         1: {name: '洋室', color: '#bcaaa4'},
@@ -35,11 +35,11 @@ function Madori (canvas, objEvent) {
 
         return obj;
     };
-    this.create = (x, y, width, height, unit, type, floor) => {
+    this.create = (x, y, width, height, type, floor) => {
         if (!floor) floor = this.getFloor();
 
-        var property = {scaleX: scale, scaleY: scale, x: x, y: y, width: width, height: height, size: width * height * 2, unit: unit, type: type, floor: floor};
-        var text = (scale < 0.5) ? '' : property.size + '畳 (' + units[unit] + ')\n' + types[type].name;
+        var property = {scaleX: scale, scaleY: scale, x: x, y: y, width: width, height: height, size: width * height * 2, type: type, floor: floor};
+        var text = (scale < 0.5) ? '' : property.size + '畳\n' + types[type].name;
         var container = this.createObject('Container', property);
         container.addChild(this.createObject('Shape', {name: 'field'}));
         container.addChild(this.createObject('Shape', {name: 'top'}));
@@ -54,8 +54,8 @@ function Madori (canvas, objEvent) {
     };
     this.draw = (container) => {
         if (container.right && container.bottom) this.clearLocate(container)
-        container.right = container.width * container.unit * picsel;
-        container.bottom = container.height * container.unit * picsel;
+        container.right = container.width * picsel;
+        container.bottom = container.height * picsel;
 
         if (this.checkFloor(container)) {
             container.getChildByName('top').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, 0).lineTo(container.right, 0).endStroke();
@@ -69,7 +69,7 @@ function Madori (canvas, objEvent) {
             container.getChildByName('right').graphics.clear();
             container.getChildByName('bottom').graphics.clear();
             container.getChildByName('text').text = '';
-            container.getChildByName('field').graphics.clear().beginFill('#9e9e9e').drawRect(0, 0, container.right, container.bottom).endFill();
+            container.getChildByName('field').graphics.clear().beginFill('rgba(0,0,0,0.5)').drawRect(0, 0, container.right, container.bottom).endFill();
         }
         this.setLocate(container);
         stage.update();
@@ -103,27 +103,27 @@ function Madori (canvas, objEvent) {
         stage.update();
     };
     this.resize = (container, diff) => {
-        var offset = container.unit * 0.25 * picsel * scale;
+        var offset = 0.25 * picsel * scale;
 
         if (Math.abs(diff) > offset) {
             if (container.width < container.height && (diff > 0 || container.width > 0.25)) {
                 this.clearLocate(container);
-                container.x += container.width * container.unit * picsel * scale / 2;
-                container.y += container.height * container.unit * picsel * scale / 2;
+                container.x += container.width * picsel * scale / 2;
+                container.y += container.height * picsel * scale / 2;
                 container.width += 0.25 * (diff > 0 ? 1 : -1);
                 container.width = (diff > 0 ? Math.floor(container.width / 0.25) : Math.floor(container.width / 0.25)) * 0.25;
                 container.height = this.getLength(container.size, container.width);
-                container.x -= container.width * container.unit * picsel * scale / 2;
-                container.y -= container.height * container.unit * picsel * scale / 2;
+                container.x -= container.width * picsel * scale / 2;
+                container.y -= container.height * picsel * scale / 2;
             } else if (container.width >= container.height && (diff < 0 || container.height > 0.25)) {
                 this.clearLocate(container);
-                container.x += container.width * container.unit * picsel * scale / 2;
-                container.y += container.height * container.unit * picsel * scale / 2;
+                container.x += container.width * picsel * scale / 2;
+                container.y += container.height * picsel * scale / 2;
                 container.height += 0.25 * (diff > 0 ? -1 : 1);
                 container.height = (diff > 0 ? Math.floor(container.height / 0.25) : Math.floor(container.height / 0.25)) * 0.25;
                 container.width = this.getLength(container.size, container.height);
-                container.x -= container.width * container.unit * picsel * scale / 2;
-                container.y -= container.height * container.unit * picsel * scale / 2;
+                container.x -= container.width * picsel * scale / 2;
+                container.y -= container.height * picsel * scale / 2;
             } else
                 return;
             container.right = container.bottom = null;
@@ -136,22 +136,26 @@ function Madori (canvas, objEvent) {
 
         if (diffx > diffy) this.resize(container, stage.mouseX - drag.x - container.x);
         if (diffx < diffy) this.resize(container, stage.mouseY - drag.y - container.y);
-        if (diffx != diffy && Math.max(diffx, diffy) > container.unit * 0.25 * picsel * scale) {
+        if (diffx != diffy && Math.max(diffx, diffy) > 0.25 * picsel * scale) {
             drag.x = stage.mouseX - container.x;
             drag.y = stage.mouseY - container.y;
         }
     };
-    this.setScale = (value) => {
-        if (scale + value < 0.1) return;
+    this.setSetting = (value) => {
         var json = this.getJson();
-        scale += Math.round(value * 10) / 10;
+        setting = value;
+
+        this.setJson(json);
+    };
+    this.setScale = (value) => {
+        var json = this.getJson();
+        scale = value / 100;
 
         this.setJson(json);
     };
     this.setFloor = (value) => {
-        if (floor + value < 1) return;
         var json = this.getJson();
-        floor += value;
+        floor = value;
 
         this.setJson(json);
     };
@@ -188,9 +192,9 @@ function Madori (canvas, objEvent) {
         width.y = locate.y.min - 15;
         height.x = locate.x.min - 15;
         height.y = locate.y.min;
-        width.getChildByName('text').text = Math.round((locate.x.max - locate.x.min) / scale * 10) + 'mm';
+        width.getChildByName('text').text = this.getMeter(locate.x.max - locate.x.min) + 'mm';
         width.getChildByName('line').graphics.clear().beginStroke('#bdbdbd').setStrokeDash([5, 5]).setStrokeStyle(2).moveTo(0, 5).lineTo(locate.x.max - locate.x.min, 5).endStroke();
-        height.getChildByName('text').text = Math.round((locate.y.max - locate.y.min) / scale * 10) + 'mm';
+        height.getChildByName('text').text = this.getMeter(locate.y.max - locate.y.min) + 'mm';
         height.getChildByName('line').graphics.clear().beginStroke('#bdbdbd').setStrokeDash([5, 5]).setStrokeStyle(2).moveTo(5, 0).lineTo(5, locate.y.max - locate.y.min).endStroke();
     };
     this.checkFloor = (container) => {
@@ -200,11 +204,12 @@ function Madori (canvas, objEvent) {
     };
     this.setJson = (json) => {
         this.forEach((container) => { this.remove(container); });
+        if (json.setting) setting = json.setting;
         for (var i = 0; i < json.data.length; i++) {
-            if (!this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].unit, json.data[i].type, json.data[i].floor);
+            if (!this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].type, json.data[i].floor);
         }
         for (var i = 0; i < json.data.length; i++) {
-            if (this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].unit, json.data[i].type, json.data[i].floor);
+            if (this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].type, json.data[i].floor);
         }
     };
     this.getMouse = (type) => {
@@ -215,14 +220,17 @@ function Madori (canvas, objEvent) {
         return {x: stage.x, y: stage.y};
     };
     this.getJson = () => {
-        var json = {version: this.version, data: []};
+        var json = {version: version, setting: setting, data: []};
         this.forEach((container) => {
-            json.data.push({x: container.x / scale, y: container.y / scale, width: container.width, height: container.height, unit: container.unit, type: container.type, floor: container.floor});
+            json.data.push({x: container.x / scale, y: container.y / scale, width: container.width, height: container.height, type: container.type, floor: container.floor});
         });
         return json;
     };
+    this.getSetting = () => {
+        return setting;
+    };
     this.getScale = () => {
-        return scale;
+        return Math.round(scale * 100);
     };
     this.getFloor = () => {
         return floor;
@@ -237,12 +245,15 @@ function Madori (canvas, objEvent) {
         var tubo = 0;
 
         this.forEach((container) => {
-            tubo += container.size / 2 * container.unit * container.unit * (container.type == '7' ? 2 : 1);
+            tubo += container.size / 2 * setting.unit * setting.unit * (container.type == '7' ? 2 : 1);
         });
         return Math.round(tubo / 3.30579 * 100) / 100;
     };
     this.getLength = (size, length) => {
         return size / length / 2;
+    };
+    this.getMeter = (px) => {
+        return Math.round(px / scale / picsel * setting.unit * 1000);
     };
     this.forEach = (callback) => {
         for (var i = stage.children.length - 1; i >= 0; i--) {

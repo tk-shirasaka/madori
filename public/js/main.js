@@ -2,17 +2,17 @@ $(document).ready(function() {
     var madori = new Madori('canvas', setEvent);
     var winSize = {width: null, height: null};
     var drag = {x: null, y: null};
-    var settings = {width: null, height: null, percent: null};
-    var container, resize, shift, moving, lock;
+    var setting = madori.getSetting();
+    var container, resizing, shift, moving, lock;
 
     setWindowSize();
-    setZoom(0);
-    setFloor(0);
+    setZoom(100);
+    setFloor(1);
     $('#madori').on('click', setMadoriForm);
     $('#toti').on('click', setTotiForm);
     $('#add, #change').on('click', submit);
     $('#remove').on('click', remove)
-    $('#setting').on('click', setting)
+    $('#setting').on('click', setSetting)
     $('#import').on('change', importFile);
     $('#export').on('click', exportFile);
     $('#zoomIn').on('click', zoomIn);
@@ -25,16 +25,19 @@ $(document).ready(function() {
     $('#bottom').on('mouseenter', shiftBottom);
     $('#top, #left, #right, #bottom').on('mouseleave', shiftEnd);
     $('#menu').sideNav();
-    $('select').material_select();
     $(window).on('resize', resize);
 
-    function submit() {
-        if (!container._init) madori.remove(container);
-        madori.create(container.x, container.y, madori.getLength($('#size').val(), container.height), container.height, $('#unit').val(), $('#type').val());
+    function update() {
+        checkOverFlow();
         checkError();
 
-        $('#side').sideNav('hide');
         $('#tubo').text(madori.getTubo() + '坪');
+    }
+    function submit() {
+        if (!container._init) madori.remove(container);
+        madori.create(container.x, container.y, madori.getLength($('#size').val(), container.height), container.height, $('#type').val());
+        $('#side').sideNav('hide');
+        update();
     }
     function setEvent(container) {
         if (!madori.checkFloor(container)) return;
@@ -52,18 +55,18 @@ $(document).ready(function() {
         container.getChildByName('left').on('mouseover', () => { $('body').css('cursor', 'col-resize') });
         container.getChildByName('right').on('mouseover', () => { $('body').css('cursor', 'col-resize') });
         container.getChildByName('bottom').on('mouseover', () => { $('body').css('cursor', 'row-resize') });
-        checkOverFlow();
     }
     function remove() {
         madori.remove(container);
-        checkOverFlow();
-        checkError();
-        $('#tubo').text(madori.getTubo() + '坪');
+        update();
     }
-    function setting() {
-        settings.width = $('#width').val();
-        settings.height = $('#height').val();
-        settings.percent = $('#percent').val();
+    function setSetting() {
+        setting.width = $('#width').val();
+        setting.height = $('#height').val();
+        setting.unit = $('#unit').val();
+
+        madori.setSetting(setting);
+        update();
     }
     function moveStart() {
         drag.x = madori.getMouse('x') - this.x;
@@ -87,23 +90,19 @@ $(document).ready(function() {
         checkError();
     }
     function resizeTop() {
-        madori.resize(this.parent, madori.getMouse('y') - this.parent.y - madori.getStagePtr().y);
-        checkOverFlow();
-        lock = true;
+        resizeMadori(this.parent, madori.getMouse('y') - this.localToGlobal(0, 0).y);
     }
     function resizeLeft() {
-        madori.resize(this.parent, this.parent.x - madori.getMouse('x') + madori.getStagePtr().x);
-        checkOverFlow();
-        lock = true;
+        resizeMadori(this.parent, this.localToGlobal(0, 0).x - madori.getMouse('x'));
     }
     function resizeRight() {
-        madori.resize(this.parent, madori.getMouse('x') - this.parent.x - this.parent.right - madori.getStagePtr().x);
-        checkOverFlow();
-        lock = true;
+        resizeMadori(this.parent, madori.getMouse('x') - this.localToGlobal(this.parent.right, 0).x);
     }
     function resizeBottom() {
-        madori.resize(this.parent, this.parent.y - madori.getMouse('y') + this.parent.bottom + madori.getStagePtr().y);
-        checkOverFlow();
+        resizeMadori(this.parent, this.localToGlobal(0, this.parent.bottom).y - madori.getMouse('y'));
+    }
+    function resizeMadori(container, diff) {
+        madori.resize(container, diff);
         lock = true;
     }
     function setMadoriForm(c, isChange) {
@@ -114,43 +113,44 @@ $(document).ready(function() {
             $('#add').addClass('hide');
             $('#remove, #change').removeClass('hide');
         } else {
-            container = {x: 100, y: 100, size: 1, height: 1, unit: '1.82', type: 1, _init: true};
+            container = {x: 100, y: 100, size: 1, height: 1, type: 1, _init: true};
             $('#add').removeClass('hide');
             $('#remove, #change').addClass('hide');
         }
         $('#size').val(container.size).trigger('change');
-        $('#unit').val(container.unit).trigger('change');
-        $('#type').val(container.type).trigger('change');
-        $('select').material_select('update');
+        $('#type').val(container.type).material_select();
     }
     function setTotiForm() {
+        setting = madori.getSetting();
         $('#totiForm').openModal();
 
-        $('#width').val(settings.width).trigger('change');
-        $('#height').val(settings.height).trigger('change');
-        $('#percent').val(settings.percent).trigger('change');
-        $('select').material_select('update');
+        $('#width').val(setting.width).trigger('change');
+        $('#height').val(setting.height).trigger('change');
+        $('#unit').val(setting.unit).material_select();
     }
     function zoomIn() {
-        setZoom(0.1);
+        setZoom(madori.getScale() + 10);
     }
     function zoomOut() {
-        setZoom(-0.1);
+        setZoom(madori.getScale() - 10);
     }
     function setZoom(scale) {
+        if (scale <= 0) return;
+
         madori.setScale(scale);
-        $('#zoomLevel').text(Math.round(madori.getScale() * 100) + '%');
-        checkOverFlow();
+        $('#zoomLevel').text(scale + '%');
     }
     function floorUp() {
-        setFloor(1);
+        setFloor(madori.getFloor() + 1);
     }
     function floorDown() {
-        setFloor(-1);
+        setFloor(madori.getFloor() - 1);
     }
     function setFloor(floor) {
+        if (floor <= 0) return;
+
         madori.setFloor(floor);
-        $('#floor').text(madori.getFloor() + '階');
+        $('#floor').text(floor + '階');
     }
     function setWindowSize() {
         winSize.width = $(window).width();
@@ -185,11 +185,11 @@ $(document).ready(function() {
         }
     }
     function resize() {
-        if (resize) clearTimeout(resize);
-        resize = setTimeout(() => {
+        if (resizing) clearTimeout(resizing);
+        resizing = setTimeout(() => {
             setWindowSize();
             madori.changeLocale();
-            resize = null;
+            resizing = null;
         });
     }
     function checkOverFlow() {
@@ -206,8 +206,8 @@ $(document).ready(function() {
     }
     function checkError() {
         var locate = madori.getLimitLocate();
-        if (settings.width && settings.width < (locate.x.max - locate.x.min) / 100 * madori.getScale()) Materialize.toast('土地の横幅を超過してます', 3000);
-        if (settings.height && settings.height < (locate.y.max - locate.y.min) / 100 * madori.getScale()) Materialize.toast('土地の縦幅を超過してます', 3000);
+        if (setting.width && setting.width * 1000 < madori.getMeter(locate.x.max - locate.x.min)) Materialize.toast('土地の横幅を超過してます', 2000);
+        if (setting.height && setting.height * 1000 < madori.getMeter(locate.y.max - locate.y.min)) Materialize.toast('土地の縦幅を超過してます', 2000);
     }
     function importFile(e) {
         var file = new FileReader();
@@ -215,8 +215,8 @@ $(document).ready(function() {
 
         file.onload = () => {
             madori.setJson(JSON.parse(file.result));
-            $('#tubo').text(madori.getTubo() + '坪');
             $('#side').sideNav('hide');
+            update();
         }
     }
     function exportFile() {

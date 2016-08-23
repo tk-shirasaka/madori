@@ -49,7 +49,7 @@ html
             li
                 a#export.waves-effect.waves-light.btn エクスポート
             li
-                a#toti.waves-effect.waves-light.btn 土地情報設定
+                a#toti.waves-effect.waves-light.btn 基本設定
             li
                 a#madori.waves-effect.waves-light.btn.red 間取を追加
         #madoriForm.modal.modal-fixed-footer
@@ -68,12 +68,6 @@ html
                         option(value='7') 階段
                         option(value='8') 玄関
                         option(value='9') その他
-                .input-field
-                    select#unit
-                        option(value='1.70') 畳 (団地間)
-                        option(value='1.76') 畳 (江戸間)
-                        option(value='1.82') 畳 (中京間)
-                        option(value='1.91') 畳 (京間)
             .modal-footer
                 a#add.modal-close.waves-effect.waves-light.btn 追加
                 a#remove.modal-close.waves-effect.waves-light.btn.red 削除
@@ -81,11 +75,17 @@ html
         #totiForm.modal.modal-fixed-footer
             .modal-content
                 .input-field
-                    label(for='width') 横幅(m)
+                    label(for='width') 土地 横幅(m)
                     input#width(type='number')
                 .input-field
-                    label(for='height') 縦幅(m)
+                    label(for='height') 土地 縦幅(m)
                     input#height(type='number')
+                .input-field
+                    select#unit
+                        option(value='1.70') 畳 (団地間)
+                        option(value='1.76') 畳 (江戸間)
+                        option(value='1.82') 畳 (中京間)
+                        option(value='1.91') 畳 (京間)
             .modal-footer
                 a#setting.modal-close.waves-effect.waves-light.btn 適用
         canvas#canvas
