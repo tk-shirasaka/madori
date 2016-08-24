@@ -3,15 +3,17 @@ $(document).ready(function() {
     var winSize = {width: null, height: null};
     var drag = {x: null, y: null};
     var setting = madori.getSetting();
-    var container, resizing, shift, moving, lock;
+    var container, resizing, shift, moving, lock, clear;
 
     setWindowSize();
     setZoom(100);
     setFloor(1);
     $('#madori').on('click', setMadoriForm);
-    $('#toti').on('click', setTotiForm);
+    $('#toti').on('click', setSettingForm);
     $('#add, #change').on('click', submit);
     $('#remove').on('click', remove)
+    $('.add-types').on('click', addTypes);
+    $('.rm-types').on('click', rmTypes);
     $('#setting').on('click', setSetting)
     $('#import').on('change', importFile);
     $('#export').on('click', exportFile);
@@ -25,6 +27,7 @@ $(document).ready(function() {
     $('#bottom').on('mouseenter', shiftBottom);
     $('#top, #left, #right, #bottom').on('mouseleave', shiftEnd);
     $('#menu').sideNav();
+    $('#types').collapsible();
     $(window).on('resize', resize);
 
     function update() {
@@ -60,12 +63,29 @@ $(document).ready(function() {
         madori.remove(container);
         update();
     }
+    function addTypes() {
+        var $type = newType();
+        $type.find('.collapsible-header').text('-');
+        $('#types').append($type);
+    }
+    function rmTypes() {
+        $(this).closest('li').remove();
+    }
     function setSetting() {
-        setting.width = $('#width').val();
-        setting.height = $('#height').val();
-        setting.unit = $('#unit').val();
+        setting.types = [];
+        setting.madori.width = $('#width').val();
+        setting.madori.height = $('#height').val();
+        setting.madori.unit = $('#unit').val();
 
+        $('#types li').each(function() {
+            setting.types.push({
+                name: $(this).find('input.name').val(),
+                color: $(this).find('input.color').val(),
+                ignore: $(this).find('input.ignore').prop('checked')
+            });
+        });
         madori.setSetting(setting);
+        clear = false;
         update();
     }
     function moveStart() {
@@ -101,6 +121,38 @@ $(document).ready(function() {
     function resizeBottom() {
         resizeMadori(this.parent, this.localToGlobal(0, this.parent.bottom).y - madori.getMouse('y'));
     }
+    function newType() {
+        var $type = $('#typeList').clone(true).attr('id', null).removeClass('hide');
+        var id = 'ignore_' + $('#types li').length;
+        $type.find('input.ignore').attr('id', id).next().attr('for', id);
+        return $type;
+    }
+    function setSelectForm() {
+        if (!clear) {
+            setting = madori.getSetting();
+
+            $('#unit, #type, #types').empty();
+
+            Object.keys(setting.units).forEach((i) => {
+                $('#unit').append(`<option value="${i}">${setting.units[i]}</option>`);
+            });
+            Object.keys(setting.types).forEach((i) => {
+                var $type = newType();
+                $type.find('.collapsible-header').text(setting.types[i].name).css({background: setting.types[i].color});
+                $type.find('input.name').val(setting.types[i].name);
+                $type.find('input.color').val(setting.types[i].color);
+                $type.find('input.ignore').prop('checked', setting.types[i].ignore);
+                if (setting.types[i]._default) $type.find('.rm-types').addClass('hide');
+                $('#types').append($type);
+                $('#type').append(`<option value="${i}">${setting.types[i].name}</option>`);
+            });
+
+            $('#width').val(setting.madori.width).trigger('change');
+            $('#height').val(setting.madori.height).trigger('change');
+            $('#unit').val(setting.madori.unit).material_select();
+            clear = true;
+        }
+    }
     function resizeMadori(container, diff) {
         madori.resize(container, diff);
         lock = true;
@@ -109,24 +161,22 @@ $(document).ready(function() {
         container = c;
         $('#madoriForm').openModal();
 
+        setSelectForm();
         if (isChange) {
             $('#add').addClass('hide');
             $('#remove, #change').removeClass('hide');
         } else {
-            container = {x: 100, y: 100, size: 1, height: 1, type: 1, _init: true};
+            container = {x: 100, y: 100, size: 1, height: 1, type: 0, _init: true};
             $('#add').removeClass('hide');
             $('#remove, #change').addClass('hide');
         }
         $('#size').val(container.size).trigger('change');
         $('#type').val(container.type).material_select();
     }
-    function setTotiForm() {
-        setting = madori.getSetting();
-        $('#totiForm').openModal();
+    function setSettingForm() {
+        $('#settingForm').openModal();
 
-        $('#width').val(setting.width).trigger('change');
-        $('#height').val(setting.height).trigger('change');
-        $('#unit').val(setting.unit).material_select();
+        setSelectForm();
     }
     function zoomIn() {
         setZoom(madori.getScale() + 10);
@@ -153,10 +203,11 @@ $(document).ready(function() {
         $('#floor').text(floor + '階');
     }
     function setWindowSize() {
-        winSize.width = $(window).width();
-        winSize.height = $(window).height() - $('.navbar-fixed').height();
+        winSize.width = $(window).width() - 20;
+        winSize.height = $(window).height() - $('.navbar-fixed').height() - 20;
         $('#canvas').attr('width', winSize.width);
         $('#canvas').attr('height', winSize.height);
+        $('#canvas').css({margin: '10px'});
         checkOverFlow();
         madori.update();
     }
@@ -206,8 +257,8 @@ $(document).ready(function() {
     }
     function checkError() {
         var locate = madori.getLimitLocate();
-        if (setting.width && setting.width * 1000 < madori.getMeter(locate.x.max - locate.x.min)) Materialize.toast('土地の横幅を超過してます', 2000);
-        if (setting.height && setting.height * 1000 < madori.getMeter(locate.y.max - locate.y.min)) Materialize.toast('土地の縦幅を超過してます', 2000);
+        if (setting.madori.width && setting.madori.width * 1000 < madori.getMeter(locate.x.max - locate.x.min)) Materialize.toast('土地の横幅を超過してます', 2000);
+        if (setting.madori.height && setting.madori.height * 1000 < madori.getMeter(locate.y.max - locate.y.min)) Materialize.toast('土地の縦幅を超過してます', 2000);
     }
     function importFile(e) {
         var file = new FileReader();
@@ -217,6 +268,7 @@ $(document).ready(function() {
             madori.setJson(JSON.parse(file.result));
             $('#side').sideNav('hide');
             update();
+            clear = false;
         }
     }
     function exportFile() {

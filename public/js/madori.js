@@ -6,18 +6,20 @@ function Madori (canvas, objEvent) {
     var scale = 1;
     var floor = 1;
     var locate = {x: [], y: []};
-    var setting = {unit: '1.82', width: null, height: null};
-    var units = {'1.70': '団地間', '1.76': '江戸間', '1.82': '中京間', '1.91': '京間'};
-    var types = {
-        1: {name: '洋室', color: '#bcaaa4'},
-        2: {name: '和室', color: '#8bc34a'},
-        3: {name: 'トイレ', color: '#bdbdbd'},
-        4: {name: 'お風呂', color: '#81d4fa'},
-        5: {name: '洗面所', color: '#009688'},
-        6: {name: '廊下', color: '#795548'},
-        7: {name: '階段', color: '#ffff8d'},
-        8: {name: '玄関', color: '#ce93d8'},
-        9: {name: 'その他', color: '#f44336'},
+    var setting = {
+        madori: {unit: '1.82', width: null, height: null},
+        units: {'1.70': '団地間', '1.76': '江戸間', '1.82': '中京間', '1.91': '京間'},
+        types: [
+            {_default: true, name: '洋室', color: '#bcaaa4'},
+            {_default: true, name: '和室', color: '#8bc34a'},
+            {_default: true, name: 'トイレ', color: '#bdbdbd'},
+            {_default: true, name: 'お風呂', color: '#81d4fa'},
+            {_default: true, name: '洗面所', color: '#009688'},
+            {_default: true, name: '廊下', color: '#795548'},
+            {_default: true, name: '階段', color: '#ffff8d', rate: 2},
+            {_default: true, name: '玄関', color: '#ce93d8'},
+            {_default: true, name: 'その他', color: '#f44336'},
+        ]
     };
 
     stage.mouseMoveOutside = true;
@@ -39,7 +41,7 @@ function Madori (canvas, objEvent) {
         if (!floor) floor = this.getFloor();
 
         var property = {scaleX: scale, scaleY: scale, x: x, y: y, width: width, height: height, size: width * height * 2, type: type, floor: floor};
-        var text = (scale < 0.5) ? '' : property.size + '畳\n' + types[type].name;
+        var text = (scale < 0.5) ? '' : property.size + '畳\n' + setting.types[type].name;
         var container = this.createObject('Container', property);
         container.addChild(this.createObject('Shape', {name: 'field'}));
         container.addChild(this.createObject('Shape', {name: 'top'}));
@@ -62,7 +64,7 @@ function Madori (canvas, objEvent) {
             container.getChildByName('left').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, 0).lineTo(0, container.bottom).endStroke();
             container.getChildByName('right').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(container.right, 0).lineTo(container.right, container.bottom).endStroke();
             container.getChildByName('bottom').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, container.bottom).lineTo(container.right, container.bottom).endStroke();
-            container.getChildByName('field').graphics.clear().beginFill(types[container.type].color).drawRect(0, 0, container.right, container.bottom).endFill();
+            container.getChildByName('field').graphics.clear().beginFill(setting.types[container.type].color).drawRect(0, 0, container.right, container.bottom).endFill();
         } else {
             container.getChildByName('top').graphics.clear();
             container.getChildByName('left').graphics.clear();
@@ -242,10 +244,11 @@ function Madori (canvas, objEvent) {
         };
     };
     this.getTubo = () => {
-        var tubo = 0;
+        var rate, tubo = 0;
 
         this.forEach((container) => {
-            tubo += container.size / 2 * setting.unit * setting.unit * (container.type == '7' ? 2 : 1);
+            rate = (setting.types[container.type].ignore) ? 0 : 1;
+            tubo += container.size / 2 * setting.madori.unit * setting.madori.unit * (setting.types[container.type].rate || rate);
         });
         return Math.round(tubo / 3.30579 * 100) / 100;
     };
@@ -253,7 +256,7 @@ function Madori (canvas, objEvent) {
         return size / length / 2;
     };
     this.getMeter = (px) => {
-        return Math.round(px / scale / picsel * setting.unit * 1000);
+        return Math.round(px / scale / picsel * setting.madori.unit * 1000);
     };
     this.forEach = (callback) => {
         for (var i = stage.children.length - 1; i >= 0; i--) {
