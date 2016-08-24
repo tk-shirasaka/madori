@@ -81,6 +81,7 @@ $(document).ready(function() {
             setting.types.push({
                 name: $(this).find('input.name').val(),
                 color: $(this).find('input.color').val(),
+                rate: parseInt($(this).find('input.rate').val()),
                 ignore: $(this).find('input.ignore').prop('checked')
             });
         });
@@ -141,8 +142,8 @@ $(document).ready(function() {
                 $type.find('.collapsible-header').text(setting.types[i].name).css({background: setting.types[i].color});
                 $type.find('input.name').val(setting.types[i].name);
                 $type.find('input.color').val(setting.types[i].color);
+                $type.find('input.rate').val(setting.types[i].rate);
                 $type.find('input.ignore').prop('checked', setting.types[i].ignore);
-                if (setting.types[i]._default) $type.find('.rm-types').addClass('hide');
                 $('#types').append($type);
                 $('#type').append(`<option value="${i}">${setting.types[i].name}</option>`);
             });

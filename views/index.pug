@@ -87,10 +87,13 @@ html
                         input.name
                     .input-field.col.s12.m2
                         input.color(type='color')
-                    .input-field.col.s12.m10
+                    p.range-field.col.s12.m6
+                        | 指定した上位階まで連続して配置
+                        input.rate(type='range', min='0', max='4')
+                    .input-field.col.s12.m6
                         input.ignore(type='checkbox')
                         label 面積に含めない
-                    .input-field.col.s12.m2
+                    .col.s12
                         a.rm-types.waves-effect.waves-light.btn.red.right 削除
         canvas#canvas.z-depth-2
         a#left.btn-floating.hide(style='position:fixed; left: 5px; top:50%;')
