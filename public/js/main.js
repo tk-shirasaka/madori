@@ -38,7 +38,7 @@ $(document).ready(function() {
     }
     function submit() {
         if (!container._init) madori.remove(container);
-        madori.create(container.x, container.y, madori.getLength($('#size').val(), container.height), container.height, $('#type').val());
+        madori.create(container.x, container.y, madori.getLength($('#size').val(), container.height), container.height, $('#type').val(), container.floor);
         $('#side').sideNav('hide');
         update();
     }

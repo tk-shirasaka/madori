@@ -16,7 +16,7 @@ function Madori (canvas, objEvent) {
             {_default: true, name: 'お風呂', color: '#81d4fa'},
             {_default: true, name: '洗面所', color: '#009688'},
             {_default: true, name: '廊下', color: '#795548'},
-            {_default: true, name: '階段', color: '#ffff8d', rate: 2},
+            {_default: true, name: '階段', color: '#ffff8d', rate: 1},
             {_default: true, name: '玄関', color: '#ce93d8'},
             {_default: true, name: 'その他', color: '#f44336'},
         ]
@@ -200,7 +200,7 @@ function Madori (canvas, objEvent) {
         height.getChildByName('line').graphics.clear().beginStroke('#bdbdbd').setStrokeDash([5, 5]).setStrokeStyle(2).moveTo(5, 0).lineTo(5, locate.y.max - locate.y.min).endStroke();
     };
     this.checkFloor = (container) => {
-        if (floor === container.floor + 1 && container.type == 7) return true;
+        if (floor === container.floor + setting.types[container.type].rate) return true;
         if (floor === container.floor) return true;
         return false;
     };
@@ -247,8 +247,8 @@ function Madori (canvas, objEvent) {
         var rate, tubo = 0;
 
         this.forEach((container) => {
-            rate = (setting.types[container.type].ignore) ? 0 : 1;
-            tubo += container.size / 2 * setting.madori.unit * setting.madori.unit * (setting.types[container.type].rate || rate);
+            rate = (setting.types[container.type].ignore) ? 0 : 1 + (setting.types[container.type].rate || 0);
+            tubo += container.size / 2 * setting.madori.unit * setting.madori.unit * rate;
         });
         return Math.round(tubo / 3.30579 * 100) / 100;
     };
