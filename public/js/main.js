@@ -103,12 +103,15 @@ $(document).ready(function() {
         checkOverFlow();
     }
     function moveEnd() {
-        if (!moving && !lock) setMadoriForm(this, true);
+        if (moving || lock) {
+            checkOverFlow();
+            checkError();
+        } else {
+            setMadoriForm(this, true);
+        }
         $('body').css('cursor', 'pointer');
 
         moving = lock = false;
-        checkOverFlow();
-        checkError();
     }
     function resizeTop() {
         resizeMadori(this.parent, madori.getMouse('y') - this.localToGlobal(0, 0).y);
@@ -190,6 +193,7 @@ $(document).ready(function() {
 
         madori.setScale(scale);
         $('#zoomLevel').text(scale + '%');
+        checkOverFlow();
     }
     function floorUp() {
         setFloor(madori.getFloor() + 1);
