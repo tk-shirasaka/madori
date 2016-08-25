@@ -209,7 +209,7 @@ $(document).ready(function() {
     }
     function setWindowSize() {
         winSize.width = $(window).width() - 20;
-        winSize.height = $(window).height() - $('.navbar-fixed').height() - 20;
+        winSize.height = $(window).height() - $('.navbar-fixed').height() - 26;
         $('#canvas').attr('width', winSize.width);
         $('#canvas').attr('height', winSize.height);
         $('#canvas').css({margin: '10px'});
