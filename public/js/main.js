@@ -76,7 +76,7 @@ $(document).ready(function() {
         if (error) Materialize.toast('使用中のため削除できません', 2000);
         else {
             $(this).closest('li').remove();
-            madori.forEach((container) => { if (container.type) > id) container.type -= 1; });
+            madori.forEach((container) => { if (container.type > id) container.type -= 1; });
             setSetting();
             setSelectForm();
         }
