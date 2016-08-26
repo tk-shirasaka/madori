@@ -55,10 +55,17 @@ html
         #madoriForm.modal.modal-fixed-footer
             .modal-content
                 p.range-field
-                    | 畳数を指定
+                    | 広さ (畳)
                     input#size(type='range', min='0.25', max='20', step='0.25')
                 .input-field
                     select#type
+                .input-field
+                    select#wall(multiple)
+                        option(value='top') 上
+                        option(value='left') 左
+                        option(value='right') 右
+                        option(value='bottom') 下
+                    label 壁
             .modal-footer
                 a#add.modal-close.waves-effect.waves-light.btn 追加
                 a#remove.modal-close.waves-effect.waves-light.btn.red 削除
@@ -89,7 +96,7 @@ html
                         input.color(type='color')
                     p.range-field.col.s12.m6
                         | 指定した上位階まで連続して配置
-                        input.rate(type='range', min='0', max='4')
+                        input.rate(type='range', value='0', min='0', max='4')
                     .input-field.col.s12.m6
                         input.ignore(type='checkbox')
                         label 面積に含めない

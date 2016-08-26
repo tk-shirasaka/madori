@@ -38,7 +38,7 @@ $(document).ready(function() {
     }
     function submit() {
         if (!container._init) madori.remove(container);
-        madori.create(container.x, container.y, madori.getLength($('#size').val(), container.height), container.height, $('#type').val(), container.floor);
+        madori.create(container.x, container.y, madori.getLength($('#size').val(), container.height), container.height, $('#type').val(), container.floor, $('#wall').val());
         $('#side').sideNav('hide');
         update();
     }
@@ -170,12 +170,13 @@ $(document).ready(function() {
             $('#add').addClass('hide');
             $('#remove, #change').removeClass('hide');
         } else {
-            container = {x: 100, y: 100, size: 1, height: 1, type: 0, _init: true};
+            container = {x: 100, y: 100, size: 1, height: 1, type: 0, wall: ['top', 'left', 'right', 'bottom'], _init: true};
             $('#add').removeClass('hide');
             $('#remove, #change').addClass('hide');
         }
         $('#size').val(container.size).trigger('change');
         $('#type').val(container.type).material_select();
+        $('#wall').val(container.wall).material_select();
     }
     function setSettingForm() {
         $('#settingForm').openModal();

@@ -37,10 +37,10 @@ function Madori (canvas, objEvent) {
 
         return obj;
     };
-    this.create = (x, y, width, height, type, floor) => {
+    this.create = (x, y, width, height, type, floor, wall) => {
         if (!floor) floor = this.getFloor();
 
-        var property = {scaleX: scale, scaleY: scale, x: x, y: y, width: width, height: height, size: width * height * 2, type: type, floor: floor};
+        var property = {scaleX: scale, scaleY: scale, x: x, y: y, width: width, height: height, size: width * height * 2, type: type, floor: floor, wall: wall};
         var text = (scale < 0.5) ? '' : property.size + '畳\n' + setting.types[type].name;
         var container = this.createObject('Container', property);
         container.addChild(this.createObject('Shape', {name: 'field'}));
@@ -55,24 +55,26 @@ function Madori (canvas, objEvent) {
         this.draw(container);
     };
     this.draw = (container) => {
+        var wall = this.checkFloor(container) ? 'Black' : 'rgba(0,0,0,0.5)'
+        var color = this.checkFloor(container) ? setting.types[container.type].color : 'rgba(0,0,0,0.5)';
+        var _drawLine = (type, a, b, c, d) => {
+            container.getChildByName(type).graphics.clear().beginStroke((container.wall.indexOf(type) < 0) ? color : wall).setStrokeStyle(4).moveTo(a, b).lineTo(c, d).endStroke();
+        };
+        var _resetLine = (type) => {
+            var line = container.getChildByName(type);
+            container.removeChild(line);
+            container.addChild(line);
+        };
         if (container.right && container.bottom) this.clearLocate(container)
         container.right = container.width * picsel;
         container.bottom = container.height * picsel;
 
-        if (this.checkFloor(container)) {
-            container.getChildByName('top').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, 0).lineTo(container.right, 0).endStroke();
-            container.getChildByName('left').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, 0).lineTo(0, container.bottom).endStroke();
-            container.getChildByName('right').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(container.right, 0).lineTo(container.right, container.bottom).endStroke();
-            container.getChildByName('bottom').graphics.clear().beginStroke('Black').setStrokeStyle(2).moveTo(0, container.bottom).lineTo(container.right, container.bottom).endStroke();
-            container.getChildByName('field').graphics.clear().beginFill(setting.types[container.type].color).drawRect(0, 0, container.right, container.bottom).endFill();
-        } else {
-            container.getChildByName('top').graphics.clear();
-            container.getChildByName('left').graphics.clear();
-            container.getChildByName('right').graphics.clear();
-            container.getChildByName('bottom').graphics.clear();
-            container.getChildByName('text').text = '';
-            container.getChildByName('field').graphics.clear().beginFill('rgba(0,0,0,0.5)').drawRect(0, 0, container.right, container.bottom).endFill();
-        }
+        _drawLine('top', -3, -1, container.right + 3, -1);
+        _drawLine('left', -1, -3, -1, container.bottom + 3);
+        _drawLine('right', container.right + 1, -3, container.right + 1, container.bottom + 3);
+        _drawLine('bottom', -3, container.bottom + 1, container.right + 3, container.bottom + 1);
+        container.wall.forEach(_resetLine);
+        container.getChildByName('field').graphics.clear().beginFill(color).drawRect(0, 0, container.right, container.bottom).endFill();
         this.setLocate(container);
         stage.update();
     };
@@ -205,10 +207,10 @@ function Madori (canvas, objEvent) {
     this.setJson = (json) => {
         this.forEach((container) => { this.remove(container); });
         if (json.setting) setting = json.setting;
-        for (var i = 0; i < json.data.length; i++) {
+        for (var i = json.data.length - 1; i >= 0; i--) {
             if (!this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].type, json.data[i].floor);
         }
-        for (var i = 0; i < json.data.length; i++) {
+        for (var i = json.data.length - 1; i >= 0; i--) {
             if (this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].type, json.data[i].floor);
         }
     };
