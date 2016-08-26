@@ -69,7 +69,17 @@ $(document).ready(function() {
         $('#types').append($type);
     }
     function rmTypes() {
-        $(this).closest('li').remove();
+        var error = false;
+        var id = parseInt($(this).closest('li').find('input.id').val());
+
+        madori.forEach((container) => { if (container.type == id) error = true; });
+        if (error) Materialize.toast('使用中のため削除できません', 2000);
+        else {
+            $(this).closest('li').remove();
+            madori.forEach((container) => { if (container.type) > id) container.type -= 1; });
+            setSetting();
+            setSelectForm();
+        }
     }
     function setSetting() {
         setting.types = [];
@@ -150,6 +160,7 @@ $(document).ready(function() {
             Object.keys(setting.types).forEach((i) => {
                 var $type = newType();
                 $type.find('.collapsible-header').text(setting.types[i].name).css({background: setting.types[i].color});
+                $type.find('input.id').val(i);
                 $type.find('input.name').val(setting.types[i].name);
                 $type.find('input.color').val(setting.types[i].color);
                 $type.find('input.rate').val(setting.types[i].rate);
