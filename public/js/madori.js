@@ -69,10 +69,10 @@ function Madori (canvas, objEvent) {
         container.right = container.width * picsel;
         container.bottom = container.height * picsel;
 
-        _drawLine('top', -3, -1, container.right + 3, -1);
-        _drawLine('left', -1, -3, -1, container.bottom + 3);
-        _drawLine('right', container.right + 1, -3, container.right + 1, container.bottom + 3);
-        _drawLine('bottom', -3, container.bottom + 1, container.right + 3, container.bottom + 1);
+        _drawLine('top', -2, 0, container.right + 2, 0);
+        _drawLine('left', 0, -2, 0, container.bottom + 2);
+        _drawLine('right', container.right, -2, container.right, container.bottom + 2);
+        _drawLine('bottom', -2, container.bottom, container.right + 2, container.bottom);
         container.wall.forEach(_resetLine);
         container.getChildByName('field').graphics.clear().beginFill(color).drawRect(0, 0, container.right, container.bottom).endFill();
         this.setLocate(container);
@@ -208,10 +208,10 @@ function Madori (canvas, objEvent) {
         this.forEach((container) => { this.remove(container); });
         if (json.setting) setting = json.setting;
         for (var i = json.data.length - 1; i >= 0; i--) {
-            if (!this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].type, json.data[i].floor);
+            if (!this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].type, json.data[i].floor, json.data[i].wall);
         }
         for (var i = json.data.length - 1; i >= 0; i--) {
-            if (this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].type, json.data[i].floor);
+            if (this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].type, json.data[i].floor, json.data[i].wall);
         }
     };
     this.getMouse = (type) => {
@@ -224,7 +224,7 @@ function Madori (canvas, objEvent) {
     this.getJson = () => {
         var json = {version: version, setting: setting, data: []};
         this.forEach((container) => {
-            json.data.push({x: container.x / scale, y: container.y / scale, width: container.width, height: container.height, type: container.type, floor: container.floor});
+            json.data.push({x: container.x / scale, y: container.y / scale, width: container.width, height: container.height, type: container.type, floor: container.floor, wall: container.wall});
         });
         return json;
     };
