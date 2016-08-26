@@ -98,8 +98,15 @@ $(document).ready(function() {
     }
     function move(e) {
         moving = true;
-        if (e.pointerID < 1 && !lock) madori.move(this, drag);
-        else if (e.pointerID >= 1) madori.pinch(this, drag);
+        if (e.pointerID < 1 && !lock) {
+            var ptr = madori.getStagePtr();
+            madori.move(this, drag);
+            if (ptr.y + this.y < 50) shiftTop();
+            else if (ptr.x + this.x < 100) shiftLeft();
+            else if (ptr.x + this.x + this.right > winSize.width) shiftRight();
+            else if (ptr.y + this.y + this.bottom > winSize.height) shiftBottom();
+            else if (shift) shiftEnd();
+        } else if (e.pointerID >= 1) madori.pinch(this, drag);
         checkOverFlow();
     }
     function moveEnd() {
@@ -170,7 +177,8 @@ $(document).ready(function() {
             $('#add').addClass('hide');
             $('#remove, #change').removeClass('hide');
         } else {
-            container = {x: 100, y: 100, size: 1, height: 1, type: 0, wall: ['top', 'left', 'right', 'bottom'], _init: true};
+            var ptr = madori.getStagePtr();
+            container = {x: 100 - ptr.x, y: 100 - ptr.y, size: 1, height: 1, type: 0, wall: ['top', 'left', 'right', 'bottom'], _init: true};
             $('#add').removeClass('hide');
             $('#remove, #change').addClass('hide');
         }

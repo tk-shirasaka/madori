@@ -224,7 +224,7 @@ function Madori (canvas, objEvent) {
     this.getJson = () => {
         var json = {version: version, setting: setting, data: []};
         this.forEach((container) => {
-            json.data.push({x: container.x / scale, y: container.y / scale, width: container.width, height: container.height, type: container.type, floor: container.floor, wall: container.wall});
+            json.data.push({x: container.x / scale + stage.x, y: container.y / scale + stage.y, width: container.width, height: container.height, type: container.type, floor: container.floor, wall: container.wall});
         });
         return json;
     };
