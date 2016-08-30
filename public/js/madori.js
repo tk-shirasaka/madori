@@ -148,18 +148,21 @@ function Madori (canvas, objEvent) {
     this.setSetting = (value) => {
         var json = this.getJson();
         setting = value;
+        stage.x = stage.y = 0;
 
         this.setJson(json);
     };
     this.setScale = (value) => {
         var json = this.getJson();
         scale = value / 100;
+        stage.x = stage.y = 0;
 
         this.setJson(json);
     };
     this.setFloor = (value) => {
         var json = this.getJson();
         floor = value;
+        stage.x = stage.y = 0;
 
         this.setJson(json);
     };
@@ -265,8 +268,8 @@ function Madori (canvas, objEvent) {
         }
     };
     this.shiftWindow = (x, y, max, shiftEnd) => {
-        var locate = this.getLimitLocate();
         return setInterval(() => {
+            var locate = this.getLimitLocate();
             if ((x > 0 && stage.x + locate.x.min > 100) ||
                 (y > 0 && stage.y + locate.y.min > 50) ||
                 (x < 0 && stage.x + locate.x.max + 10 < max.width) ||

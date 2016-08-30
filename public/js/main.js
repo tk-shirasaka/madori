@@ -110,12 +110,24 @@ $(document).ready(function() {
         moving = true;
         if (e.pointerID < 1 && !lock) {
             var ptr = madori.getStagePtr();
-            madori.move(this, drag);
-            if (ptr.y + this.y < 50) shiftTop();
-            else if (ptr.x + this.x < 100) shiftLeft();
-            else if (ptr.x + this.x + this.right > winSize.width) shiftRight();
-            else if (ptr.y + this.y + this.bottom > winSize.height) shiftBottom();
+            var direction = {x: 0, y: 0, id: null};
+            if (ptr.y + this.y < 50 && drag.y > madori.getMouse('y') - this.y) direction.y = 5;
+            else if (ptr.x + this.x < 100 && drag.x > madori.getMouse('x') - this.x) direction.x = 5;
+            else if (ptr.x + this.x + this.right > winSize.width && drag.x < madori.getMouse('x') - this.x) direction.x = -5;
+            else if (ptr.y + this.y + this.bottom > winSize.height && drag.y < madori.getMouse('y') - this.y) direction.y = -5;
             else if (shift) shiftEnd();
+            if (!shift && (direction.x || direction.y)) {
+                shiftWindow(direction.x, direction.y);
+                direction.id = setInterval(() => {
+                    if (!shift) clearInterval(direction.id);
+                    this.x += direction.x;
+                    this.y += direction.y;
+                    drag.x += direction.x;
+                    drag.y += direction.y;
+                    madori.move(this, drag);
+                }, 10);
+            }
+            madori.move(this, drag);
         } else if (e.pointerID >= 1) madori.pinch(this, drag);
         checkOverFlow();
     }
@@ -126,6 +138,7 @@ $(document).ready(function() {
         } else {
             setMadoriForm(this, true);
         }
+        if (shift) shiftEnd();
         $('body').css('cursor', 'pointer');
 
         moving = lock = false;
