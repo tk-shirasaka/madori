@@ -55,9 +55,13 @@ $(document).ready(function() {
         container.getChildByName('field').on('mouseover', () => { if (!moving && !lock) $('body').css('cursor', 'pointer') });
         container.getChildByName('field').on('mouseout', () => { if (!moving && !lock) $('body').css('cursor', '') });
         container.getChildByName('top').on('mouseover', () => { $('body').css('cursor', 'row-resize') });
+        container.getChildByName('top').on('mouseout', () => { if (!moving && !lock) $('body').css('cursor', '') });
         container.getChildByName('left').on('mouseover', () => { $('body').css('cursor', 'col-resize') });
+        container.getChildByName('left').on('mouseout', () => { if (!moving && !lock) $('body').css('cursor', '') });
         container.getChildByName('right').on('mouseover', () => { $('body').css('cursor', 'col-resize') });
+        container.getChildByName('right').on('mouseout', () => { if (!moving && !lock) $('body').css('cursor', '') });
         container.getChildByName('bottom').on('mouseover', () => { $('body').css('cursor', 'row-resize') });
+        container.getChildByName('bottom').on('mouseout', () => { if (!moving && !lock) $('body').css('cursor', '') });
     }
     function remove() {
         madori.remove(container);
