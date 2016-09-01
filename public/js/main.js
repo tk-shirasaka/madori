@@ -5,12 +5,16 @@ $(document).ready(function() {
     var setting = madori.getSetting();
     var container, resizing, shift, moving, drawing, lock, clear;
 
+    madoriMode();
     setWindowSize();
     setZoom(100);
     setFloor(1);
     $('#madori').on('click', setMadoriForm);
-    $('#draw').on('click', drawStart);
-    $('#erase').on('click', drawErase);
+    $('#memoMode').on('click', memoMode);
+    $('#madoriMode').on('click', madoriMode);
+    $('#erase').on('click', memoErase);
+    $('#undo').on('click', undo);
+    $('#redo').on('click', redo);
     $('#toti').on('click', setSettingForm);
     $('#add, #change').on('click', submit);
     $('#remove').on('click', remove);
@@ -30,7 +34,6 @@ $(document).ready(function() {
     $('#bottom').on('mouseenter', shiftBottom);
     $('#top, #left, #right, #bottom').on('mouseleave', shiftEnd);
     $('#menu').sideNav();
-    $('#menu').on('click', drawEnd);
     $('#types').collapsible();
     $(window).on('resize', resize);
 
@@ -67,20 +70,28 @@ $(document).ready(function() {
         container.getChildByName('bottom').on('mouseover', () => { if (!moving && !drawing && !lock) $('body').css('cursor', 'row-resize') });
         container.getChildByName('bottom').on('mouseout', () => { if (!moving && !drawing && !lock) $('body').css('cursor', '') });
     }
-    function drawStart() {
+    function memoMode() {
         drawing = true;
-        $('#menu').sideNav('hide');
+        $('.memo-mode').removeClass('hide');
+        $('.madori-mode').addClass('hide');
         $('body').css('cursor', 'crosshair');
-        madori.drawStart();
-        Materialize.toast('メニューボタン(<i class="material-icons">menu</i>)を押すと書込みを終了します', 3000);
+        madori.memoMode();
     }
-    function drawEnd() {
+    function madoriMode() {
         drawing = false;
+        $('.memo-mode').addClass('hide');
+        $('.madori-mode').removeClass('hide');
         $('body').css('cursor', '');
-        madori.drawEnd();
+        madori.madoriMode();
     }
-    function drawErase() {
-        madori.drawErase();
+    function memoErase() {
+        madori.memoErase();
+    }
+    function undo() {
+        madori.undo();
+    }
+    function redo() {
+        madori.redo();
     }
     function remove() {
         madori.remove(container);

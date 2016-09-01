@@ -6,6 +6,7 @@ function Madori (canvas, objEvent) {
     var scale = 1;
     var floor = 1;
     var locate = {x: [], y: []};
+    var memos = [];
     var setting = {
         madori: {unit: '1.82', width: null, height: null},
         units: {'1.70': '団地間', '1.76': '江戸間', '1.82': '中京間', '1.91': '京間'},
@@ -42,7 +43,7 @@ function Madori (canvas, objEvent) {
 
         var property = {scaleX: scale, scaleY: scale, x: x, y: y, width: width, height: height, size: width * height * 2, type: type, floor: floor, wall: wall};
         var text = (scale < 0.5) ? '' : property.size + '畳\n' + setting.types[type].name;
-        var draw = stage.getChildByName('draw');
+        var memo = stage.getChildByName('memo');
         var container = this.createObject('Container', property);
         container.addChild(this.createObject('Shape', {name: 'field'}));
         container.addChild(this.createObject('Shape', {name: 'top'}));
@@ -54,9 +55,9 @@ function Madori (canvas, objEvent) {
         stage.addChild(container);
         objEvent(container);
 
-        if (draw) {
-            stage.removeChild(draw);
-            stage.addChild(draw);
+        if (memo) {
+            stage.removeChild(memo);
+            stage.addChild(memo);
         }
         this.draw(container);
     };
@@ -67,9 +68,9 @@ function Madori (canvas, objEvent) {
             container.getChildByName(type).graphics.clear().beginStroke((container.wall.indexOf(type) < 0) ? color : wall).setStrokeStyle(4).moveTo(a, b).lineTo(c, d).endStroke();
         };
         var _resetLine = (type) => {
-            var line = container.getChildByName(type);
-            container.removeChild(line);
-            container.addChild(line);
+            var memo = container.getChildByName(type);
+            container.removeChild(memo);
+            container.addChild(memo);
         };
         if (container.right && container.bottom) this.clearLocate(container)
         container.right = container.width * picsel;
@@ -84,34 +85,49 @@ function Madori (canvas, objEvent) {
         this.setLocate(container);
         stage.update();
     };
-    this.drawStart = () => {
+    this.memoMode = () => {
         var ptrA, ptrB, ptrC;
-        var draw = stage.getChildByName('draw');
-        if (!draw) {
-            draw = this.createObject('Shape', {name: 'draw', scaleX: scale, scaleY: scale});
-            stage.addChild(draw);
-        }
+
+        if (!stage.getChildByName('memo')) stage.addChild(this.createObject('Container', {name: 'memo', scaleX: scale, scaleY: scale}));
         stage.on('stagemousedown', () => {
-            ptrA = ptrB = {x: stage.mouseX - stage.x - draw.x, y: stage.mouseY - stage.y - draw.y};
+            var memo = this.createObject('Shape');
+            ptrA = ptrB = {x: stage.mouseX / scale - stage.x, y: stage.mouseY / scale - stage.y};
             stage.on('stagemousemove', () => {
-                ptrC = {x: ptrA.x + stage.mouseX - stage.x - draw.x >> 1, y: ptrA.y + stage.mouseY - stage.y - draw.y >> 1};
-                draw.graphics.setStrokeStyle(2, 'round', 'round').beginStroke('Black').moveTo(ptrC.x, ptrC.y).curveTo(ptrA.x, ptrA.y, ptrB.x, ptrB.y);
-                ptrA = {x: stage.mouseX - stage.x - draw.x, y: stage.mouseY - stage.y - draw.y};
+                ptrC = {x: ptrA.x + stage.mouseX / scale - stage.x >> 1, y: ptrA.y + stage.mouseY / scale - stage.y >> 1};
+                memo.graphics.setStrokeStyle(2, 'round', 'round').beginStroke('Black').moveTo(ptrC.x, ptrC.y).curveTo(ptrA.x, ptrA.y, ptrB.x, ptrB.y);
+                ptrA = {x: stage.mouseX / scale - stage.x, y: stage.mouseY / scale - stage.y};
                 ptrB = ptrC;
                 stage.update();
             });
+            stage.getChildByName('memo').addChild(memo);
+            memos = [];
         });
         stage.on('stagemouseup', () => {
             stage.removeAllEventListeners('stagemousemove');
         });
     };
-    this.drawEnd = () => {
+    this.madoriMode = () => {
         stage.removeAllEventListeners('stagemousedown');
         stage.removeAllEventListeners('stagemouseup');
     };
-    this.drawErase = () => {
-        stage.getChildByName('draw').graphics.clear();
+    this.memoErase = () => {
+        stage.getChildByName('memo').removeAllChildren();
         stage.update();
+    };
+    this.undo = () => {
+        var memo = stage.getChildByName('memo').children.pop();
+        if (memo) {
+            memos.push(memo);
+            stage.getChildByName('memo').removeChild(memo);
+            stage.update();
+        }
+        return memo;
+    };
+    this.redo = () => {
+        if (memos.length) {
+            stage.getChildByName('memo').addChild(memos.pop());
+            stage.update();
+        }
     };
     this.update = () => {
         stage.update();
@@ -243,7 +259,7 @@ function Madori (canvas, objEvent) {
         return (container.floor <= floor && floor <= container.floor + setting.types[container.type].rate)
     };
     this.setJson = (json) => {
-        var draw = stage.getChildByName('draw');
+        var memo = stage.getChildByName('memo');
         this.forEach((container) => { this.remove(container); });
         if (json.setting) setting = json.setting;
         for (var i = json.data.length - 1; i >= 0; i--) {
@@ -252,7 +268,7 @@ function Madori (canvas, objEvent) {
         for (var i = json.data.length - 1; i >= 0; i--) {
             if (this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].type, json.data[i].floor, json.data[i].wall);
         }
-        if (draw) draw.scaleX = draw.scaleY = scale;
+        if (memo) memo.scaleX = memo.scaleY = scale;
         stage.update();
     };
     this.getMouse = (type) => {
@@ -264,13 +280,13 @@ function Madori (canvas, objEvent) {
     };
     this.getJson = () => {
         var json = {version: version, setting: setting, data: []};
-        var draw = stage.getChildByName('draw');
+        var memo = stage.getChildByName('memo');
         this.forEach((container) => {
             json.data.push({x: container.x / scale + stage.x, y: container.y / scale + stage.y, width: container.width, height: container.height, type: container.type, floor: container.floor, wall: container.wall});
         });
-        if (draw) {
-            draw.x += stage.x;
-            draw.y += stage.y;
+        if (memo) {
+            memo.x += stage.x;
+            memo.y += stage.y;
         }
         return json;
     };
