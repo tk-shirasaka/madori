@@ -86,15 +86,17 @@ function Madori (canvas, objEvent) {
     };
     this.drawStart = () => {
         var ptrA, ptrB, ptrC;
-        if (!stage.getChildByName('draw')) {
-            stage.addChild(this.createObject('Shape', {name: 'draw', scaleX: scale, scaleY: scale}));
+        var draw = stage.getChildByName('draw');
+        if (!draw) {
+            draw = this.createObject('Shape', {name: 'draw', scaleX: scale, scaleY: scale});
+            stage.addChild(draw);
         }
         stage.on('stagemousedown', () => {
-            ptrA = ptrB = {x: stage.mouseX - stage.x, y: stage.mouseY - stage.y};
+            ptrA = ptrB = {x: stage.mouseX - stage.x - draw.x, y: stage.mouseY - stage.y - draw.y};
             stage.on('stagemousemove', () => {
-                ptrC = {x: ptrA.x + stage.mouseX - stage.x >> 1, y: ptrA.y + stage.mouseY - stage.y >> 1};
-                stage.getChildByName('draw').graphics.setStrokeStyle(2, 'round', 'round').beginStroke('Black').moveTo(ptrC.x, ptrC.y).curveTo(ptrA.x, ptrA.y, ptrB.x, ptrB.y);
-                ptrA = {x: stage.mouseX - stage.x, y: stage.mouseY - stage.y};
+                ptrC = {x: ptrA.x + stage.mouseX - stage.x - draw.x >> 1, y: ptrA.y + stage.mouseY - stage.y - draw.y >> 1};
+                draw.graphics.setStrokeStyle(2, 'round', 'round').beginStroke('Black').moveTo(ptrC.x, ptrC.y).curveTo(ptrA.x, ptrA.y, ptrB.x, ptrB.y);
+                ptrA = {x: stage.mouseX - stage.x - draw.x, y: stage.mouseY - stage.y - draw.y};
                 ptrB = ptrC;
                 stage.update();
             });
@@ -262,9 +264,14 @@ function Madori (canvas, objEvent) {
     };
     this.getJson = () => {
         var json = {version: version, setting: setting, data: []};
+        var draw = stage.getChildByName('draw');
         this.forEach((container) => {
             json.data.push({x: container.x / scale + stage.x, y: container.y / scale + stage.y, width: container.width, height: container.height, type: container.type, floor: container.floor, wall: container.wall});
         });
+        if (draw) {
+            draw.x += stage.x;
+            draw.y += stage.y;
+        }
         return json;
     };
     this.getSetting = () => {
