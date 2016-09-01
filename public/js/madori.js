@@ -42,6 +42,7 @@ function Madori (canvas, objEvent) {
 
         var property = {scaleX: scale, scaleY: scale, x: x, y: y, width: width, height: height, size: width * height * 2, type: type, floor: floor, wall: wall};
         var text = (scale < 0.5) ? '' : property.size + '畳\n' + setting.types[type].name;
+        var draw = stage.getChildByName('draw');
         var container = this.createObject('Container', property);
         container.addChild(this.createObject('Shape', {name: 'field'}));
         container.addChild(this.createObject('Shape', {name: 'top'}));
@@ -52,6 +53,11 @@ function Madori (canvas, objEvent) {
 
         stage.addChild(container);
         objEvent(container);
+
+        if (draw) {
+            stage.removeChild(draw);
+            stage.addChild(draw);
+        }
         this.draw(container);
     };
     this.draw = (container) => {
@@ -76,6 +82,33 @@ function Madori (canvas, objEvent) {
         container.wall.forEach(_resetLine);
         container.getChildByName('field').graphics.clear().beginFill(color).drawRect(0, 0, container.right, container.bottom).endFill();
         this.setLocate(container);
+        stage.update();
+    };
+    this.drawStart = () => {
+        var ptrA, ptrB, ptrC;
+        if (!stage.getChildByName('draw')) {
+            stage.addChild(this.createObject('Shape', {name: 'draw', scaleX: scale, scaleY: scale}));
+        }
+        stage.on('stagemousedown', () => {
+            ptrA = ptrB = {x: stage.mouseX - stage.x, y: stage.mouseY - stage.y};
+            stage.on('stagemousemove', () => {
+                ptrC = {x: ptrA.x + stage.mouseX - stage.x >> 1, y: ptrA.y + stage.mouseY - stage.y >> 1};
+                stage.getChildByName('draw').graphics.setStrokeStyle(2, 'round', 'round').beginStroke('Black').moveTo(ptrC.x, ptrC.y).curveTo(ptrA.x, ptrA.y, ptrB.x, ptrB.y);
+                ptrA = {x: stage.mouseX - stage.x, y: stage.mouseY - stage.y};
+                ptrB = ptrC;
+                stage.update();
+            });
+        });
+        stage.on('stagemouseup', () => {
+            stage.removeAllEventListeners('stagemousemove');
+        });
+    };
+    this.drawEnd = () => {
+        stage.removeAllEventListeners('stagemousedown');
+        stage.removeAllEventListeners('stagemouseup');
+    };
+    this.drawErase = () => {
+        stage.getChildByName('draw').graphics.clear();
         stage.update();
     };
     this.update = () => {
@@ -208,6 +241,7 @@ function Madori (canvas, objEvent) {
         return (container.floor <= floor && floor <= container.floor + setting.types[container.type].rate)
     };
     this.setJson = (json) => {
+        var draw = stage.getChildByName('draw');
         this.forEach((container) => { this.remove(container); });
         if (json.setting) setting = json.setting;
         for (var i = json.data.length - 1; i >= 0; i--) {
@@ -216,6 +250,8 @@ function Madori (canvas, objEvent) {
         for (var i = json.data.length - 1; i >= 0; i--) {
             if (this.checkFloor(json.data[i])) this.create(json.data[i].x * scale, json.data[i].y * scale, json.data[i].width, json.data[i].height, json.data[i].type, json.data[i].floor, json.data[i].wall);
         }
+        if (draw) draw.scaleX = draw.scaleY = scale;
+        stage.update();
     };
     this.getMouse = (type) => {
         if (type === 'x') return stage.mouseX;

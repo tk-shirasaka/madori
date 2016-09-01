@@ -3,12 +3,14 @@ $(document).ready(function() {
     var winSize = {width: null, height: null};
     var drag = {x: null, y: null};
     var setting = madori.getSetting();
-    var container, resizing, shift, moving, lock, clear;
+    var container, resizing, shift, moving, drawing, lock, clear;
 
     setWindowSize();
     setZoom(100);
     setFloor(1);
     $('#madori').on('click', setMadoriForm);
+    $('#draw').on('click', drawStart);
+    $('#erase').on('click', drawErase);
     $('#toti').on('click', setSettingForm);
     $('#add, #change').on('click', submit);
     $('#remove').on('click', remove);
@@ -28,6 +30,7 @@ $(document).ready(function() {
     $('#bottom').on('mouseenter', shiftBottom);
     $('#top, #left, #right, #bottom').on('mouseleave', shiftEnd);
     $('#menu').sideNav();
+    $('#menu').on('click', drawEnd);
     $('#types').collapsible();
     $(window).on('resize', resize);
 
@@ -53,16 +56,31 @@ $(document).ready(function() {
         container.getChildByName('left').on('pressmove', resizeLeft);
         container.getChildByName('right').on('pressmove', resizeRight);
         container.getChildByName('bottom').on('pressmove', resizeBottom);
-        container.getChildByName('field').on('mouseover', () => { if (!moving && !lock) $('body').css('cursor', 'pointer') });
-        container.getChildByName('field').on('mouseout', () => { if (!moving && !lock) $('body').css('cursor', '') });
-        container.getChildByName('top').on('mouseover', () => { $('body').css('cursor', 'row-resize') });
-        container.getChildByName('top').on('mouseout', () => { if (!moving && !lock) $('body').css('cursor', '') });
-        container.getChildByName('left').on('mouseover', () => { $('body').css('cursor', 'col-resize') });
-        container.getChildByName('left').on('mouseout', () => { if (!moving && !lock) $('body').css('cursor', '') });
-        container.getChildByName('right').on('mouseover', () => { $('body').css('cursor', 'col-resize') });
-        container.getChildByName('right').on('mouseout', () => { if (!moving && !lock) $('body').css('cursor', '') });
-        container.getChildByName('bottom').on('mouseover', () => { $('body').css('cursor', 'row-resize') });
-        container.getChildByName('bottom').on('mouseout', () => { if (!moving && !lock) $('body').css('cursor', '') });
+        container.getChildByName('field').on('mouseover', () => { if (!moving && !drawing && !lock) $('body').css('cursor', 'pointer') });
+        container.getChildByName('field').on('mouseout', () => { if (!moving && !drawing && !lock) $('body').css('cursor', '') });
+        container.getChildByName('top').on('mouseover', () => { if (!moving && !drawing && !lock) $('body').css('cursor', 'row-resize') });
+        container.getChildByName('top').on('mouseout', () => { if (!moving && !drawing && !lock) $('body').css('cursor', '') });
+        container.getChildByName('left').on('mouseover', () => { if (!moving && !drawing && !lock) $('body').css('cursor', 'col-resize') });
+        container.getChildByName('left').on('mouseout', () => { if (!moving && !drawing && !lock) $('body').css('cursor', '') });
+        container.getChildByName('right').on('mouseover', () => { if (!moving && !drawing && !lock) $('body').css('cursor', 'col-resize') });
+        container.getChildByName('right').on('mouseout', () => { if (!moving && !drawing && !lock) $('body').css('cursor', '') });
+        container.getChildByName('bottom').on('mouseover', () => { if (!moving && !drawing && !lock) $('body').css('cursor', 'row-resize') });
+        container.getChildByName('bottom').on('mouseout', () => { if (!moving && !drawing && !lock) $('body').css('cursor', '') });
+    }
+    function drawStart() {
+        drawing = true;
+        $('#menu').sideNav('hide');
+        $('body').css('cursor', 'crosshair');
+        madori.drawStart();
+        Materialize.toast('メニューボタン(<i class="material-icons">menu</i>)を押すと書込みを終了します', 3000);
+    }
+    function drawEnd() {
+        drawing = false;
+        $('body').css('cursor', '');
+        madori.drawEnd();
+    }
+    function drawErase() {
+        madori.drawErase();
     }
     function remove() {
         madori.remove(container);
@@ -109,6 +127,7 @@ $(document).ready(function() {
         clear = false
     }
     function moveStart() {
+        if (drawing) return;
         drag.x = madori.getMouse('x') - this.x;
         drag.y = madori.getMouse('y') - this.y;
         moving = false;
@@ -116,6 +135,7 @@ $(document).ready(function() {
         $('body').css('cursor', 'move');
     }
     function move(e) {
+        if (drawing) return;
         moving = true;
         if (e.pointerID < 1 && !lock) {
             var ptr = madori.getStagePtr();
@@ -141,6 +161,7 @@ $(document).ready(function() {
         checkOverFlow();
     }
     function moveEnd() {
+        if (drawing) return;
         if (moving || lock) {
             checkOverFlow();
             checkError();
@@ -198,6 +219,7 @@ $(document).ready(function() {
         }
     }
     function resizeMadori(container, diff) {
+        if (drawing) return;
         madori.resize(container, diff);
         lock = true;
     }
