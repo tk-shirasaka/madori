@@ -11,10 +11,11 @@ $(document).ready(function() {
     $('#madori').on('click', setMadoriForm);
     $('#toti').on('click', setSettingForm);
     $('#add, #change').on('click', submit);
-    $('#remove').on('click', remove)
+    $('#remove').on('click', remove);
     $('.add-types').on('click', addTypes);
     $('.rm-types').on('click', rmTypes);
-    $('#setting').on('click', setSetting)
+    $('#setting').on('click', setSetting);
+    $('#width, #height, input.name, input.color, input.ignore').on('change', dirtySetting);
     $('#import').on('change', importFile);
     $('#export').on('click', exportFile);
     $('#zoomIn').on('click', zoomIn);
@@ -71,6 +72,7 @@ $(document).ready(function() {
         var $type = newType();
         $type.find('.collapsible-header').text('-');
         $('#types').append($type);
+        clear = false
     }
     function rmTypes() {
         var error = false;
@@ -102,6 +104,9 @@ $(document).ready(function() {
         madori.setSetting(setting);
         clear = false;
         update();
+    }
+    function dirtySetting() {
+        clear = false
     }
     function moveStart() {
         drag.x = madori.getMouse('x') - this.x;
