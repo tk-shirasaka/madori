@@ -90,7 +90,7 @@ function Madori (canvas, objEvent) {
 
         if (!stage.getChildByName('memo')) stage.addChild(this.createObject('Container', {name: 'memo', scaleX: scale, scaleY: scale}));
         stage.on('stagemousedown', () => {
-            var memo = this.createObject('Shape');
+            var memo = this.createObject('Shape', {name: floor});
             ptrA = ptrB = {x: stage.mouseX / scale - stage.x, y: stage.mouseY / scale - stage.y};
             stage.on('stagemousemove', () => {
                 ptrC = {x: ptrA.x + stage.mouseX / scale - stage.x >> 1, y: ptrA.y + stage.mouseY / scale - stage.y >> 1};
@@ -99,7 +99,7 @@ function Madori (canvas, objEvent) {
                 ptrB = ptrC;
                 stage.update();
             });
-            stage.getChildByName('memo').addChild(memo);
+            stage.getChildByName('memo').addChildAt(memo, 0);
             memos = [];
         });
         stage.on('stagemouseup', () => {
@@ -107,6 +107,7 @@ function Madori (canvas, objEvent) {
         });
     };
     this.madoriMode = () => {
+        memos = [];
         stage.removeAllEventListeners('stagemousedown');
         stage.removeAllEventListeners('stagemouseup');
     };
@@ -115,7 +116,7 @@ function Madori (canvas, objEvent) {
         stage.update();
     };
     this.undo = () => {
-        var memo = stage.getChildByName('memo').children.pop();
+        var memo = stage.getChildByName('memo').getChildByName(floor);
         if (memo) {
             memos.push(memo);
             stage.getChildByName('memo').removeChild(memo);
@@ -125,7 +126,7 @@ function Madori (canvas, objEvent) {
     };
     this.redo = () => {
         if (memos.length) {
-            stage.getChildByName('memo').addChild(memos.pop());
+            stage.getChildByName('memo').addChildAt(memos.pop(), 0);
             stage.update();
         }
     };
@@ -212,7 +213,10 @@ function Madori (canvas, objEvent) {
     };
     this.setFloor = (value) => {
         var json = this.getJson();
+
+        this.forEachMemo((memo) => { memo.graphics.store(); });
         floor = value;
+        this.forEachMemo((memo) => { memo.graphics.unstore(); });
         stage.x = stage.y = 0;
 
         this.setJson(json);
@@ -325,6 +329,16 @@ function Madori (canvas, objEvent) {
             var child = stage.children[i];
             if (child.size) callback.call(this, child);
         }
+    };
+    this.forEachMemo = (callback) => {
+        var memos = [];
+        var memo;
+        while (stage.getChildByName('memo') && (memo = stage.getChildByName('memo').getChildByName(floor))) {
+            memos.push(memo);
+            callback.call(this, memo);
+            stage.getChildByName('memo').removeChild(memo);
+        }
+        memos.forEach((memo) => { stage.getChildByName('memo').addChildAt(memo, 0); });
     };
     this.shiftWindow = (x, y, max, shiftEnd) => {
         return setInterval(() => {
