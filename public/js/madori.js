@@ -86,16 +86,18 @@ function Madori (canvas, objEvent) {
         stage.update();
     };
     this.memoMode = () => {
-        var ptrA, ptrB, ptrC;
+        var ptrA, ptrB, ptrC, mouseX, mouseY;
 
         if (!stage.getChildByName('memo')) stage.addChild(this.createObject('Container', {name: 'memo', scaleX: scale, scaleY: scale}));
+        mouseX = stage.getChildByName('memo').x;
+        mouseY = stage.getChildByName('memo').y;
         stage.on('stagemousedown', () => {
             var memo = this.createObject('Shape', {name: floor});
-            ptrA = ptrB = {x: stage.mouseX / scale - stage.x, y: stage.mouseY / scale - stage.y};
+            ptrA = ptrB = {x: stage.mouseX / scale - stage.x - mouseX, y: stage.mouseY / scale - stage.y - mouseY};
             stage.on('stagemousemove', () => {
-                ptrC = {x: ptrA.x + stage.mouseX / scale - stage.x >> 1, y: ptrA.y + stage.mouseY / scale - stage.y >> 1};
+                ptrC = {x: ptrA.x + stage.mouseX / scale - stage.x - mouseX >> 1, y: ptrA.y + stage.mouseY / scale - stage.y - mouseY >> 1};
                 memo.graphics.setStrokeStyle(2, 'round', 'round').beginStroke('Black').moveTo(ptrC.x, ptrC.y).curveTo(ptrA.x, ptrA.y, ptrB.x, ptrB.y);
-                ptrA = {x: stage.mouseX / scale - stage.x, y: stage.mouseY / scale - stage.y};
+                ptrA = {x: stage.mouseX / scale - stage.x - mouseX, y: stage.mouseY / scale - stage.y - mouseY};
                 ptrB = ptrC;
                 stage.update();
             });
@@ -139,6 +141,7 @@ function Madori (canvas, objEvent) {
         stage.update();
     };
     this.move = (container, drag) => {
+        var isFit = {x: false, y: false};
         this.clearLocate(container);
         container.x = stage.mouseX - drag.x;
         container.y = stage.mouseY - drag.y;
@@ -147,16 +150,20 @@ function Madori (canvas, objEvent) {
             if (Math.abs(pos - container.x) < 10) container.x = pos;
             else if (Math.abs(pos - container.x - container.right * scale) < 10) container.x = pos - container.right * scale;
             else return false;
+            isFit.x = true;
             return true;
         }, this);
         locate.y.find(function(pos) {
             if (Math.abs(pos - container.y) < 10) container.y = pos;
             else if (Math.abs(pos - container.y - container.bottom * scale) < 10) container.y = pos - container.bottom * scale;
             else return false;
+            isFit.y = true;
             return true;
         }, this);
         this.setLocate(container);
         stage.update();
+
+        return isFit;
     };
     this.resize = (container, diff) => {
         var offset = 0.25 * picsel * scale;

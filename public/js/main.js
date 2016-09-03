@@ -151,6 +151,7 @@ $(document).ready(function() {
         if (e.pointerID < 1 && !lock) {
             var ptr = madori.getStagePtr();
             var direction = {x: 0, y: 0, id: null};
+            var isFit = null;
             if (ptr.y + this.y < 50 && drag.y > madori.getMouse('y') - this.y) direction.y = 5;
             else if (ptr.x + this.x < 100 && drag.x > madori.getMouse('x') - this.x) direction.x = 5;
             else if (ptr.x + this.x + this.right > winSize.width && drag.x < madori.getMouse('x') - this.x) direction.x = -5;
@@ -164,7 +165,11 @@ $(document).ready(function() {
                     this.y += direction.y;
                     drag.x += direction.x;
                     drag.y += direction.y;
-                    madori.move(this, drag);
+                    isFit = madori.move(this, drag);
+                    if ((isFit.x && direction.x) || (isFit.y && direction.y)) {
+                        clearInterval(direction.id);
+                        shiftEnd();
+                    }
                 }, 10);
             }
             madori.move(this, drag);
