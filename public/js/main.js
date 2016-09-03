@@ -169,6 +169,8 @@ $(document).ready(function() {
                     if ((isFit.x && direction.x) || (isFit.y && direction.y)) {
                         clearInterval(direction.id);
                         shiftEnd();
+                        drag.x = madori.getMouse('x') - this.x;
+                        drag.y = madori.getMouse('y') - this.y;
                     }
                 }, 10);
             }
