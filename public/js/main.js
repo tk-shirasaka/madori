@@ -1,7 +1,7 @@
 $(document).ready(function() {
     var madori = new Madori('canvas', setEvent);
     var winSize = {width: null, height: null};
-    var drag = {x: null, y: null};
+    var drag = {x: null, y: null, time: null};
     var setting = madori.getSetting();
     var container, resizing, shift, moving, drawing, lock, clear;
 
@@ -137,21 +137,26 @@ $(document).ready(function() {
     function dirtySetting() {
         clear = false
     }
+    function initDrag(container) {
+        drag.x = madori.getMouse('x') - container.x;
+        drag.y = madori.getMouse('y') - container.y;
+        drag.time = new Date().getTime();
+    }
     function moveStart() {
         if (drawing) return;
-        drag.x = madori.getMouse('x') - this.x;
-        drag.y = madori.getMouse('y') - this.y;
+        initDrag(this);
         moving = false;
 
         $('body').css('cursor', 'move');
     }
-    function move(e) {
+    function move() {
         if (drawing) return;
-        moving = true;
-        if (e.pointerID < 1 && !lock) {
+        var now = new Date().getTime();
+        if ((now - drag.time < 500 && !lock) || moving) {
             var ptr = madori.getStagePtr();
             var direction = {x: 0, y: 0, id: null};
             var isFit = null;
+            moving = true;
             if (ptr.y + this.y < 50 && drag.y > madori.getMouse('y') - this.y) direction.y = 5;
             else if (ptr.x + this.x < 100 && drag.x > madori.getMouse('x') - this.x) direction.x = 5;
             else if (ptr.x + this.x + this.right > winSize.width && drag.x < madori.getMouse('x') - this.x) direction.x = -5;
@@ -169,13 +174,15 @@ $(document).ready(function() {
                     if ((isFit.x && direction.x) || (isFit.y && direction.y)) {
                         clearInterval(direction.id);
                         shiftEnd();
-                        drag.x = madori.getMouse('x') - this.x;
-                        drag.y = madori.getMouse('y') - this.y;
+                        initDrag(this);
                     }
                 }, 10);
             }
             madori.move(this, drag);
-        } else if (e.pointerID >= 1) madori.pinch(this, drag);
+        } else if (now - drag.time >= 500) {
+            madori.pinch(this, drag);
+            lock = true;
+        }
         checkOverFlow();
     }
     function moveEnd() {
