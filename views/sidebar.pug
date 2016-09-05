@@ -1,32 +1,31 @@
 ul#side.side-nav
-    li
-        table.centered.bordered
-            tbody
-                tr.madori-mode
-                    td
-                        a#zoomOut(href='#!')
-                            i.material-icons zoom_out
-                    td
-                        span#zoomLevel
-                    td
-                        a#zoomIn(href='#!')
-                            i.material-icons zoom_in
-                tr.madori-mode
-                    td
-                        a#floorDown(href='#!')
-                            i.material-icons keyboard_arrow_left
-                    td
-                        span#floor
-                    td
-                        a#floorUp(href='#!')
-                            i.material-icons keyboard_arrow_right
-                tr.memo-mode
-                    td
-                        a#undo(href='#!')
-                            i.material-icons undo
-                    td
-                        a#redo(href='#!')
-                            i.material-icons redo
+    table.centered.bordered
+        tbody
+            tr.madori-mode
+                td
+                    a#zoomOut(href='#!')
+                        i.material-icons zoom_out
+                td
+                    span#zoomLevel
+                td
+                    a#zoomIn(href='#!')
+                        i.material-icons zoom_in
+            tr.madori-mode
+                td
+                    a#floorDown(href='#!')
+                        i.material-icons keyboard_arrow_left
+                td
+                    span#floor
+                td
+                    a#floorUp(href='#!')
+                        i.material-icons keyboard_arrow_right
+            tr.memo-mode
+                td
+                    a#undo(href='#!')
+                        i.material-icons undo
+                td
+                    a#redo(href='#!')
+                        i.material-icons redo
     .madori-mode
         li
             .file-field.input-field
@@ -36,15 +35,17 @@ ul#side.side-nav
                 .file-path-wrapper
                     input.file-path.validate(type='text')
         li
-            a#export.waves-effect.waves-light.btn エクスポート
+            a#export(class=btnDefault) エクスポート
         li
-            a#toti.waves-effect.waves-light.btn 基本設定
+            a.modal-trigger(class=btnDefault, href='#guide') 使い方
         li
-            a#memoMode.waves-effect.waves-light.btn メモを書く
+            a#toti(class=btnDefault) 基本設定
         li
-            a#madori.waves-effect.waves-light.btn.red 間取を追加
+            a#memoMode(class=btnDefault) メモを書く
+        li
+            a#madori(class=btnPrimary) 間取を追加
     .memo-mode
         li
-            a#erase.waves-effect.waves-light.btn メモを消す
+            a#erase(class=btnDefault) メモを消す
         li
-            a#madoriMode.waves-effect.waves-light.btn.red メモを終わる
+            a#madoriMode(class=btnPrimary) メモを終わる

@@ -34,6 +34,7 @@ $(document).ready(function() {
     $('#bottom').on('mouseenter', shiftBottom);
     $('#top, #left, #right, #bottom').on('mouseleave', shiftEnd);
     $('#menu').sideNav();
+    $('.modal-trigger').leanModal();
     $('#types').collapsible();
     $(window).on('resize', resize);
 
