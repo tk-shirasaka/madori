@@ -152,15 +152,17 @@ $(document).ready(function() {
     function move() {
         if (drawing) return;
         var now = new Date().getTime();
-        if ((now - drag.time < 500 && !lock) || moving) {
+        var moveX = madori.getMouse('x') - this.x;
+        var moveY = madori.getMouse('y') - this.y;
+        if ((now - drag.time < 500 && !lock && ((Math.abs(drag.x - moveX) > 2) || (Math.abs(drag.y - moveY) > 2))) || moving) {
             var ptr = madori.getStagePtr();
             var direction = {x: 0, y: 0, id: null};
             var isFit = null;
             moving = true;
-            if (ptr.y + this.y < 50 && drag.y > madori.getMouse('y') - this.y) direction.y = 5;
-            else if (ptr.x + this.x < 100 && drag.x > madori.getMouse('x') - this.x) direction.x = 5;
-            else if (ptr.x + this.x + this.right > winSize.width && drag.x < madori.getMouse('x') - this.x) direction.x = -5;
-            else if (ptr.y + this.y + this.bottom > winSize.height && drag.y < madori.getMouse('y') - this.y) direction.y = -5;
+            if (ptr.y + this.y < 50 && drag.y > moveY) direction.y = 5;
+            else if (ptr.x + this.x < 100 && drag.x > moveX) direction.x = 5;
+            else if (ptr.x + this.x + this.right > winSize.width && drag.x < moveX) direction.x = -5;
+            else if (ptr.y + this.y + this.bottom > winSize.height && drag.y < moveY) direction.y = -5;
             else if (shift) shiftEnd();
             if (!shift && (direction.x || direction.y)) {
                 shiftWindow(direction.x, direction.y);
