@@ -248,6 +248,7 @@ $(document).ready(function() {
     function resizeMadori(container, diff) {
         if (drawing) return;
         madori.resize(container, diff);
+        initDrag(container);
         lock = true;
     }
     function setMadoriForm(c, isChange) {

@@ -1,0 +1,50 @@
+ul#side.side-nav
+    li
+        table.centered.bordered
+            tbody
+                tr.madori-mode
+                    td
+                        a#zoomOut(href='#!')
+                            i.material-icons zoom_out
+                    td
+                        span#zoomLevel
+                    td
+                        a#zoomIn(href='#!')
+                            i.material-icons zoom_in
+                tr.madori-mode
+                    td
+                        a#floorDown(href='#!')
+                            i.material-icons keyboard_arrow_left
+                    td
+                        span#floor
+                    td
+                        a#floorUp(href='#!')
+                            i.material-icons keyboard_arrow_right
+                tr.memo-mode
+                    td
+                        a#undo(href='#!')
+                            i.material-icons undo
+                    td
+                        a#redo(href='#!')
+                            i.material-icons redo
+    .madori-mode
+        li
+            .file-field.input-field
+                .btn
+                   span インポート
+                   input#import(type='file')
+                .file-path-wrapper
+                    input.file-path.validate(type='text')
+        li
+            a#export.waves-effect.waves-light.btn エクスポート
+        li
+            a#toti.waves-effect.waves-light.btn 基本設定
+        li
+            a#memoMode.waves-effect.waves-light.btn メモを書く
+        li
+            a#madori.waves-effect.waves-light.btn.red 間取を追加
+    .memo-mode
+        li
+            a#erase.waves-effect.waves-light.btn メモを消す
+        li
+            a#madoriMode.waves-effect.waves-light.btn.red メモを終わる
