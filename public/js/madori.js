@@ -169,26 +169,20 @@ function Madori (canvas, objEvent) {
         var offset = 0.25 * picsel * scale;
 
         if (Math.abs(diff) > offset) {
-            if (container.width < container.height && (diff > 0 || container.width > 0.25)) {
-                this.clearLocate(container);
-                container.x += container.width * picsel * scale / 2;
-                container.y += container.height * picsel * scale / 2;
+            this.clearLocate(container);
+            container.x += container.width * picsel * scale / 2;
+            container.y += container.height * picsel * scale / 2;
+            if (container.width < container.height) {
                 container.width += 0.25 * (diff > 0 ? 1 : -1);
-                container.width = (diff > 0 ? Math.floor(container.width / 0.25) : Math.floor(container.width / 0.25)) * 0.25;
+                container.width = Math.max(0.25, (diff > 0 ? Math.floor(container.width / 0.25) : Math.floor(container.width / 0.25)) * 0.25);
                 container.height = this.getLength(container.size, container.width);
-                container.x -= container.width * picsel * scale / 2;
-                container.y -= container.height * picsel * scale / 2;
-            } else if (container.width >= container.height && (diff < 0 || container.height > 0.25)) {
-                this.clearLocate(container);
-                container.x += container.width * picsel * scale / 2;
-                container.y += container.height * picsel * scale / 2;
+            } else if (container.width >= container.height) {
                 container.height += 0.25 * (diff > 0 ? -1 : 1);
-                container.height = (diff > 0 ? Math.floor(container.height / 0.25) : Math.floor(container.height / 0.25)) * 0.25;
+                container.height = Math.max(0.25, (diff > 0 ? Math.floor(container.height / 0.25) : Math.floor(container.height / 0.25)) * 0.25);
                 container.width = this.getLength(container.size, container.height);
-                container.x -= container.width * picsel * scale / 2;
-                container.y -= container.height * picsel * scale / 2;
-            } else
-                return;
+            }
+            container.x -= container.width * picsel * scale / 2;
+            container.y -= container.height * picsel * scale / 2;
             container.right = container.bottom = null;
             this.draw(container);
         }
