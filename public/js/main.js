@@ -158,11 +158,10 @@ $(document).ready(function() {
         if ((now - drag.time < 500 && !lock && ((Math.abs(drag.x - moveX) > 10) || (Math.abs(drag.y - moveY) > 10))) || moving) {
             var ptr = madori.getStagePtr();
             var direction = {x: 0, y: 0, id: null};
-            var checkFit = (isFit, isInit) => {
+            var checkFit = (isFit) => {
                 if ((isFit.x && direction.x) || (isFit.y && direction.y)) {
                     shiftEnd();
                     if (direction.id) clearInterval(direction.id);
-                    if (isInit) initDrag(this);
                 }
             };
             moving = true;
@@ -178,7 +177,7 @@ $(document).ready(function() {
                     this.y += direction.y;
                     drag.x += direction.x;
                     drag.y += direction.y;
-                    checkFit(madori.move(this, drag), true);
+                    checkFit(madori.move(this, drag));
                 }, 10);
             }
             checkFit(madori.move(this, drag));
