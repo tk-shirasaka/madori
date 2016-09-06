@@ -28,11 +28,11 @@ $(document).ready(function() {
     $('#zoomOut').on('click', zoomOut);
     $('#floorUp').on('click', floorUp);
     $('#floorDown').on('click', floorDown);
-    $('#top').on('mouseenter, touchstart', shiftTop);
-    $('#left').on('mouseenter, touchstart', shiftLeft);
-    $('#right').on('mouseenter, touchstart', shiftRight);
-    $('#bottom').on('mouseenter, touchstart', shiftBottom);
-    $('#top, #left, #right, #bottom').on('mouseleave, touchend', shiftEnd);
+    $('#top').on('mouseenter touchstart', shiftTop);
+    $('#left').on('mouseenter touchstart', shiftLeft);
+    $('#right').on('mouseenter touchstart', shiftRight);
+    $('#bottom').on('mouseenter touchstart', shiftBottom);
+    $('#top, #left, #right, #bottom').on('mouseleave touchend', shiftEnd);
     $('#menu').sideNav();
     $('.modal-trigger').leanModal();
     $('#types').collapsible();
