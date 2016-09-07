@@ -329,7 +329,7 @@ $(document).ready(function() {
         if (shift) {
             checkOverFlow();
             clearInterval(shift);
-            shift = false;
+            setTimeout(() => { shift = false; }, 0);
         }
     }
     function resize() {
