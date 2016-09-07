@@ -1,18 +1,19 @@
 #madoriForm.modal.modal-fixed-footer
     .modal-content
-        p.range-field
-            | 広さ (畳)
-            input#size(type='range', min='0.25', max='20', step='0.25')
-        .input-field
-            select#type
-        .input-field
-            select#wall(multiple)
-                option(value='top') 上
-                option(value='left') 左
-                option(value='right') 右
-                option(value='bottom') 下
-            label 壁
+        form
+            p 広さ (畳)
+            p.range-field
+                input#size(type='range', min='0.25', max='20', step='0.25')
+            .input-field
+                select#type
+            .input-field
+                select#wall(multiple)
+                    option(value='top') 上
+                    option(value='left') 左
+                    option(value='right') 右
+                    option(value='bottom') 下
+                label 壁
     .modal-footer
-        a#add.modal-close(class=btnDefault) 追加
-        a#remove.modal-close(class=btnPrimary) 削除
-        a#change.modal-close(class=btnDefault) 変更
+        a#add.modal-close(class=btnDefault, href='#!') 追加
+        a#remove.modal-close(class=btnPrimary, href='#!') 削除
+        a#change.modal-close(class=btnDefault, href='#!') 変更
