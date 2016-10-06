@@ -3,6 +3,7 @@
 
     function VerticalLine(name) {
         this.Line_constructor(name);
+        this.mouseover = 'col-resize';
     }
     createjs.extend(VerticalLine, createjs.Line);
     createjs.promote(VerticalLine, 'Line');
