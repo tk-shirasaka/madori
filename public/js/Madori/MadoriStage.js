@@ -2,6 +2,7 @@
     'use strict'
 
     var _version    = '0.0.1';
+    var _mode       = null;
     var _floor      = 1;
     var _units      = {'1.70': '団地間', '1.76': '江戸間', '1.82': '中京間', '1.91': '京間'};
     var _defaults   = {unit: '1.82', width: null, height: null};
@@ -19,6 +20,8 @@
 
     function MadoriStage(canvas) {
         this.Stage_constructor(canvas);
+        this.initEventListener();
+        this.setMode('madori');
         this.mouseMoveOutside = true;
         this.enableMouseOver(50);
         if (createjs.Touch.isSupported()) createjs.Touch.enable(this);
@@ -26,6 +29,61 @@
     createjs.extend(MadoriStage, createjs.Stage);
     createjs.promote(MadoriStage, 'Stage');
     createjs.MadoriStage = MadoriStage;
+
+    MadoriStage.prototype.initEventListener = function() {
+        var action      = null;
+
+        var madoriModeListener  = () => {
+            this.x += this.mouseX - action.x;
+            this.y += this.mouseY - action.y;
+            action  = {x: this.mouseX, y: this.mouseY};
+            this.update();
+        };
+
+        var memoModeListener    = () => {
+            action.c    = {x: action.a.x + this.mouseX / this.scaleX - this.x >> 1, y: action.a.y + this.mouseY / this.scaleX - this.y >> 1};
+            action.memo.graphics.setStrokeStyle(2, 'round', 'round').beginStroke('Black').moveTo(action.c.x, action.c.y).curveTo(action.a.x, action.a.y, action.b.x, action.b.y);
+            action.a    = {x: this.mouseX / this.scaleX - this.x, y: this.mouseY / this.scaleX - this.y};
+            action.b    = action.c;
+            this.update();
+        };
+
+        this.addEventListener('stagemousedown', () => {
+            var cursor  = null;
+
+            switch (_mode) {
+            case 'madori':
+                cursor  = 'move';
+                action  = {x: this.mouseX, y: this.mouseY};
+                this.addEventListener('stagemousemove', madoriModeListener);
+                break;
+            case 'memo':
+                cursor      = 'pointer';
+                action      = {};
+                action.memo = new createjs.Shape();
+                action.a    = {x: this.mouseX / this.scaleX - this.x, y: this.mouseY / this.scaleX - this.y};
+                action.b    = action.a
+                this.addChild(action.memo);
+                this.addEventListener('stagemousemove', memoModeListener);
+                break;
+            }
+            document.body.style.cursor = cursor;
+        });
+
+        this.addEventListener('stagemouseup', () => {
+            document.body.style.cursor = '';
+            this.removeAllEventListeners('stagemousemove');
+        });
+    };
+
+    MadoriStage.prototype.setMode = function(mode) {
+        switch (mode) {
+        case 'madori':
+        case 'memo':
+            _mode   = mode;
+            break;
+        }
+    };
 
     MadoriStage.prototype.clearMadori = function() {
         var result = [];
