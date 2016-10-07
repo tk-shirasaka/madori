@@ -12,29 +12,34 @@
 
     Field.prototype.initEventListener = function() {
         this.addEventListener('mouseover', () => {
-            if (!this.parent.inAction()) document.body.style.cursor = 'pointer';
+            if (!this.parent.inAction() && this.parent.actionable()) document.body.style.cursor = 'pointer';
         });
 
         this.addEventListener('mouseout', () => {
-            if (!this.parent.inAction()) document.body.style.cursor = '';
+            if (!this.parent.inAction() && this.parent.actionable()) document.body.style.cursor = '';
         });
 
-        this.addEventListener('pressmove', (e) => {
+        this.addEventListener('pressmove', () => {
+            if (!this.parent.actionable()) return;
             var action  = this.parent.inAction();
-            var x       = e.stageX - action.x + this.parent.x;
-            var y       = e.stageY - action.y + this.parent.y;
-
-            action.x    = e.stageX;
-            action.y    = e.stageY;
+            var x       = this.stage.mouseX - action.x + this.parent.x;
+            var y       = this.stage.mouseY - action.y + this.parent.y;
             this.parent.setMadoriProps({x: x, y: y});
+
+            var near    = this.parent.nearLocate();
+            this.parent.setMadoriProps(near);
+
+            action.x    = this.stage.mouseX + (near.x || x) - x;
+            action.y    = this.stage.mouseY + (near.y || y) - y;
         });
     };
 
     Field.prototype.redraw = function() {
-        var color   = this.color;
+        var color   = this.color || this.stage.types[this.parent.type].color;
         var width   = this.parent.width;
         var height  = this.parent.height;
 
+        if (!this.parent.onFloor()) color = 'rgba(0,0,0,0.5)';
         this.graphics.clear().beginFill(color).drawRect(0, 0, width, height).endFill();
     };
 }());

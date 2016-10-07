@@ -5,7 +5,6 @@
         this.Shape_constructor();
         this.initEventListener();
         this.name   = name;
-        this.color  = 'Black';
     }
     createjs.extend(Line, createjs.Shape);
     createjs.promote(Line, 'Shape');
@@ -13,39 +12,38 @@
 
     Line.prototype.initEventListener = function() {
         this.addEventListener('mouseover', () => {
-            if (!this.parent.inAction()) document.body.style.cursor = this.mouseover;
+            if (!this.parent.inAction() && this.parent.actionable()) document.body.style.cursor = this.mouseover;
         });
 
         this.addEventListener('mouseout', () => {
-            if (!this.parent.inAction()) document.body.style.cursor = '';
+            if (!this.parent.inAction() && this.parent.actionable()) document.body.style.cursor = '';
         });
 
-        this.addEventListener('pressmove', (e) => {
+        this.addEventListener('pressmove', () => {
+            if (!this.parent.actionable()) return;
             var action  = this.parent.inAction();
-            //var point   = (this.mouseover === 'col-resize') ? this.parent.x : this.parent.y * -1;
-            var diff    = (this.mouseover === 'col-resize') ?  e.stageX - action.x : action.y - e.stageY;
-            var base    = 150 * 0.25;
-            var offset  = base * this.stage.scaleX;
+            var diff    = (this.mouseover === 'col-resize') ? action.x - this.stage.mouseX : this.stage.mouseY - action.y;
+            var offset  = 150 * 0.25;
 
             if (this.x || this.y) diff *= -1;
 
             if (Math.abs(diff) > offset) {
-                var x       = this.parent.x + this.parent.width * this.stage.scaleX / 2;
-                var y       = this.parent.y + this.parent.height * this.stage.scaleX / 2;
                 var width   = this.parent.width;
                 var height  = this.parent.height;
-                var size    = width * height / 2;
+                var size    = width * height;
                 if (width < height) {
-                    width  += base * (diff > 0 ? 1 : -1);
-                    width   = Math.max(base, (diff > 0 ? Math.floor(width / base) : Math.floor(width / base)) * base);
-                    height  = size / width / 2;
+                    width  += offset * (diff > 0 ? 1 : -1);
+                    width   = Math.max(offset, width);
+                    height  = size / width;
                 } else if (width >= height) {
-                    height += base * (diff > 0 ? -1 : 1);
-                    height  = Math.max(base, (diff > 0 ? Math.floor(height / base) : Math.floor(height / base)) * base);
-                    width   = size / height / 2;
+                    height += offset * (diff > 0 ? -1 : 1);
+                    height  = Math.max(offset, height);
+                    width   = size / height;
                 }
-                x      -= width * this.stage.scaleX / 2;
-                y      -= height * this.stage.scaleX / 2;
+                var x       = this.parent.x + (this.parent.width - width) / 2;
+                var y       = this.parent.y + (this.parent.height - height) / 2;
+                action.x    = this.stage.mouseX;
+                action.y    = this.stage.mouseY;
                 this.parent.setMadoriProps({x: x, y: y, width: width, height: height});
             }
         });
@@ -68,12 +66,13 @@
     };
 
     Line.prototype.redraw = function() {
-        var color   = this.color;
+        var color   = 'Black' ;
         var x       = this.getX();
         var y       = this.getY();
         var height  = this.getHeight();
         var width   = this.getWidth();
 
+        if (!this.parent.onFloor()) color = 'rgba(0,0,0,0.5)';
         this.graphics.clear().beginStroke(color).setStrokeStyle(4).moveTo(x, y).lineTo(width, height).endStroke();
     };
 }());

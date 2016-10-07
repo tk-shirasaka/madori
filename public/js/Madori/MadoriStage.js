@@ -2,26 +2,35 @@
     'use strict'
 
     var _version    = '0.0.1';
-    var _mode       = null;
-    var _floor      = 1;
-    var _units      = {'1.70': '団地間', '1.76': '江戸間', '1.82': '中京間', '1.91': '京間'};
-    var _defaults   = {unit: '1.82', width: null, height: null};
-    var _types      = [
-        {name: '洋室', color: '#bcaaa4', rate: 0},
-        {name: '和室', color: '#8bc34a', rate: 0},
-        {name: 'トイレ', color: '#bdbdbd', rate: 0},
-        {name: 'お風呂', color: '#81d4fa', rate: 0},
-        {name: '洗面所', color: '#009688', rate: 0},
-        {name: '廊下', color: '#795548', rate: 0},
-        {name: '階段', color: '#ffff8d', rate: 1},
-        {name: '玄関', color: '#ce93d8', rate: 0},
-        {name: 'その他', color: '#f44336', rate: 0},
-    ];
+    var _defaults   = {
+        floor:  1,
+        unit:   182,
+        width:  null,
+        height: null,
+        mode:   'madori',
+        units:  {
+            170: '団地間',
+            176: '江戸間',
+            182: '中京間',
+            191: '京間'
+        },
+        types:  [
+            {name: '洋室', color: '#bcaaa4', rate: 0},
+            {name: '和室', color: '#8bc34a', rate: 0},
+            {name: 'トイレ', color: '#bdbdbd', rate: 0},
+            {name: 'お風呂', color: '#81d4fa', rate: 0},
+            {name: '洗面所', color: '#009688', rate: 0},
+            {name: '廊下', color: '#795548', rate: 0},
+            {name: '階段', color: '#ffff8d', rate: 1},
+            {name: '玄関', color: '#ce93d8', rate: 0},
+            {name: 'その他', color: '#f44336', rate: 0},
+        ]
+    };
 
     function MadoriStage(canvas) {
         this.Stage_constructor(canvas);
         this.initEventListener();
-        this.setMode('madori');
+        this.set(_defaults);
         this.mouseMoveOutside = true;
         this.enableMouseOver(50);
         if (createjs.Touch.isSupported()) createjs.Touch.enable(this);
@@ -50,8 +59,10 @@
 
         this.addEventListener('stagemousedown', () => {
             var cursor  = null;
+            var madori  = this.getChildByName('madori');
 
-            switch (_mode) {
+            if (madori && madori.hovered()) return;
+            switch (this.mode) {
             case 'madori':
                 cursor  = 'move';
                 action  = {x: this.mouseX, y: this.mouseY};
@@ -74,15 +85,6 @@
             document.body.style.cursor = '';
             this.removeAllEventListeners('stagemousemove');
         });
-    };
-
-    MadoriStage.prototype.setMode = function(mode) {
-        switch (mode) {
-        case 'madori':
-        case 'memo':
-            _mode   = mode;
-            break;
-        }
     };
 
     MadoriStage.prototype.clearMadori = function() {
