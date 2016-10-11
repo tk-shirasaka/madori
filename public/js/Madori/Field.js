@@ -21,6 +21,7 @@
 
         this.addEventListener('pressmove', () => {
             if (!this.parent.actionable()) return;
+            document.body.style.cursor = 'move';
             var action  = this.parent.inAction();
             var pointer = this.stage.getPointer();
             var x       = pointer.x - action.x + this.parent.x;

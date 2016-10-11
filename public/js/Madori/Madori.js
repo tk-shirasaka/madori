@@ -44,6 +44,11 @@
             _action = false;
             document.body.style.cursor = '';
         });
+
+        this.addEventListener('removed', () => {
+            _area -= (this.width * this.height);
+            this.clearLocate();
+        });
     };
 
     Madori.prototype.area = function() {
@@ -109,6 +114,10 @@
     };
 
     Madori.prototype.redraw = function() {
+        if (this.wall.indexOf('top') < 0) this.setChildIndex(this.getChildByName('top'), 0);
+        if (this.wall.indexOf('left') < 0) this.setChildIndex(this.getChildByName('left'), 0);
+        if (this.wall.indexOf('right') < 0) this.setChildIndex(this.getChildByName('right'), 0);
+        if (this.wall.indexOf('bottom') < 0) this.setChildIndex(this.getChildByName('bottom'), 0);
         this.getChildByName('text').redraw();
         this.getChildByName('field').redraw();
         this.getChildByName('top').redraw();

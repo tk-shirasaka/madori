@@ -1,7 +1,7 @@
 (function () {
     'use strict'
 
-    var _version    = '0.0.1';
+    var _version    = '0.0.2';
     var _defaults   = {
         floor:  1,
         unit:   182,
@@ -77,7 +77,8 @@
                 action.memo = new createjs.Shape();
                 action.a    = {x: pointer.x - this.x, y: pointer.y - this.y};
                 action.b    = action.a
-                this.addChild(action.memo);
+                action.memo.set({name: 'memo', floor: this.floor});
+                this.addChildAt(action.memo, 0);
                 this.addEventListener('stagemousemove', memoModeListener);
                 break;
             }
@@ -98,7 +99,7 @@
     };
 
     MadoriStage.prototype.loopByName = function(name, callback) {
-        for (var i = 0; i < this.children.length; i++) {
+        for (var i = this.children.length - 1; i >= 0; i--) {
             if (this.children[i].name === name) callback.call(this, this.children[i]);
         }
     };
@@ -111,26 +112,42 @@
     };
 
     MadoriStage.prototype.getMadoriJson = function() {
-        var result = [];
+        var result = {
+            version: _version,
+            setting: {
+                unit: this.unit,
+                width: this.width,
+                height: this.height,
+                units: this.units,
+                types: this.types,
+            },
+            data: [],
+        };
 
         this.loopByName('madori', (madori) => {
-            result.push({
-                x:      madori[i].x,
-                y:      madori[i].y,
-                width:  madori[i].width,
-                height: madori[i].height,
+            result.data.unshift({
+                x:      madori.x,
+                y:      madori.y,
+                width:  madori.width,
+                height: madori.height,
+                type:   madori.type,
+                floor:  madori.floor,
+                wall:   madori.wall,
             });
         });
         return JSON.stringify(result);
     };
 
     MadoriStage.prototype.setMadoriJson = function(json) {
-        json = JSON.parse();
+        json = JSON.parse(json);
 
-        for (var i = 0; i < json.length; i++) {
+        this.removeAllChildren();
+        this.set(json.setting);
+        for (var i = 0; i < json.data.length; i++) {
             var madori = new createjs.Madori();
+            this.addChild(madori);
 
-            madori.setMadoriProps(json);
+            madori.setMadoriProps(json.data[i]);
         }
     };
 }());
