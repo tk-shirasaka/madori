@@ -22,7 +22,8 @@
         this.addEventListener('pressmove', () => {
             if (!this.parent.actionable()) return;
             var action  = this.parent.inAction();
-            var diff    = (this.mouseover === 'col-resize') ? action.x - this.stage.mouseX : this.stage.mouseY - action.y;
+            var pointer = this.stage.getPointer();
+            var diff    = (this.mouseover === 'col-resize') ? action.x - pointer.x : pointer.y - action.y;
             var offset  = 150 * 0.25;
 
             if (this.x || this.y) diff *= -1;
@@ -42,8 +43,8 @@
                 }
                 var x       = this.parent.x + (this.parent.width - width) / 2;
                 var y       = this.parent.y + (this.parent.height - height) / 2;
-                action.x    = this.stage.mouseX;
-                action.y    = this.stage.mouseY;
+                action.x    = pointer.x;
+                action.y    = pointer.y;
                 this.parent.setMadoriProps({x: x, y: y, width: width, height: height});
             }
         });
@@ -66,7 +67,7 @@
     };
 
     Line.prototype.redraw = function() {
-        var color   = 'Black' ;
+        var color   = (this.parent.wall.indexOf(this.name) >= 0) ? 'Black' : this.stage.types[this.parent.type].color;
         var x       = this.getX();
         var y       = this.getY();
         var height  = this.getHeight();

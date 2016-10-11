@@ -43,36 +43,39 @@
         var action      = null;
 
         var madoriModeListener  = () => {
-            this.x += this.mouseX - action.x;
-            this.y += this.mouseY - action.y;
-            action  = {x: this.mouseX, y: this.mouseY};
+            var pointer = this.getPointer();
+            this.x += (pointer.x - action.x) * this.scaleX;
+            this.y += (pointer.y - action.y) * this.scaleY;
+            action  = pointer;
             this.update();
         };
 
         var memoModeListener    = () => {
-            action.c    = {x: action.a.x + this.mouseX / this.scaleX - this.x >> 1, y: action.a.y + this.mouseY / this.scaleX - this.y >> 1};
+            var pointer = this.getPointer();
+            action.c    = {x: action.a.x + pointer.x - this.x >> 1, y: action.a.y + pointer.y - this.y >> 1};
             action.memo.graphics.setStrokeStyle(2, 'round', 'round').beginStroke('Black').moveTo(action.c.x, action.c.y).curveTo(action.a.x, action.a.y, action.b.x, action.b.y);
-            action.a    = {x: this.mouseX / this.scaleX - this.x, y: this.mouseY / this.scaleX - this.y};
+            action.a    = {x: pointer.x - this.x, y: pointer.y - this.y};
             action.b    = action.c;
             this.update();
         };
 
         this.addEventListener('stagemousedown', () => {
             var cursor  = null;
+            var pointer = this.getPointer();
             var madori  = this.getChildByName('madori');
 
             if (madori && madori.hovered()) return;
             switch (this.mode) {
             case 'madori':
                 cursor  = 'move';
-                action  = {x: this.mouseX, y: this.mouseY};
+                action  = pointer;
                 this.addEventListener('stagemousemove', madoriModeListener);
                 break;
             case 'memo':
                 cursor      = 'pointer';
                 action      = {};
                 action.memo = new createjs.Shape();
-                action.a    = {x: this.mouseX / this.scaleX - this.x, y: this.mouseY / this.scaleX - this.y};
+                action.a    = {x: pointer.x - this.x, y: pointer.y - this.y};
                 action.b    = action.a
                 this.addChild(action.memo);
                 this.addEventListener('stagemousemove', memoModeListener);
@@ -87,30 +90,37 @@
         });
     };
 
-    MadoriStage.prototype.clearMadori = function() {
-        var result = [];
-        var madori = null;
+    MadoriStage.prototype.getPointer = function() {
+        return {
+            x: this.mouseX / this.scaleX,
+            y: this.mouseY / this.scaleY,
+        };
+    };
 
-        while (madori = this.getChildByName('madori')) {
-            result.unshift(madori);
+    MadoriStage.prototype.loopByName = function(name, callback) {
+        for (var i = 0; i < this.children.length; i++) {
+            if (this.children[i].name === name) callback.call(this, this.children[i]);
+        }
+    };
+
+    MadoriStage.prototype.clearMadori = function() {
+        this.loopByName('madori', (madori) => {
             madori.clearLocate();
             this.removeChild(madori);
-        }
-        return result;
+        });
     };
 
     MadoriStage.prototype.getMadoriJson = function() {
-        var madori = this.clearMadori();
         var result = [];
 
-        for (var i = 0; i < madori.length; i++) {
+        this.loopByName('madori', (madori) => {
             result.push({
                 x:      madori[i].x,
                 y:      madori[i].y,
                 width:  madori[i].width,
                 height: madori[i].height,
             });
-        }
+        });
         return JSON.stringify(result);
     };
 

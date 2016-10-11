@@ -22,15 +22,16 @@
         this.addEventListener('pressmove', () => {
             if (!this.parent.actionable()) return;
             var action  = this.parent.inAction();
-            var x       = this.stage.mouseX - action.x + this.parent.x;
-            var y       = this.stage.mouseY - action.y + this.parent.y;
+            var pointer = this.stage.getPointer();
+            var x       = pointer.x - action.x + this.parent.x;
+            var y       = pointer.y - action.y + this.parent.y;
             this.parent.setMadoriProps({x: x, y: y});
 
             var near    = this.parent.nearLocate();
             this.parent.setMadoriProps(near);
 
-            action.x    = this.stage.mouseX + (near.x || x) - x;
-            action.y    = this.stage.mouseY + (near.y || y) - y;
+            action.x    = pointer.x + (near.x || x) - x;
+            action.y    = pointer.y + (near.y || y) - y;
         });
     };
 

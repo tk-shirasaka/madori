@@ -37,7 +37,7 @@
         });
 
         this.addEventListener('mousedown', () => {
-            if (!this.inAction()) _action = {x: this.stage.mouseX, y: this.stage.mouseY};
+            if (!this.inAction()) _action = this.stage.getPointer();
         });
 
         this.addEventListener('pressup', () => {
