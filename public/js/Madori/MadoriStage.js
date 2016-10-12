@@ -33,6 +33,7 @@
         this.set(_defaults);
         this.mouseMoveOutside = true;
         this.enableMouseOver(50);
+        this.addChild(new createjs.Width(), new createjs.Height());
         if (createjs.Touch.isSupported()) createjs.Touch.enable(this);
         createjs.Ticker.timingMode = createjs.Ticker.RAF;
     }
@@ -49,6 +50,8 @@
             this.y += (pointer.y - action.y) * this.scaleY;
             action  = pointer;
             this.update();
+            this.getChildByName('width').redraw();
+            this.getChildByName('height').redraw();
         };
 
         var memoModeListener    = () => {

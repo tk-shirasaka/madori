@@ -84,7 +84,7 @@
 
     Madori.prototype.clearLocate = function() {
         _locate.x.splice(_locate.x.indexOf(this.x), 1);
-        _locate.x.splice(_locate.x.indexOf(this.x + this.right), 1);
+        _locate.x.splice(_locate.x.indexOf(this.x + this.width), 1);
         _locate.y.splice(_locate.y.indexOf(this.y), 1);
         _locate.y.splice(_locate.y.indexOf(this.y + this.height), 1);
     };
@@ -118,6 +118,7 @@
     };
 
     Madori.prototype.redraw = function() {
+        if (this.floor === this.stage.floor) this.stage.setChildIndex(this, this.stage.children.length - 1);
         if (this.wall.indexOf('top') < 0) this.setChildIndex(this.getChildByName('top'), 0);
         if (this.wall.indexOf('left') < 0) this.setChildIndex(this.getChildByName('left'), 0);
         if (this.wall.indexOf('right') < 0) this.setChildIndex(this.getChildByName('right'), 0);
@@ -128,6 +129,8 @@
         this.getChildByName('left').redraw();
         this.getChildByName('right').redraw();
         this.getChildByName('bottom').redraw();
+        this.stage.getChildByName('width').redraw();
+        this.stage.getChildByName('height').redraw();
         this.stage.update();
     };
 
