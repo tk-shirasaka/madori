@@ -34,6 +34,7 @@
         this.mouseMoveOutside = true;
         this.enableMouseOver(50);
         if (createjs.Touch.isSupported()) createjs.Touch.enable(this);
+        createjs.Ticker.timingMode = createjs.Ticker.RAF;
     }
     createjs.extend(MadoriStage, createjs.Stage);
     createjs.promote(MadoriStage, 'Stage');

@@ -5,6 +5,7 @@
     var _area   = 0;
     var _hover  = false;
     var _action = false;
+    var _ticker = false;
 
     function Madori() {
         this.Container_constructor();
@@ -21,13 +22,16 @@
         this.name   = 'madori';
         this.width  = 0;
         this.height = 0;
-        this.setLocate();
     }
     createjs.extend(Madori, createjs.Container);
     createjs.promote(Madori, 'Container');
     createjs.Madori = Madori;
 
     Madori.prototype.initEventListener = function() {
+        this.addEventListener('added', () => {
+            this.setLocate();
+        });
+
         this.addEventListener('mouseover', () => {
             if (this.actionable()) _hover  = true;
         });
@@ -139,5 +143,24 @@
 
         this.setLocate();
         this.redraw();
+    };
+
+    Madori.prototype.shiftWindow = function() {
+        var shift = {x: 0, y: 0};
+
+        if (this.x < this.stage.x * -1) shift.x = 3;
+        if (this.y < this.stage.y * -1) shift.y = 3;
+        if (this.x + this.width > (this.stage.x * -1 + this.stage.canvas.width)) shift.x = -3;
+        if (this.y + this.height > (this.stage.y * -1 + this.stage.canvas.height)) shift.y = -3;
+        if (_ticker) {
+            createjs.Ticker.removeEventListener('tick', _ticker);
+            _ticker = false;
+        }
+        if (shift.x || shift.y) {
+            _ticker = createjs.Ticker.addEventListener('tick', () => {
+                this.stage.set({x: this.stage.x + shift.x, y: this.stage.y + shift.y});
+                this.setMadoriProps({x: this.x - shift.x, y: this.y - shift.y});
+            });
+        }
     };
 }());

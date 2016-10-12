@@ -30,6 +30,7 @@
 
             var near    = this.parent.nearLocate();
             this.parent.setMadoriProps(near);
+            this.parent.shiftWindow();
 
             action.x    = pointer.x + (near.x || x) - x;
             action.y    = pointer.y + (near.y || y) - y;
