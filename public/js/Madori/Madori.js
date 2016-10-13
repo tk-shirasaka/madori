@@ -40,8 +40,11 @@
             if (this.actionable()) _hover  = false;
         });
 
-        this.addEventListener('mousedown', () => {
-            if (!this.inAction()) _action = this.stage.getPointer();
+        this.addEventListener('mousedown', (e) => {
+            if (!this.inAction()) {
+                _action = this.stage.getPointer();
+                _action.start = e.timeStamp;
+            }
         });
 
         this.addEventListener('pressup', () => {
