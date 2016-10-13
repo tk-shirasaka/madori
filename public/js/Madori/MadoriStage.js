@@ -33,6 +33,8 @@
         this.set(_defaults);
         this.mouseMoveOutside = true;
         this.enableMouseOver(50);
+        this.addChildParent('madori');
+        this.addChildParent('memo');
         this.addChild(new createjs.Width(), new createjs.Height());
         if (createjs.Touch.isSupported()) createjs.Touch.enable(this);
         createjs.Ticker.timingMode = createjs.Ticker.RAF;
@@ -40,6 +42,55 @@
     createjs.extend(MadoriStage, createjs.Stage);
     createjs.promote(MadoriStage, 'Stage');
     createjs.MadoriStage = MadoriStage;
+
+    MadoriStage.prototype.addChildParent = function(name) {
+        var parent  = new createjs.Container();
+        parent.set({name: name});
+        createjs.Stage.prototype.addChild.call(this, parent);
+
+        return parent;
+    };
+
+    MadoriStage.prototype.getChildParentByName = function(name) {
+        var parent = createjs.Stage.prototype.getChildByName.call(this, name);
+
+        if (!parent) parent = this.addChildParent(name);
+        return parent;
+    };
+
+    MadoriStage.prototype.addChild = function() {
+        for (var i = 0; i < arguments.length; i++) {
+            var name    = arguments[i].name;
+            var parent  = this.getChildParentByName(name);
+
+            if (!parent) parent = this.addChildParent(name);
+            parent.addChild(arguments[i]);
+        }
+    };
+
+    MadoriStage.prototype.addChildAt = function() {
+        for (var i = 0; i < arguments.length; i += 2) {
+            var name    = arguments[i].name;
+            var parent  = this.getChildParentByName(name);
+
+            if (!parent) parent = this.addChildParent(name);
+            parent.addChildAt(arguments[i], arguments[i + 1]);
+        }
+    };
+
+    MadoriStage.prototype.removeChild = function() {
+        for (var i = 0; i < arguments.length; i++) {
+            var name    = arguments[i].name;
+            var parent  = this.getChildParentByName(name);
+
+            if (!parent) parent = this.addChildParent(name);
+            parent.removeChild(arguments[i]);
+        }
+    };
+
+    MadoriStage.prototype.getChildByName = function(name) {
+        return this.getChildParentByName(name).getChildByName(name);
+    };
 
     MadoriStage.prototype.initEventListener = function() {
         var action      = null;
@@ -49,9 +100,9 @@
             this.x += (pointer.x - action.x) * this.scaleX;
             this.y += (pointer.y - action.y) * this.scaleY;
             action  = pointer;
-            this.update();
             this.getChildByName('width').redraw();
             this.getChildByName('height').redraw();
+            this.update();
         };
 
         var memoModeListener    = () => {
@@ -103,8 +154,9 @@
     };
 
     MadoriStage.prototype.loopByName = function(name, callback) {
-        for (var i = this.children.length - 1; i >= 0; i--) {
-            if (this.children[i].name === name) callback.call(this, this.children[i]);
+        var parent = this.getChildParentByName(name);
+        for (var i = parent.children.length - 1; i >= 0; i--) {
+            if (parent.children[i].name === name) callback.call(this, parent.children[i]);
         }
     };
 
@@ -116,22 +168,25 @@
     };
 
     MadoriStage.prototype.getMadoriJson = function() {
-        var result = {
+        var limit   = createjs.Madori.prototype.limitLocate();
+        var result  = {
             version: _version,
             setting: {
-                unit: this.unit,
-                width: this.width,
+                x:      0,
+                y:      0,
+                unit:   this.unit,
+                width:  this.width,
                 height: this.height,
-                units: this.units,
-                types: this.types,
+                units:  this.units,
+                types:  this.types,
             },
             data: [],
         };
 
         this.loopByName('madori', (madori) => {
             result.data.unshift({
-                x:      madori.x,
-                y:      madori.y,
+                x:      madori.x - limit.x.min + 100,
+                y:      madori.y - limit.y.min + 100,
                 width:  madori.width,
                 height: madori.height,
                 type:   madori.type,
@@ -145,7 +200,8 @@
     MadoriStage.prototype.setMadoriJson = function(json) {
         json = JSON.parse(json);
 
-        this.removeAllChildren();
+        this.getChildParentByName('madori').removeAllChildren();
+        this.getChildParentByName('memo').removeAllChildren();
         this.set(json.setting);
         for (var i = 0; i < json.data.length; i++) {
             var madori = new createjs.Madori();

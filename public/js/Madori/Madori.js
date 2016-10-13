@@ -166,4 +166,30 @@
             });
         }
     };
+
+    Madori.prototype.transform = function(diff) {
+        var action  = this.inAction();
+        var pointer = this.stage.getPointer();
+        var offset  = this.stage.unit * 0.25;
+
+        if (Math.abs(diff) > offset) {
+            var width   = this.width;
+            var height  = this.height;
+            var size    = width * height;
+            if (width < height) {
+                width  += offset * (diff > 0 ? 1 : -1);
+                width   = Math.round(Math.max(offset, width) / offset) * offset;
+                height  = size / width;
+            } else if (width >= height) {
+                height += offset * (diff > 0 ? -1 : 1);
+                height  = Math.round(Math.max(offset, height) / offset) * offset;
+                width   = size / height;
+            }
+            var x       = this.x + (this.width - width) / 2;
+            var y       = this.y + (this.height - height) / 2;
+            action.x    = pointer.x;
+            action.y    = pointer.y;
+            this.setMadoriProps({x: x, y: y, width: width, height: height});
+        }
+    };
 }());
