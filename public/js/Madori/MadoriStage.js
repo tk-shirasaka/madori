@@ -96,6 +96,10 @@
         var action      = null;
 
         var madoriModeListener  = () => {
+            if (createjs.Madori.prototype.hovered()) {
+                this.removeAllEventListeners('stagemousemove');
+                return;
+            }
             var pointer = this.getPointer();
             this.x += (pointer.x - action.x) * this.scaleX;
             this.y += (pointer.y - action.y) * this.scaleY;
@@ -117,9 +121,8 @@
         this.addEventListener('stagemousedown', () => {
             var cursor  = null;
             var pointer = this.getPointer();
-            var madori  = this.getChildByName('madori');
 
-            if (madori && madori.hovered()) return;
+            if (createjs.Madori.prototype.hovered()) return;
             switch (this.mode) {
             case 'madori':
                 cursor  = 'move';

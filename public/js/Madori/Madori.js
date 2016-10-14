@@ -3,7 +3,7 @@
 
     var _locate = {x: [], y: []};
     var _area   = 0;
-    var _hover  = false;
+    var _hover  = 0;
     var _action = false;
     var _ticker = false;
 
@@ -33,22 +33,26 @@
         });
 
         this.addEventListener('mouseover', () => {
-            if (this.actionable()) _hover  = true;
+            if (this.actionable()) _hover++;
         });
 
         this.addEventListener('mouseout', () => {
-            if (this.actionable()) _hover  = false;
+            if (this.actionable()) _hover--;
         });
 
         this.addEventListener('mousedown', (e) => {
             if (!this.inAction()) {
+                _hover++;
                 _action = this.stage.getPointer();
                 _action.start = e.timeStamp;
             }
         });
 
         this.addEventListener('pressup', () => {
+            _hover--;
             _action = false;
+            createjs.Ticker.removeEventListener('tick', _ticker);
+            _ticker = false;
             document.body.style.cursor = '';
         });
 
@@ -151,13 +155,13 @@
         this.redraw();
     };
 
-    Madori.prototype.shiftWindow = function() {
+    Madori.prototype.shiftWindow = function(vector) {
         var shift = {x: 0, y: 0};
 
-        if (this.x < this.stage.x * -1) shift.x = 3;
-        if (this.y < this.stage.y * -1) shift.y = 3;
-        if (this.x + this.width > (this.stage.x * -1 + this.stage.canvas.width)) shift.x = -3;
-        if (this.y + this.height > (this.stage.y * -1 + this.stage.canvas.height)) shift.y = -3;
+        if (vector.x < 0 && this.x < this.stage.x * -1) shift.x = 3;
+        if (vector.y < 0 && this.y < this.stage.y * -1) shift.y = 3;
+        if (vector.x > 0 && this.x + this.width > (this.stage.x * -1 + this.stage.canvas.width)) shift.x = -3;
+        if (vector.y > 0 && this.y + this.height > (this.stage.y * -1 + this.stage.canvas.height)) shift.y = -3;
         if (_ticker) {
             createjs.Ticker.removeEventListener('tick', _ticker);
             _ticker = false;

@@ -56,18 +56,20 @@ $(document).ready(function() {
         stage.update();
     }
     function undo() {
-        redos.push(stage.getChildByName('memo'));
-        if (redos[redos.length - 1]) {
-            stage.removeChild(redos[redos.length - 1]);
+        var memo = stage.getChildByName('memo');
+        if (memo) {
+            redos.push(memo);
+            stage.removeChild(memo);
             stage.update();
-        } else {
-            redos.pop();
         }
     }
     function redo() {
         if (!redos.length) return;
         stage.addChildAt(redos.pop(), 0);
         stage.update();
+    }
+    function setTimestamp(e) {
+        action = e.timeStamp;
     }
     function remove() {
         stage.removeChild(madori);
@@ -89,7 +91,7 @@ $(document).ready(function() {
         } else {
             $(this).closest('li').remove();
             stage.loopByName('madori', (madori) => { if (madori.type > id) madori.type -= 1; });
-            setSetting();
+            stage.types.splice(id, 1);
             setSelectForm();
         }
     }
@@ -146,9 +148,6 @@ $(document).ready(function() {
         $('#remove, #change').addClass('hide');
         $('#size').val(1).trigger('change');
         resetMadoriForm();
-    }
-    function setTimestamp(e) {
-        action = e.timeStamp;
     }
     function changeMadori(e) {
         if (e.timeStamp - action > 200) return;

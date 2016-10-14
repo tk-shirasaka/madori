@@ -16,11 +16,12 @@
             var pointer = this.stage.getPointer();
             var x       = pointer.x - action.x + this.parent.x;
             var y       = pointer.y - action.y + this.parent.y;
+            var vector  = {x: (this.parent.x < x) ? 1 : -1, y: (this.parent.y < y) ? 1 : -1};
             this.parent.setMadoriProps({x: x, y: y});
 
             var near    = this.parent.nearLocate();
             this.parent.setMadoriProps(near);
-            this.parent.shiftWindow();
+            this.parent.shiftWindow(vector);
 
             action.x    = pointer.x + (near.x || x) - x;
             action.y    = pointer.y + (near.y || y) - y;
@@ -53,8 +54,11 @@
         this.addEventListener('pressmove', (e) => {
             if (!this.parent.actionable()) return;
             var action  = this.parent.inAction();
+            var pointer = this.stage.getPointer();
 
             document.body.style.cursor = 'move';
+            if (!action.type && Math.abs(action.x - pointer.x) < 5 * this.stage.scaleX) return;
+            if (!action.type && Math.abs(action.y - pointer.y) < 5 * this.stage.scaleY) return;
             (action.type !== 'move' && action.start < e.timeStamp - 500) ? resize() : move();
         });
     };
