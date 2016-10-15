@@ -126,10 +126,10 @@
 
     Madori.prototype.redraw = function() {
         if (this.floor === this.stage.floor) this.stage.setChildIndex(this, this.stage.children.length - 1);
-        if (this.wall.indexOf('top') < 0) this.setChildIndex(this.getChildByName('top'), 0);
-        if (this.wall.indexOf('left') < 0) this.setChildIndex(this.getChildByName('left'), 0);
-        if (this.wall.indexOf('right') < 0) this.setChildIndex(this.getChildByName('right'), 0);
-        if (this.wall.indexOf('bottom') < 0) this.setChildIndex(this.getChildByName('bottom'), 0);
+        if (this.wall.indexOf('top') < 0) this.setChildIndex(this.getChildByName('top'), 2);
+        if (this.wall.indexOf('left') < 0) this.setChildIndex(this.getChildByName('left'), 2);
+        if (this.wall.indexOf('right') < 0) this.setChildIndex(this.getChildByName('right'), 2);
+        if (this.wall.indexOf('bottom') < 0) this.setChildIndex(this.getChildByName('bottom'), 2);
         this.getChildByName('text').redraw();
         this.getChildByName('field').redraw();
         this.getChildByName('top').redraw();
@@ -148,8 +148,8 @@
         this.set(props);
 
         _area += (this.width * this.height) - (width * height);
-        this.getChildByName('right').x  = this.width;
-        this.getChildByName('bottom').y = this.height;
+        this.getChildByName('right').x  = this.width - 2;
+        this.getChildByName('bottom').y = this.height - 2;
 
         this.setLocate();
         this.redraw();

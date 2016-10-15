@@ -30,14 +30,6 @@
         });
     };
 
-    Line.prototype.getX = function() {
-        return 0;
-    };
-
-    Line.prototype.getY = function() {
-        return 0;
-    };
-
     Line.prototype.getHeight = function() {
         return 0;
     };
@@ -48,12 +40,10 @@
 
     Line.prototype.redraw = function() {
         var color   = (this.parent.wall.indexOf(this.name) >= 0) ? 'Black' : this.stage.types[this.parent.type].color;
-        var x       = this.getX();
-        var y       = this.getY();
         var height  = this.getHeight();
         var width   = this.getWidth();
 
         if (!this.parent.onFloor()) color = 'rgba(0,0,0,0.5)';
-        this.graphics.clear().beginStroke(color).setStrokeStyle(4).moveTo(x, y).lineTo(width, height).endStroke();
+        this.graphics.clear().beginStroke(color).setStrokeStyle(4).moveTo(0, 0).lineTo(width, height).endStroke();
     };
 }());

@@ -3,17 +3,14 @@
 
     function VerticalLine(name) {
         this.Line_constructor(name);
-        this.mouseover = 'col-resize';
+        this.mouseover  = 'col-resize';
+        this.x          = 2;
     }
     createjs.extend(VerticalLine, createjs.Line);
     createjs.promote(VerticalLine, 'Line');
     createjs.VerticalLine = VerticalLine;
 
-    VerticalLine.prototype.getY = function() {
-        return -2;
-    };
-
     VerticalLine.prototype.getHeight = function() {
-        return (this.height || this.parent.height) + 2;
+        return this.height || this.parent.height;
     };
 }());

@@ -200,7 +200,7 @@
         return JSON.stringify(result);
     };
 
-    MadoriStage.prototype.setMadoriJson = function(json) {
+    MadoriStage.prototype.setMadoriJson = function(json, callback) {
         json = JSON.parse(json);
 
         this.getChildParentByName('madori').removeAllChildren();
@@ -211,6 +211,7 @@
             this.addChild(madori);
 
             madori.setMadoriProps(json.data[i]);
+            if (callback) callback(madori);
         }
     };
 }());

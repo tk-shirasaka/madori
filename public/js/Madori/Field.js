@@ -57,8 +57,8 @@
             var pointer = this.stage.getPointer();
 
             document.body.style.cursor = 'move';
-            if (!action.type && Math.abs(action.x - pointer.x) < 5 * this.stage.scaleX) return;
-            if (!action.type && Math.abs(action.y - pointer.y) < 5 * this.stage.scaleY) return;
+            if (typeof(action.type) === undefined && Math.abs(action.x - pointer.x) < 5 * this.stage.scaleX) return;
+            if (typeof(action.type) === undefined && Math.abs(action.y - pointer.y) < 5 * this.stage.scaleY) return;
             (action.type !== 'move' && action.start < e.timeStamp - 500) ? resize() : move();
         });
     };
