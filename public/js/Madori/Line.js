@@ -44,6 +44,6 @@
         var width   = this.getWidth();
 
         if (!this.parent.onFloor()) color = 'rgba(0,0,0,0.5)';
-        this.graphics.clear().beginStroke(color).setStrokeStyle(4).moveTo(0, 0).lineTo(width, height).endStroke();
+        this.graphics.clear().beginStroke(color).setStrokeStyle(3).moveTo(0, 0).lineTo(width, height).endStroke();
     };
 }());

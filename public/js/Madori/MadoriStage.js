@@ -177,6 +177,7 @@
             setting: {
                 x:      0,
                 y:      0,
+                floor:  this.floor,
                 unit:   this.unit,
                 width:  this.width,
                 height: this.height,

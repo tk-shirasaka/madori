@@ -3,7 +3,8 @@ $(document).ready(function() {
     var madori  = null;
     var redos   = [];
     var memos   = [];
-    var action  = null
+    var action  = null;
+    var preview = null;
 
     setSelectForm();
     madoriMode();
@@ -12,7 +13,8 @@ $(document).ready(function() {
     setFloor();
     $('#madori').on('click', addMadori);
     $('#memoMode').on('click', memoMode);
-    $('#madoriMode').on('click', madoriMode);
+    $('#previewMode').on('click', previewMode);
+    $('.madoriMode').on('click', madoriMode);
     $('#erase').on('click', memoErase);
     $('#undo').on('click', undo);
     $('#redo').on('click', redo);
@@ -41,13 +43,16 @@ $(document).ready(function() {
     }
     function memoMode() {
         stage.mode  = 'memo';
-        $('.memo-mode').removeClass('hide');
         $('.madori-mode').addClass('hide');
+        $('.memo-mode').removeClass('hide');
     }
     function madoriMode() {
         stage.mode  = 'madori';
         $('.memo-mode').addClass('hide');
+        $('.preview-mode').addClass('hide');
         $('.madori-mode').removeClass('hide');
+
+        if (preview) preview = null;
     }
     function memoErase() {
         stage.loopByName('memo', (memo) => {
@@ -205,11 +210,14 @@ $(document).ready(function() {
         }
         stage.update();
         $('#floor').text(stage.floor + '階');
+
+        if (preview) previewMode();
     }
     function resize() {
-        $('#canvas').attr('width', $(window).width() - 20);
-        $('#canvas').attr('height', $(window).height() - $('.navbar-fixed').height() - 26);
-        $('#canvas').css({margin: '10px'});
+        var width   = $(window).width() - 20;
+        var height  = $(window).height() - $('.navbar-fixed').height() - 26;
+        $('#canvas, #preview').attr({width, width, height: height});
+        $('#canvas, #preview').css({margin: '10px'});
         stage.update();
     }
     function importFile(e) {
@@ -223,5 +231,11 @@ $(document).ready(function() {
     }
     function exportFile() {
         window.location.href = window.URL.createObjectURL(new Blob([stage.getMadoriJson()], {type: 'application/octet-stream'}));
+    }
+    function previewMode() {
+        $('.madori-mode').addClass('hide');
+        $('.preview-mode').removeClass('hide');
+        preview = new Preview(JSON.parse(stage.getMadoriJson()));
+        $('#side').sideNav('hide');
     }
 })

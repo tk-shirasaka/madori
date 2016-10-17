@@ -1,11 +1,14 @@
 function Preview(madori) {
     'use strict'
 
+    var canvas      = document.getElementById('preview');
     var scene       = new THREE.Scene();
     var camera      = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight);
-    var light       = new THREE.AmbientLight(0xffffff);
-    var renderer    = new THREE.WebGLRenderer();
-    var controls    = new THREE.TrackballControls(camera);
+    var light1      = new THREE.DirectionalLight(0xffffff);
+    var light2      = new THREE.DirectionalLight(0x999999);
+    var light3      = new THREE.AmbientLight(0x222222);
+    var renderer    = new THREE.WebGLRenderer({canvas: canvas});
+    var controls    = new THREE.Controller(camera, renderer.domElement);
 
 
     function setCube(x, y, width, height, depth, color) {
@@ -28,19 +31,24 @@ function Preview(madori) {
 
     function render() {
         requestAnimationFrame(render);
-        controls.update();
         renderer.render(scene, camera);
     }
 
     for (var i = 0; i < madori.data.length; i++) {
+        if (madori.setting.floor !== madori.data[i].floor) continue;
         setMadoriCube(madori.data[i]);
     }
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
 
+    camera.position.y = 150;
     camera.position.z = 500;
-    light.position.set(1, 1, 1);
-    scene.add(light);
+    light1.position.set(1, 1, 1);
+    scene.add(light1);
+    light2.position.set(-1, -1, -1);
+    scene.add(light2);
+    scene.add(light3);
     render();
+
+    renderer.setClearColor( new THREE.Color(0xccffff) );
+    return renderer;
 }

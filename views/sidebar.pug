@@ -10,7 +10,7 @@ ul#side.side-nav
                 td
                     a#zoomIn(href='#!')
                         i.material-icons zoom_in
-            tr.madori-mode
+            tr.madori-mode.preview-mode
                 td
                     a#floorDown(href='#!')
                         i.material-icons keyboard_arrow_left
@@ -37,6 +37,8 @@ ul#side.side-nav
         li
             a#export(class=btnDefault, href='#!') エクスポート
         li
+            a#previewMode(class=btnDefault, href='#!') プレビュー
+        li
             a.modal-trigger(class=btnDefault, href='#guide') 使い方
         li
             a#toti(class=btnDefault, href='#!') 基本設定
@@ -48,4 +50,7 @@ ul#side.side-nav
         li
             a#erase(class=btnDefault, href='#!') メモを消す
         li
-            a#madoriMode(class=btnPrimary, href='#!') メモを終わる
+            a.madoriMode(class=btnPrimary, href='#!') メモを終わる
+    .preview-mode
+        li
+            a.madoriMode(class=btnPrimary, href='#!') プレビューを終わる

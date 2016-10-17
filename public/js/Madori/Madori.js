@@ -148,8 +148,8 @@
         this.set(props);
 
         _area += (this.width * this.height) - (width * height);
-        this.getChildByName('right').x  = this.width - 2;
-        this.getChildByName('bottom').y = this.height - 2;
+        this.getChildByName('right').x  = this.width - 1;
+        this.getChildByName('bottom').y = this.height - 1;
 
         this.setLocate();
         this.redraw();
@@ -158,17 +158,14 @@
     Madori.prototype.shiftWindow = function(vector) {
         var shift = {x: 0, y: 0};
 
-        if (vector.x < 0 && this.x < this.stage.x * -1) shift.x = 3;
-        if (vector.y < 0 && this.y < this.stage.y * -1) shift.y = 3;
-        if (vector.x > 0 && this.x + this.width > (this.stage.x * -1 + this.stage.canvas.width)) shift.x = -3;
-        if (vector.y > 0 && this.y + this.height > (this.stage.y * -1 + this.stage.canvas.height)) shift.y = -3;
-        if (_ticker) {
-            createjs.Ticker.removeEventListener('tick', _ticker);
-            _ticker = false;
-        }
+        if (vector.x < 0 && this.x * this.stage.scaleX < -this.stage.x) shift.x = 3;
+        if (vector.y < 0 && this.y * this.stage.scaleY < -this.stage.y) shift.y = 3;
+        if (vector.x > 0 && (this.x + this.width) * this.stage.scaleX > (-this.stage.x + this.stage.canvas.width)) shift.x = -3;
+        if (vector.y > 0 && (this.y + this.height) * this.stage.scaleY > (-this.stage.y + this.stage.canvas.height)) shift.y = -3;
+        if (_ticker) createjs.Ticker.removeEventListener('tick', _ticker);
         if (shift.x || shift.y) {
             _ticker = createjs.Ticker.addEventListener('tick', () => {
-                this.stage.set({x: this.stage.x + shift.x, y: this.stage.y + shift.y});
+                this.stage.set({x: this.stage.x + shift.x * this.stage.scaleX, y: this.stage.y + shift.y * this.stage.scaleY});
                 this.setMadoriProps({x: this.x - shift.x, y: this.y - shift.y});
             });
         }
