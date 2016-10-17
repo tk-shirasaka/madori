@@ -38,7 +38,6 @@ $(document).ready(function() {
     function submit() {
         if (!madori.stage) stage.addChild(madori);
         madori.setMadoriProps({width: $('#size').val() * stage.unit * stage.unit / madori.height / 2, type: $('#type').val(), wall: $('#wall').val()});
-        $('#tubo').text(Math.round(madori.area() / 3.30579 / 100) / 100 + '坪');
         $('#side').sideNav('hide');
     }
     function memoMode() {
@@ -79,7 +78,6 @@ $(document).ready(function() {
     function remove() {
         stage.removeChild(madori);
         stage.update();
-        $('#tubo').text(Math.round(madori.area() / 3.30579 / 100) / 100 + '坪');
     }
     function addTypes() {
         var $type = newType();
@@ -225,7 +223,10 @@ $(document).ready(function() {
         file.readAsText(e.target.files[0]);
 
         file.onload = () => {
-            stage.setMadoriJson(file.result);
+            stage.setMadoriJson(file.result, (madori) => {
+                madori.addEventListener('mousedown', setTimestamp);
+                madori.addEventListener('pressup', changeMadori);
+            });
             $('#side').sideNav('hide');
         }
     }

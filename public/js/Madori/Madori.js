@@ -138,6 +138,7 @@
         this.getChildByName('bottom').redraw();
         this.stage.getChildByName('width').redraw();
         this.stage.getChildByName('height').redraw();
+        this.stage.getChildByName('tubo').redraw();
         this.stage.update();
     };
 

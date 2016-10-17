@@ -20,6 +20,9 @@
             this.parent.setMadoriProps({x: x, y: y});
 
             var near    = this.parent.nearLocate();
+            if (near.x !== undefined) vector.x = 0;
+            if (near.y !== undefined) vector.y = 0;
+
             this.parent.setMadoriProps(near);
             this.parent.shiftWindow(vector);
 

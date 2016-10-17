@@ -35,7 +35,7 @@
         this.enableMouseOver(50);
         this.addChildParent('madori');
         this.addChildParent('memo');
-        this.addChild(new createjs.Width(), new createjs.Height());
+        this.addChild(new createjs.Width(), new createjs.Height(), new createjs.Tubo());
         if (createjs.Touch.isSupported()) createjs.Touch.enable(this);
         createjs.Ticker.timingMode = createjs.Ticker.RAF;
     }
