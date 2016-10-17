@@ -106,6 +106,7 @@
             action  = pointer;
             this.getChildByName('width').redraw();
             this.getChildByName('height').redraw();
+            this.getChildByName('madori').redraw();
             this.update();
         };
 

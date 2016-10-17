@@ -13,7 +13,7 @@ function Preview(madori) {
 
     function setCube(x, y, width, height, depth, color) {
         var geometry = new THREE.BoxBufferGeometry(width, depth, height);
-        var material = new THREE.MeshLambertMaterial({color: color});
+        var material = new THREE.MeshStandardMaterial({color: color});
         var cube = new THREE.Mesh(geometry, material);
 
         cube.position.set(x + width / 2, depth / 2, y + height / 2);
@@ -49,6 +49,6 @@ function Preview(madori) {
     scene.add(light3);
     render();
 
-    renderer.setClearColor( new THREE.Color(0xccffff) );
+    renderer.setClearColor(0xccffff);
     return renderer;
 }
