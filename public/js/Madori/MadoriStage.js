@@ -78,6 +78,16 @@
         }
     };
 
+    MadoriStage.prototype.setChildIndex = function() {
+        for (var i = 0; i < arguments.length; i += 2) {
+            var name    = arguments[i].name;
+            var parent  = this.getChildParentByName(name);
+
+            if (!parent) parent = this.addChildParent(name);
+            parent.setChildIndex(arguments[i], arguments[i + 1]);
+        }
+    };
+
     MadoriStage.prototype.removeChild = function() {
         for (var i = 0; i < arguments.length; i++) {
             var name    = arguments[i].name;
@@ -158,9 +168,13 @@
     };
 
     MadoriStage.prototype.loopByName = function(name, callback) {
-        var parent = this.getChildParentByName(name);
-        for (var i = parent.children.length - 1; i >= 0; i--) {
-            if (parent.children[i].name === name) callback.call(this, parent.children[i]);
+        var parent      = this.getChildParentByName(name);
+        var children    = [];
+        for (var i = 0; i < parent.children.length; i++) {
+            children.unshift(parent.children[i])
+        }
+        for (var i = 0; i < children.length; i++) {
+            callback.call(this, children[i]);
         }
     };
 

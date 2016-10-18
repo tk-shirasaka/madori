@@ -41,6 +41,7 @@
         });
 
         this.addEventListener('mousedown', (e) => {
+            if (!this.actionable()) return;
             if (!this.inAction()) {
                 _hover++;
                 _action = this.stage.getPointer();
@@ -49,6 +50,7 @@
         });
 
         this.addEventListener('pressup', () => {
+            if (!this.actionable()) return;
             _hover--;
             _action = false;
             createjs.Ticker.removeEventListener('tick', _ticker);
@@ -125,7 +127,7 @@
     };
 
     Madori.prototype.redraw = function() {
-        if (this.floor === this.stage.floor) this.stage.setChildIndex(this, this.stage.children.length - 1);
+        if (this.floor !== this.stage.floor) this.stage.setChildIndex(this, 0);
         if (this.wall.indexOf('top') < 0) this.setChildIndex(this.getChildByName('top'), 2);
         if (this.wall.indexOf('left') < 0) this.setChildIndex(this.getChildByName('left'), 2);
         if (this.wall.indexOf('right') < 0) this.setChildIndex(this.getChildByName('right'), 2);
