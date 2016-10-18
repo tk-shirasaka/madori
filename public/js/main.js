@@ -113,6 +113,7 @@ $(document).ready(function() {
             });
         });
         stage.loopByName('madori', (madori) => { madori.redraw() });
+        setSelectForm();
     }
     function newType() {
         var $type = $('#typeList').clone(true).attr('id', null).removeClass('hide');
@@ -228,6 +229,7 @@ $(document).ready(function() {
                 madori.addEventListener('pressup', changeMadori);
             });
             $('#side').sideNav('hide');
+            setSelectForm();
         }
     }
     function exportFile() {
