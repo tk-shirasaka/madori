@@ -143,12 +143,16 @@
     };
 
     Madori.prototype.setMadoriProps = function(props) {
-        var width   = this.width;
-        var height  = this.height;
+        var orig    = {
+            width:  this.width,
+            height: this.height,
+            type:   this.type,
+        };
         this.clearLocate();
         this.set(props);
 
-        _area += (this.width * this.height) - (width * height);
+        _area += (this.type === undefined || this.stage.types[this.type].ignore === true) ? 0 : this.width * this.height * (this.stage.types[this.type].rate + 1);
+        _area -= (orig.type === undefined || this.stage.types[orig.type].ignore === true) ? 0 : orig.width * orig.height * (this.stage.types[orig.type].rate + 1);
         this.getChildByName('right').x  = this.width - 1;
         this.getChildByName('bottom').y = this.height - 1;
 
