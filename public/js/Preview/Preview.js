@@ -1,4 +1,4 @@
-function Preview(madori) {
+function Preview() {
     'use strict'
 
     var canvas      = document.getElementById('preview');
@@ -11,42 +11,58 @@ function Preview(madori) {
 
 
     function setCube(x, y, width, height, depth, color) {
-        var geometry = new THREE.BoxBufferGeometry(width, depth, height);
-        var material = new THREE.MeshStandardMaterial({color: color});
-        var cube = new THREE.Mesh(geometry, material);
+        var geometry    = new THREE.BoxBufferGeometry(width, depth, height);
+        var material    = new THREE.MeshStandardMaterial({color: color});
+        var cube        = new THREE.Mesh(geometry, material);
 
         cube.position.set(x + width / 2, depth / 2, y + height / 2);
         scene.add(cube);
     }
 
-    function setMadoriCube(item) {
-        setCube(item.x, item.y, item.width, item.height, 2, madori.setting.types[item.type].color);
+    this.setJson = (json) => {
+        this.dispose();
+        scene.add(light1);
+        scene.add(light2);
+        json    = JSON.parse(json);
+        for (var i = 0; i < json.data.length; i++) {
+            if (json.setting.floor !== json.data[i].floor) continue;
+            var item    = json.data[i];
+            var type    = json.setting.types[item.type];
 
-        if (item.wall.indexOf('top') >= 0) setCube(item.x, item.y, item.width, 4, 250, '#ffffff');
-        if (item.wall.indexOf('left') >= 0) setCube(item.x, item.y, 4, item.height, 250, '#ffffff');
-        if (item.wall.indexOf('right') >= 0) setCube(item.x + item.width, item.y, 4, item.height, 250, '#ffffff');
-        if (item.wall.indexOf('bottom') >= 0) setCube(item.x, item.y + item.height, item.width, 4, 250, '#ffffff');
-    }
+            setCube(item.x, item.y, item.width, item.height, 2, type.color);
+            if (item.wall.indexOf('top') >= 0) setCube(item.x, item.y, item.width, 4, type.depth, '#ffffff');
+            if (item.wall.indexOf('left') >= 0) setCube(item.x, item.y, 4, item.height, type.depth, '#ffffff');
+            if (item.wall.indexOf('right') >= 0) setCube(item.x + item.width, item.y, 4, item.height, type.depth, '#ffffff');
+            if (item.wall.indexOf('bottom') >= 0) setCube(item.x, item.y + item.height, item.width, 4, type.depth, '#ffffff');
+        }
+    };
+
+    this.dispose = () => {
+        for (var i = scene.children.length - 1; i >= 0; i--) {
+            scene.remove(scene.children[i]);
+        }
+        renderer.dispose();
+    };
+
+    this.setScale = (scale) => {
+        scene.scale.set(scale, scale, scale);
+    };
+
+    this.setSize = (width, height) => {
+        renderer.setSize(width, height);
+    };
 
     function render() {
         requestAnimationFrame(render);
         renderer.render(scene, camera);
     }
 
-    for (var i = 0; i < madori.data.length; i++) {
-        if (madori.setting.floor !== madori.data[i].floor) continue;
-        setMadoriCube(madori.data[i]);
-    }
-
 
     camera.position.y = 150;
     camera.position.z = 500;
     light1.position.set(100, 100, 100);
-    scene.add(light1);
     light2.position.set(-100, -100, -100);
-    scene.add(light2);
     render();
 
     renderer.setClearColor(0xccffff);
-    return renderer;
 }

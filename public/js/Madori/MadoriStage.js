@@ -15,15 +15,15 @@
             191: '京間'
         },
         types:  [
-            {name: '洋室', color: '#bcaaa4', rate: 0},
-            {name: '和室', color: '#8bc34a', rate: 0},
-            {name: 'トイレ', color: '#bdbdbd', rate: 0},
-            {name: 'お風呂', color: '#81d4fa', rate: 0},
-            {name: '洗面所', color: '#009688', rate: 0},
-            {name: '廊下', color: '#795548', rate: 0},
-            {name: '階段', color: '#ffff8d', rate: 1},
-            {name: '玄関', color: '#ce93d8', rate: 0},
-            {name: 'その他', color: '#f44336', rate: 0},
+            {name: '洋室', color: '#bcaaa4', rate: 0, depth: 300},
+            {name: '和室', color: '#8bc34a', rate: 0, depth: 300},
+            {name: 'トイレ', color: '#bdbdbd', rate: 0, depth: 300},
+            {name: 'お風呂', color: '#81d4fa', rate: 0, depth: 300},
+            {name: '洗面所', color: '#009688', rate: 0, depth: 300},
+            {name: '廊下', color: '#795548', rate: 0, depth: 300},
+            {name: '階段', color: '#ffff8d', rate: 1, depth: 300},
+            {name: '玄関', color: '#ce93d8', rate: 0, depth: 300},
+            {name: 'その他', color: '#f44336', rate: 0, depth: 300},
         ]
     };
 

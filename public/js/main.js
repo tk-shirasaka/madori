@@ -4,7 +4,7 @@ $(document).ready(function() {
     var redos   = [];
     var memos   = [];
     var action  = null;
-    var preview = null;
+    var preview = new Preview();
 
     setSelectForm();
     madoriMode();
@@ -50,8 +50,7 @@ $(document).ready(function() {
         $('.memo-mode').addClass('hide');
         $('.preview-mode').addClass('hide');
         $('.madori-mode').removeClass('hide');
-
-        if (preview) preview = null;
+        preview.dispose();
     }
     function memoErase() {
         stage.loopByName('memo', (memo) => {
@@ -109,7 +108,8 @@ $(document).ready(function() {
                 name: $(this).find('input.name').val(),
                 color: $(this).find('input.color').val(),
                 rate: parseInt($(this).find('input.rate').val()),
-                ignore: $(this).find('input.ignore').prop('checked')
+                ignore: $(this).find('input.ignore').prop('checked'),
+                depth: parseInt($(this).find('input.depth').val()),
             });
         });
         stage.loopByName('madori', (madori) => { madori.redraw() });
@@ -135,6 +135,7 @@ $(document).ready(function() {
             $type.find('input.color').val(stage.types[i].color);
             $type.find('input.rate').val(stage.types[i].rate);
             $type.find('input.ignore').prop('checked', stage.types[i].ignore);
+            $type.find('input.depth').val(stage.types[i].depth);
             $('#types').append($type);
             $('#type').append(`<option value="${i}">${stage.types[i].name}</option>`);
         });
@@ -184,6 +185,7 @@ $(document).ready(function() {
     function setZoom() {
         $('#zoomLevel').text(Math.round(stage.scaleX * 100) + '%');
         stage.update();
+        preview.setScale(stage.scaleX);
     }
     function floorUp() {
         stage.floor++;
@@ -210,13 +212,14 @@ $(document).ready(function() {
         stage.update();
         $('#floor').text(stage.floor + '階');
 
-        if (preview) previewMode();
+        preview.setJson(stage.getMadoriJson());
     }
     function resize() {
         var width   = $(window).width() - 20;
         var height  = $(window).height() - $('.navbar-fixed').height() - 26;
         $('#canvas, #preview').attr({width, width, height: height});
         $('#canvas, #preview').css({margin: '10px'});
+        preview.setSize(width, height);
         stage.update();
     }
     function importFile(e) {
@@ -236,9 +239,10 @@ $(document).ready(function() {
         window.location.href = window.URL.createObjectURL(new Blob([stage.getMadoriJson()], {type: 'application/octet-stream'}));
     }
     function previewMode() {
+        stage.mode  = 'preview';
         $('.madori-mode').addClass('hide');
         $('.preview-mode').removeClass('hide');
-        preview = new Preview(JSON.parse(stage.getMadoriJson()));
         $('#side').sideNav('hide');
+        preview.setJson(stage.getMadoriJson());
     }
 })
