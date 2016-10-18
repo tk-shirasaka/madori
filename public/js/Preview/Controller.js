@@ -40,12 +40,24 @@ THREE.Controller = function(object, domElement) {
     }
 
     function touchstart(e) {
-        initViewpoint(e, 'touchmove', 'touchend');
+        if (e.touches.length > 1) {
+            domElement.removeEventListener('touchmove', shiftViewpoint);
+            domElement.addEventListener('touchmove', shiftPosition);
+            viewpoint = getEventPointer(e);
+        } else {
+            initViewpoint(e, 'touchmove', 'touchend');
+        }
     }
 
     function shiftViewpoint(e) {
         var ptr = getEventPointer(e);
         setViewpoint(ptr.x, ptr.y);
+    }
+
+    function shiftPosition(e) {
+        var ptr     = getEventPointer(e);
+        setPosition((ptr.y < viewpoint.y) ? -1 : 1);
+        viewpoint   = ptr;
     }
 
     function wheel(e) {

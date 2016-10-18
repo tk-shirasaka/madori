@@ -6,7 +6,6 @@ function Preview(madori) {
     var camera      = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight);
     var light1      = new THREE.DirectionalLight(0xffffff);
     var light2      = new THREE.DirectionalLight(0x999999);
-    var light3      = new THREE.AmbientLight(0x222222);
     var renderer    = new THREE.WebGLRenderer({canvas: canvas});
     var controls    = new THREE.Controller(camera, renderer.domElement);
 
@@ -42,11 +41,10 @@ function Preview(madori) {
 
     camera.position.y = 150;
     camera.position.z = 500;
-    light1.position.set(1, 1, 1);
+    light1.position.set(100, 100, 100);
     scene.add(light1);
-    light2.position.set(-1, -1, -1);
+    light2.position.set(-100, -100, -100);
     scene.add(light2);
-    scene.add(light3);
     render();
 
     renderer.setClearColor(0xccffff);
