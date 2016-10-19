@@ -11,6 +11,7 @@ $(document).ready(function() {
     resize();
     setZoom();
     setFloor();
+    setViewHeight();
     $('#madori').on('click', addMadori);
     $('#memoMode').on('click', memoMode);
     $('#previewMode').on('click', previewMode);
@@ -30,6 +31,7 @@ $(document).ready(function() {
     $('#zoomOut').on('click', zoomOut);
     $('#floorUp').on('click', floorUp);
     $('#floorDown').on('click', floorDown);
+    $('#viewHeight').on('change', setViewHeight);
     $('#menu').sideNav();
     $('.modal-trigger').leanModal();
     $('#types').collapsible();
@@ -50,7 +52,6 @@ $(document).ready(function() {
         $('.memo-mode').addClass('hide');
         $('.preview-mode').addClass('hide');
         $('.madori-mode').removeClass('hide');
-        preview.dispose();
     }
     function memoErase() {
         stage.loopByName('memo', (memo) => {
@@ -185,7 +186,6 @@ $(document).ready(function() {
     function setZoom() {
         $('#zoomLevel').text(Math.round(stage.scaleX * 100) + '%');
         stage.update();
-        preview.setScale(stage.scaleX);
     }
     function floorUp() {
         stage.floor++;
@@ -211,8 +211,10 @@ $(document).ready(function() {
         }
         stage.update();
         $('#floor').text(stage.floor + '階');
-
-        preview.setJson(stage.getMadoriJson());
+        preview.setFloor(stage.floor);
+    }
+    function setViewHeight() {
+        preview.setViewHeight($('#viewHeight').val());
     }
     function resize() {
         var width   = $(window).width() - 20;

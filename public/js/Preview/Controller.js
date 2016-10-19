@@ -56,7 +56,7 @@ THREE.Controller = function(object, domElement) {
 
     function shiftPosition(e) {
         var ptr     = getEventPointer(e);
-        setPosition((ptr.y < viewpoint.y) ? -1 : 1);
+        setPosition((ptr.y < viewpoint.y) ? -10 : 10);
         viewpoint   = ptr;
     }
 

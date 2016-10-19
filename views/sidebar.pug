@@ -1,7 +1,7 @@
 ul#side.side-nav
     table.centered.bordered
         tbody
-            tr.madori-mode.preview-mode
+            tr.madori-mode
                 td
                     a#zoomOut(href='#!')
                         i.material-icons zoom_out
@@ -19,6 +19,10 @@ ul#side.side-nav
                 td
                     a#floorUp(href='#!')
                         i.material-icons keyboard_arrow_right
+            tr.preview-mode
+                td.range-field(colspan=3)
+                    | 視線の高さ(cm)
+                    input#viewHeight(type='range', value='150', min='10', max='1000', step='10')
             tr.memo-mode
                 td
                     a#undo(href='#!')
