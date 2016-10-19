@@ -29,8 +29,10 @@ THREE.Controller = function(object, domElement) {
         viewpoint               = getEventPointer(e);
         domElement.style.cursor = 'move';
         domElement.addEventListener(moveEvent, shiftViewpoint);
-        domElement.addEventListener(endEvent, () => {
+
+        var clearEvent          = window.addEventListener(endEvent, () => {
             domElement.removeEventListener(moveEvent, shiftViewpoint);
+            window.removeEventListener(endEvent, clearEvent);
             domElement.style.cursor = '';
         });
     }

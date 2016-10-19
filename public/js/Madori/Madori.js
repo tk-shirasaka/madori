@@ -22,6 +22,7 @@
         this.name   = 'madori';
         this.width  = 0;
         this.height = 0;
+        this.door   = [];
     }
     createjs.extend(Madori, createjs.Container);
     createjs.promote(Madori, 'Container');
@@ -82,6 +83,10 @@
 
     Madori.prototype.actionable = function() {
         return this.floor === this.stage.floor && this.stage.mode == 'madori';
+    };
+
+    Madori.prototype.inDoorAction = function(name) {
+        return this.floor === this.stage.floor && this.stage.mode == 'door' && this.wall.indexOf(name) >= 0;
     };
 
     Madori.prototype.setLocate = function() {
@@ -202,5 +207,16 @@
             action.y    = pointer.y;
             this.setMadoriProps({x: x, y: y, width: width, height: height});
         }
+    };
+
+    Madori.prototype.addDoor = function(type, start) {
+        var door    = new createjs.Door();
+        var axis    = (type === 'width') ? 'x' : 'y';
+        var pointer = this.stage.getPointer();
+
+        this.addChild(door);
+        door.set({type: type, start: start});
+        door.redraw();
+        this.stage.update();
     };
 }());

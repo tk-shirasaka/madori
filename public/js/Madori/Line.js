@@ -12,21 +12,32 @@
 
     Line.prototype.initEventListener = function() {
         this.addEventListener('mouseover', () => {
-            if (!this.parent.inAction() && this.parent.actionable()) document.body.style.cursor = this.mouseover;
+            if (!this.parent.inAction() && this.parent.actionable()) document.body.style.cursor = (this.type === 'width') ? 'row-resize' : 'col-resize';
+            else if (this.parent.inDoorAction(this.name)) document.body.style.cursor = 'pointer';
         });
 
         this.addEventListener('mouseout', () => {
             if (!this.parent.inAction() && this.parent.actionable()) document.body.style.cursor = '';
+            else if (this.parent.inDoorAction(this.name)) document.body.style.cursor = '';
         });
 
         this.addEventListener('pressmove', () => {
             if (!this.parent.actionable()) return;
             var action  = this.parent.inAction();
             var pointer = this.stage.getPointer();
-            var diff    = (this.mouseover === 'col-resize') ? action.x - pointer.x : pointer.y - action.y;
+            var diff    = (this.type === 'height') ? action.x - pointer.x : pointer.y - action.y;
 
             if (this.x || this.y) diff *= -1;
             this.parent.transform(diff);
+        });
+
+        this.addEventListener('pressup', () => {
+            if (!this.parent.inDoorAction(this.name)) return;
+            var pointer = this.stage.getPointer();
+            var type    = this.type;
+            var axis    = (type === 'width') ? 'x' : 'y';
+            var start   = Math.max(0, Math.min(Math.abs(pointer[axis] - this.parent[axis]), Math.abs(this.parent[type] - this.stage.unit)));
+            this.parent.addDoor(type, start);
         });
     };
 

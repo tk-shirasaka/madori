@@ -15,6 +15,7 @@ $(document).ready(function() {
     $('#madori').on('click', addMadori);
     $('#memoMode').on('click', memoMode);
     $('#previewMode').on('click', previewMode);
+    $('#doorMode').on('click', doorMode);
     $('.madoriMode').on('click', madoriMode);
     $('#erase').on('click', memoErase);
     $('#undo').on('click', undo);
@@ -47,9 +48,15 @@ $(document).ready(function() {
         $('.madori-mode').addClass('hide');
         $('.memo-mode').removeClass('hide');
     }
+    function doorMode() {
+        stage.mode  = 'door';
+        $('.madori-mode').addClass('hide');
+        $('.door-mode').removeClass('hide');
+    }
     function madoriMode() {
         stage.mode  = 'madori';
         $('.memo-mode').addClass('hide');
+        $('.door-mode').addClass('hide');
         $('.preview-mode').addClass('hide');
         $('.madori-mode').removeClass('hide');
     }
@@ -156,8 +163,8 @@ $(document).ready(function() {
         resetMadoriForm();
     }
     function changeMadori(e) {
-        if (e.timeStamp - action > 200) return;
         madori  = e.target.parent;
+        if (!madori.actionable() || e.timeStamp - action > 200) return;
         $('#remove, #change').removeClass('hide');
         $('#add').addClass('hide');
         $('#size').val(madori.width * madori.height / stage.unit / stage.unit * 2).trigger('change');

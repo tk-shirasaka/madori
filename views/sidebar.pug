@@ -1,7 +1,7 @@
 ul#side.side-nav
     table.centered.bordered
         tbody
-            tr.madori-mode
+            tr.madori-mode.door-mode
                 td
                     a#zoomOut(href='#!')
                         i.material-icons zoom_out
@@ -10,7 +10,7 @@ ul#side.side-nav
                 td
                     a#zoomIn(href='#!')
                         i.material-icons zoom_in
-            tr.madori-mode.preview-mode
+            tr.madori-mode.door-mode.preview-mode
                 td
                     a#floorDown(href='#!')
                         i.material-icons keyboard_arrow_left
@@ -48,6 +48,9 @@ ul#side.side-nav
             a#toti(class=btnDefault, href='#!') 基本設定
         li
             a#memoMode(class=btnDefault, href='#!') メモを書く
+        //
+            li
+                a#doorMode(class=btnDefault, href='#!') ドアをつける
         li
             a#madori(class=btnPrimary, href='#!') 間取を追加
     .memo-mode
@@ -55,6 +58,9 @@ ul#side.side-nav
             a#erase(class=btnDefault, href='#!') メモを消す
         li
             a.madoriMode(class=btnPrimary, href='#!') メモを終わる
+    .door-mode
+        li
+            a.madoriMode(class=btnPrimary, href='#!') 間取りに戻る
     .preview-mode
         li
             a.madoriMode(class=btnPrimary, href='#!') プレビューを終わる

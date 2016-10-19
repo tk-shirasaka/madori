@@ -105,7 +105,7 @@
     MadoriStage.prototype.initEventListener = function() {
         var action      = null;
 
-        var madoriModeListener  = () => {
+        var defaultListener  = () => {
             if (createjs.Madori.prototype.hovered()) {
                 this.removeAllEventListeners('stagemousemove');
                 return;
@@ -135,11 +135,6 @@
 
             if (createjs.Madori.prototype.hovered()) return;
             switch (this.mode) {
-            case 'madori':
-                cursor  = 'move';
-                action  = pointer;
-                this.addEventListener('stagemousemove', madoriModeListener);
-                break;
             case 'memo':
                 cursor      = 'pointer';
                 action      = {};
@@ -149,6 +144,11 @@
                 action.memo.set({name: 'memo', floor: this.floor});
                 this.addChildAt(action.memo, 0);
                 this.addEventListener('stagemousemove', memoModeListener);
+                break;
+            default:
+                cursor  = 'move';
+                action  = pointer;
+                this.addEventListener('stagemousemove', defaultListener);
                 break;
             }
             document.body.style.cursor = cursor;
@@ -192,7 +192,6 @@
             setting: {
                 x:      0,
                 y:      0,
-                floor:  this.floor,
                 unit:   this.unit,
                 width:  this.width,
                 height: this.height,

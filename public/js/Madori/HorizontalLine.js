@@ -3,7 +3,7 @@
 
     function HorizontalLine(name) {
         this.Line_constructor(name);
-        this.mouseover  = 'row-resize';
+        this.type       = 'width';
         this.y          = 1;
     }
     createjs.extend(HorizontalLine, createjs.Line);
