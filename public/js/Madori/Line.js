@@ -33,11 +33,11 @@
 
         this.addEventListener('pressup', () => {
             if (!this.parent.inDoorAction(this.name)) return;
+            var axis    = (this.type === 'width') ? 'x' : 'y';
             var pointer = this.stage.getPointer();
-            var type    = this.type;
-            var axis    = (type === 'width') ? 'x' : 'y';
-            var start   = Math.max(0, Math.min(Math.abs(pointer[axis] - this.parent[axis]), Math.abs(this.parent[type] - this.stage.unit)));
-            this.parent.addDoor(type, start);
+            var offset  = this.stage.unit / 4;
+            var start   = Math.max(offset, Math.min(Math.abs(pointer[axis] - this.parent[axis] - this.stage[axis]), Math.abs(this.parent[this.type] - offset)));
+            this.parent.addDoor(this.name, this.type, start - offset);
         });
     };
 

@@ -22,7 +22,6 @@
         this.name   = 'madori';
         this.width  = 0;
         this.height = 0;
-        this.door   = [];
     }
     createjs.extend(Madori, createjs.Container);
     createjs.promote(Madori, 'Container');
@@ -34,17 +33,17 @@
         });
 
         this.addEventListener('mouseover', () => {
-            if (this.actionable()) _hover++;
+            if (this.actionable()) this.hoverUp();
         });
 
         this.addEventListener('mouseout', () => {
-            if (this.actionable()) _hover--;
+            if (this.actionable()) this.hoverDown();
         });
 
         this.addEventListener('mousedown', (e) => {
             if (!this.actionable()) return;
             if (!this.inAction()) {
-                _hover++;
+                this.hoverUp();
                 _action = this.stage.getPointer();
                 _action.start = e.timeStamp;
             }
@@ -52,7 +51,7 @@
 
         this.addEventListener('pressup', () => {
             if (!this.actionable()) return;
-            _hover--;
+            this.hoverDown();
             _action = false;
             createjs.Ticker.removeEventListener('tick', _ticker);
             _ticker = false;
@@ -87,6 +86,14 @@
 
     Madori.prototype.inDoorAction = function(name) {
         return this.floor === this.stage.floor && this.stage.mode == 'door' && this.wall.indexOf(name) >= 0;
+    };
+
+    Madori.prototype.hoverUp = function() {
+        _hover++;
+    };
+
+    Madori.prototype.hoverDown = function() {
+        _hover--;
     };
 
     Madori.prototype.setLocate = function() {
@@ -209,13 +216,11 @@
         }
     };
 
-    Madori.prototype.addDoor = function(type, start) {
+    Madori.prototype.addDoor = function(line, type, start) {
         var door    = new createjs.Door();
-        var axis    = (type === 'width') ? 'x' : 'y';
-        var pointer = this.stage.getPointer();
 
         this.addChild(door);
-        door.set({type: type, start: start});
+        door.set({line: line, type: type, start: start});
         door.redraw();
         this.stage.update();
     };

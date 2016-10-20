@@ -202,6 +202,11 @@
         };
 
         this.loopByName('madori', (madori) => {
+            var door    = [];
+            madori.children.forEach((child) => {
+                if (child.name !== 'door') return;
+                door.push({line: child.line, type: child.type, start: child.start});
+            });
             result.data.unshift({
                 x:      madori.x - limit.x.min + 100,
                 y:      madori.y - limit.y.min + 100,
@@ -210,6 +215,7 @@
                 type:   madori.type,
                 floor:  madori.floor,
                 wall:   madori.wall,
+                door:   door,
             });
         });
         return JSON.stringify(result);
@@ -226,6 +232,11 @@
             this.addChild(madori);
 
             madori.setMadoriProps(json.data[i]);
+            if (json.data[i].door !== undefined) {
+                json.data[i].door.forEach((door) => {
+                    madori.addDoor(door.line, door.type, door.start);
+                });
+            }
             if (callback) callback(madori);
         }
     };
