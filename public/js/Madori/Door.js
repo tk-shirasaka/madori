@@ -39,12 +39,15 @@
     };
 
     Door.prototype.redraw = function() {
+        this.end   -= Math.min(0, this.start);
+        this.start  = Math.max(0, this.start + this.parent[this.type] - Math.max(this.parent[this.type], this.end));
+        this.end    = Math.min(this.parent[this.type], this.end);
+
         var color   = 'rgba(0,0,0,0.5)';
-        var space   = this.stage.unit / 2;
-        var door    = this.stage.unit / 8
+        var door    = (this.end - this.start) / 4
         var props   = {x: 0, y: 0, width: 0, height: 0};
 
-        props[this.type] = space;
+        props[this.type] = this.end - this.start;
         if (this.type === 'width') props.x = this.start;
         if (this.type === 'height') props.y = this.start;
         if (this.line === 'right') props.x = this.parent.width;

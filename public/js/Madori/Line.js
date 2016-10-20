@@ -36,8 +36,8 @@
             var axis    = (this.type === 'width') ? 'x' : 'y';
             var pointer = this.stage.getPointer();
             var offset  = this.stage.unit / 4;
-            var start   = Math.max(offset, Math.min(Math.abs(pointer[axis] - this.parent[axis] - this.stage[axis]), Math.abs(this.parent[this.type] - offset)));
-            this.parent.addDoor(this.name, this.type, start - offset);
+            var start   = pointer[axis] - this.parent[axis] - this.stage[axis];
+            this.parent.addDoor(this.name, this.type, start - offset, start + offset);
         });
     };
 

@@ -216,11 +216,11 @@
         }
     };
 
-    Madori.prototype.addDoor = function(line, type, start) {
+    Madori.prototype.addDoor = function(line, type, start, end) {
         var door    = new createjs.Door();
 
         this.addChild(door);
-        door.set({line: line, type: type, start: start});
+        door.set({line: line, type: type, start: start, end: end});
         door.redraw();
         this.stage.update();
     };

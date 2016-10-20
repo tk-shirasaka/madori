@@ -205,7 +205,7 @@
             var door    = [];
             madori.children.forEach((child) => {
                 if (child.name !== 'door') return;
-                door.push({line: child.line, type: child.type, start: child.start});
+                door.push({line: child.line, type: child.type, start: child.start, end: child.end});
             });
             result.data.unshift({
                 x:      madori.x - limit.x.min + 100,
@@ -234,7 +234,7 @@
             madori.setMadoriProps(json.data[i]);
             if (json.data[i].door !== undefined) {
                 json.data[i].door.forEach((door) => {
-                    madori.addDoor(door.line, door.type, door.start);
+                    madori.addDoor(door.line, door.type, door.start, door.end);
                 });
             }
             if (callback) callback(madori);
