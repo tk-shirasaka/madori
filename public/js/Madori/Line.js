@@ -27,7 +27,7 @@
             var pointer = this.stage.getPointer();
             var diff    = (this.type === 'height') ? action.x - pointer.x : pointer.y - action.y;
 
-            if (this.x || this.y) diff *= -1;
+            if (this.x > 1 || this.y > 1) diff *= -1;
             this.parent.transform(diff);
         });
 
