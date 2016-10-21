@@ -222,6 +222,5 @@
         this.addChild(door);
         door.set({line: line, type: type, start: start, end: end});
         door.redraw();
-        this.stage.update();
     };
 }());
