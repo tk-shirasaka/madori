@@ -96,6 +96,7 @@ function Preview() {
             _camera2.position.y = _camera1.position.y;
             _camera2.position.z = _camera1.position.z;
             _scene.activeCamera = _camera2;
+            _engine.switchFullscreen(true);
         } else {
             _camera1.position.x = _camera2.position.x;
             _camera1.position.y = _camera2.position.y;
