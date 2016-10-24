@@ -11,7 +11,7 @@ $(document).ready(function() {
     resize();
     setZoom();
     setFloor();
-    setViewHeight();
+    setSolidMode();
     $('#madori').on('click', addMadori);
     $('#memoMode').on('click', memoMode);
     $('#previewMode').on('click', previewMode);
@@ -32,7 +32,7 @@ $(document).ready(function() {
     $('#zoomOut').on('click', zoomOut);
     $('#floorUp').on('click', floorUp);
     $('#floorDown').on('click', floorDown);
-    $('#viewHeight').on('change', setViewHeight);
+    $('#solid').on('change', setSolidMode);
     $('#menu').sideNav();
     $('.modal-trigger').leanModal();
     $('#types').collapsible();
@@ -220,8 +220,8 @@ $(document).ready(function() {
         $('#floor').text(stage.floor + '階');
         preview.setFloor(stage.floor);
     }
-    function setViewHeight() {
-        preview.setViewHeight($('#viewHeight').val());
+    function setSolidMode() {
+        preview.setSolidMode($('#solid').prop('checked'));
     }
     function resize() {
         var width   = $(window).width() - 20;

@@ -21,8 +21,12 @@ ul#side.side-nav
                         i.material-icons keyboard_arrow_right
             tr.preview-mode
                 td.range-field(colspan=3)
-                    | 視線の高さ(cm)
-                    input#viewHeight(type='range', value='150', min='10', max='1000', step='10')
+                    .switch
+                        label
+                            | 通常
+                            input#solid(type='checkbox')
+                            span.lever
+                            | 立体視
             tr.memo-mode
                 td
                     a#undo(href='#!')

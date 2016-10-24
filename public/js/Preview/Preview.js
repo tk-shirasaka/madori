@@ -3,11 +3,11 @@ function Preview() {
 
     var _canvas     = document.getElementById('preview');
     var _json       = null;
-    var _scale      = 1;
     var _floor      = null;
     var _engine     = new BABYLON.Engine(_canvas, true);
     var _scene      = new BABYLON.Scene(_engine);
-    var _camera     = new BABYLON.FreeCamera('camera1', BABYLON.Vector3.Zero(), _scene);
+    var _camera1    = new BABYLON.TouchCamera('camera1', BABYLON.Vector3.Zero(), _scene);
+    var _camera2    = new BABYLON.WebVRFreeCamera('camera2', BABYLON.Vector3.Zero(), _scene);
     var _light1     = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(100, 100, 100), _scene);
     var _light2     = new BABYLON.HemisphericLight('light2', new BABYLON.Vector3(-100, 100, -100), _scene);
 
@@ -90,21 +90,31 @@ function Preview() {
         reset();
     };
 
-    this.setViewHeight = (height) => {
-        _camera.position.y = parseInt(height);
+    this.setSolidMode = (solid) => {
+        if (solid) {
+            _camera2.position.x = _camera1.position.x;
+            _camera2.position.y = _camera1.position.y;
+            _camera2.position.z = _camera1.position.z;
+            _scene.activeCamera = _camera2;
+        } else {
+            _camera1.position.x = _camera2.position.x;
+            _camera1.position.y = _camera2.position.y;
+            _camera1.position.z = _camera2.position.z;
+            _scene.activeCamera = _camera1;
+        }
     };
 
     this.setSize = (width, height) => {
         _engine.setSize(width, height);
     };
 
-
     _light2.intensity   = 0.5;
     _scene.clearColor   = new BABYLON.Color3(0.8, 1, 1);
-    _camera.speed       = 10;
-    _camera.setTarget(new BABYLON.Vector3.Zero());
-    _camera.attachControl(_canvas, false);
+    _camera1.speed       = 10;
+    _camera2.speed       = 10;
+    _camera1.attachControl(_canvas, false);
+    _camera2.attachControl(_canvas, false);
     _engine.runRenderLoop(() => {
-        _scene.render()
+        _scene.render();
     });
 }
