@@ -27,6 +27,7 @@
         });
 
         this.addEventListener('pressmove', () => {
+            if (!this.parent.inDoorAction(this.line)) return;
             var pointer     = this.stage.getPointer();
             var axis        = (this.type === 'width') ? 'x' : 'y';
             var point       = (this.stage[axis] + this.parent[axis] + this.start + (this.end - this.start) / 2 > pointer[axis]) ? 'start' : 'end';

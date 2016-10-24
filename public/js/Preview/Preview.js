@@ -5,34 +5,53 @@ function Preview() {
     var _json       = null;
     var _scale      = 1;
     var _floor      = null;
-    var _scene      = new THREE.Scene();
-    var _camera     = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight);
-    var _light1     = new THREE.DirectionalLight(0xffffff);
-    var _light2     = new THREE.DirectionalLight(0x999999);
-    var _renderer   = new THREE.WebGLRenderer({canvas: _canvas});
-    var _controls   = new THREE.Controller(_camera, _renderer.domElement);
+    var _engine     = new BABYLON.Engine(_canvas, true);
+    var _scene      = new BABYLON.Scene(_engine);
+    var _camera     = new BABYLON.FreeCamera('camera1', BABYLON.Vector3.Zero(), _scene);
+    var _light1     = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(100, 100, 100), _scene);
+    var _light2     = new BABYLON.HemisphericLight('light2', new BABYLON.Vector3(-100, 100, -100), _scene);
 
 
     function setCube(x, y, width, height, depth, color) {
-        var geometry    = new THREE.BoxBufferGeometry(width, depth, height);
-        var material    = new THREE.MeshStandardMaterial({color: color});
-        var cube        = new THREE.Mesh(geometry, material);
+        var props       = {
+            width:      height,
+            height:     depth,
+            depth:      width,
+            faceColors: Array.apply(null, Array(6)).map(() => {
+                return  BABYLON.Color3.FromHexString(color);
+            })
+        };
+        var cube        = BABYLON.MeshBuilder.CreateBox('box', props, _scene);
+        cube.position.x = y + height / 2;
+        cube.position.y = depth / 2;
+        cube.position.z = x + width / 2;
 
-        cube.position.set(x + width / 2, depth / 2, y + height / 2);
-        _scene.add(cube);
+        return cube;
     }
 
-    function dispose() {
-        for (var i = _scene.children.length - 1; i >= 0; i--) {
-            _scene.remove(_scene.children[i]);
-        }
-        _renderer.dispose();
+    function csgMesh(mesh1, mesh2, type) {
+        var mesh    = BABYLON.CSG.FromMesh(mesh2);
+
+        mesh2.dispose();
+        return (mesh1) ? mesh1[type](mesh) : mesh;
+    }
+
+    function subtractMesh(mesh1, mesh2) {
+        return csgMesh(mesh1, mesh2, 'subtract');
+    }
+
+    function unionMesh(mesh1, mesh2) {
+        return csgMesh(mesh1, mesh2, 'union');
     }
 
     function reset() {
-        dispose();
-        _scene.add(_light1);
-        _scene.add(_light2);
+        var wall    = null;
+        var door    = null;
+
+        for (var i = _scene.meshes.length - 1; i >= 0; i--) {
+            _scene.meshes[i].dispose();
+        }
+
         for (var i = 0; _json && i < _json.data.length; i++) {
             var item    = _json.data[i];
             var type    = _json.setting.types[item.type];
@@ -40,16 +59,25 @@ function Preview() {
             if (_floor < item.floor || _floor > item.floor + type.rate) continue;
 
             setCube(item.x, item.y, item.width, item.height, 2, type.color);
-            if (item.wall.indexOf('top') >= 0) setCube(item.x, item.y, item.width, 4, type.depth, '#ffffff');
-            if (item.wall.indexOf('left') >= 0) setCube(item.x, item.y, 4, item.height, type.depth, '#ffffff');
-            if (item.wall.indexOf('right') >= 0) setCube(item.x + item.width - 4, item.y, 4, item.height, type.depth, '#ffffff');
-            if (item.wall.indexOf('bottom') >= 0) setCube(item.x, item.y + item.height - 4, item.width, 4, type.depth, '#ffffff');
-        }
-    }
+            if (item.wall.indexOf('top') >= 0) wall = unionMesh(wall, setCube(item.x, item.y, item.width, 4, type.depth, '#ffffff'));
+            if (item.wall.indexOf('left') >= 0) wall = unionMesh(wall, setCube(item.x, item.y, 4, item.height, type.depth, '#ffffff'));
+            if (item.wall.indexOf('right') >= 0) wall = unionMesh(wall, setCube(item.x + item.width - 4, item.y, 4, item.height, type.depth, '#ffffff'));
+            if (item.wall.indexOf('bottom') >= 0) wall = unionMesh(wall, setCube(item.x, item.y + item.height - 4, item.width, 4, type.depth, '#ffffff'));
 
-    function render() {
-        requestAnimationFrame(render);
-        _renderer.render(_scene, _camera);
+            for (var j = 0; j < item.door.length; j++) {
+                door    = unionMesh(door, setCube(
+                    (item.door[j].type === 'width') ? item.x + item.door[j].start + 10 : item.x - 4 + (item.door[j].line === 'right' ? item.width : 0),
+                    (item.door[j].type === 'height') ? item.y + item.door[j].start + 10 : item.y - 4 + (item.door[j].line === 'bottom' ? item.height : 0),
+                    (item.door[j].type === 'width') ? item.door[j].end - item.door[j].start - 20 : 8,
+                    (item.door[j].type === 'height') ? item.door[j].end - item.door[j].start - 20  : 8,
+                    type.depth - 10,
+                    '#cccccc'
+                ));
+            }
+        }
+
+        if (door) wall = subtractMesh(wall, door.toMesh('door', null, _scene));
+        if (wall) wall.toMesh('wall', null, _scene);
     }
 
     this.setJson = (json) => {
@@ -63,19 +91,20 @@ function Preview() {
     };
 
     this.setViewHeight = (height) => {
-        _camera.position.y = height;
+        _camera.position.y = parseInt(height);
     };
 
     this.setSize = (width, height) => {
-        _renderer.setSize(width, height);
+        _engine.setSize(width, height);
     };
 
 
-    _camera.position.y = 150;
-    _camera.position.z = 500;
-    _light1.position.set(100, 100, 100);
-    _light2.position.set(-100, -100, -100);
-    render();
-
-    _renderer.setClearColor(0xccffff);
+    _light2.intensity   = 0.5;
+    _scene.clearColor   = new BABYLON.Color3(0.8, 1, 1);
+    _camera.speed       = 10;
+    _camera.setTarget(new BABYLON.Vector3.Zero());
+    _camera.attachControl(_canvas, false);
+    _engine.runRenderLoop(() => {
+        _scene.render()
+    });
 }
