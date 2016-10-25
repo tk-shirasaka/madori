@@ -6,8 +6,8 @@ function Preview() {
     var _floor      = null;
     var _engine     = new BABYLON.Engine(_canvas, true);
     var _scene      = new BABYLON.Scene(_engine);
-    var _camera1    = new BABYLON.TouchCamera('camera1', BABYLON.Vector3.Zero(), _scene);
-    var _camera2    = new BABYLON.WebVRFreeCamera('camera2', BABYLON.Vector3.Zero(), _scene);
+    var _camera1    = new BABYLON.TouchCamera('camera1', new BABYLON.Vector3(0, 150, 0), _scene);
+    var _camera2    = new BABYLON.WebVRFreeCamera('camera2', new BABYLON.Vector3(0, 150, 0), _scene);
     var _light1     = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(100, 100, 100), _scene);
     var _light2     = new BABYLON.HemisphericLight('light2', new BABYLON.Vector3(-100, 100, -100), _scene);
 
