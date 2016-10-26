@@ -1,4 +1,4 @@
-window.Preview = function () {
+function Preview() {
     'use strict'
 
     var _canvas     = document.getElementById('preview');
