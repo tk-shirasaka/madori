@@ -111,13 +111,14 @@ $(document).ready(function() {
         stage.height    = parseInt($('#height').val());
         stage.unit      = parseInt($('#unit').val());
 
-        $('#types li').each(function() {
+        $('#types > li').each(function() {
             stage.types.push({
                 name: $(this).find('input.name').val(),
                 color: $(this).find('input.color').val(),
                 rate: parseInt($(this).find('input.rate').val()),
                 ignore: $(this).find('input.ignore').prop('checked'),
                 depth: parseInt($(this).find('input.depth').val()),
+                material: $(this).find('select.material').val(),
             });
         });
         stage.loopByName('madori', (madori) => { madori.redraw() });
@@ -130,10 +131,14 @@ $(document).ready(function() {
         return $type;
     }
     function setSelectForm() {
-        $('#unit, #type, #types').empty();
+        $('select.material').material_select('destroy');
+        $('#unit, #type, #types, .material').empty();
 
         Object.keys(stage.units).forEach((i) => {
             $('#unit').append(`<option value="${i}">${stage.units[i]}</option>`);
+        });
+        Object.keys(stage.materials).forEach((i) => {
+            $('.material').append(`<option value="${i}">${stage.materials[i]}</option>`);
         });
         Object.keys(stage.types).forEach((i) => {
             var $type = newType();
@@ -144,6 +149,7 @@ $(document).ready(function() {
             $type.find('input.rate').val(stage.types[i].rate);
             $type.find('input.ignore').prop('checked', stage.types[i].ignore);
             $type.find('input.depth').val(stage.types[i].depth);
+            $type.find('select.material').val(stage.types[i].material);
             $('#types').append($type);
             $('#type').append(`<option value="${i}">${stage.types[i].name}</option>`);
         });
@@ -151,6 +157,7 @@ $(document).ready(function() {
         $('#width').val(stage.width).trigger('change');
         $('#height').val(stage.height).trigger('change');
         $('#unit').val(stage.unit).material_select();
+        $('select.material').material_select();
     }
     function addMadori() {
         madori  = new createjs.Madori();

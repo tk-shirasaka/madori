@@ -10,21 +10,25 @@ function Preview() {
     var _camera2    = new BABYLON.VRDeviceOrientationFreeCamera('camera2', new BABYLON.Vector3(0, 150, 0), _scene, 0);
     var _light1     = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(100, 100, 100), _scene);
     var _light2     = new BABYLON.HemisphericLight('light2', new BABYLON.Vector3(-100, 100, -100), _scene);
+    var _materials  = {
+        flooring:   new BABYLON.StandardMaterial('flooring', _scene),
+        tatami:     new BABYLON.StandardMaterial('tatami', _scene),
+        tile:       new BABYLON.StandardMaterial('tile', _scene),
+        wall:       new BABYLON.StandardMaterial('wall', _scene),
+    };
 
 
-    function setCube(x, y, width, height, depth, color) {
+    function setCube(x, y, width, height, depth, material) {
         var props       = {
             width:      height,
             height:     depth,
             depth:      width,
-            faceColors: Array.apply(null, Array(6)).map(() => {
-                return  BABYLON.Color3.FromHexString(color);
-            })
         };
         var cube        = BABYLON.MeshBuilder.CreateBox('box', props, _scene);
         cube.position.x = y + height / 2;
         cube.position.y = depth / 2;
         cube.position.z = x + width / 2;
+        cube.material   =   material;
 
         return cube;
     }
@@ -58,11 +62,11 @@ function Preview() {
 
             if (_floor < item.floor || _floor > item.floor + type.rate) continue;
 
-            setCube(item.x, item.y, item.width, item.height, 2, type.color);
-            if (item.wall.indexOf('top') >= 0) wall = unionMesh(wall, setCube(item.x, item.y, item.width, 4, type.depth, '#ffffff'));
-            if (item.wall.indexOf('left') >= 0) wall = unionMesh(wall, setCube(item.x, item.y, 4, item.height, type.depth, '#ffffff'));
-            if (item.wall.indexOf('right') >= 0) wall = unionMesh(wall, setCube(item.x + item.width - 4, item.y, 4, item.height, type.depth, '#ffffff'));
-            if (item.wall.indexOf('bottom') >= 0) wall = unionMesh(wall, setCube(item.x, item.y + item.height - 4, item.width, 4, type.depth, '#ffffff'));
+            setCube(item.x, item.y, item.width, item.height, 2, _materials[type.material]);
+            if (item.wall.indexOf('top') >= 0) wall = unionMesh(wall, setCube(item.x, item.y, item.width, 4, type.depth));
+            if (item.wall.indexOf('left') >= 0) wall = unionMesh(wall, setCube(item.x, item.y, 4, item.height, type.depth));
+            if (item.wall.indexOf('right') >= 0) wall = unionMesh(wall, setCube(item.x + item.width - 4, item.y, 4, item.height, type.depth));
+            if (item.wall.indexOf('bottom') >= 0) wall = unionMesh(wall, setCube(item.x, item.y + item.height - 4, item.width, 4, type.depth));
 
             for (var j = 0; j < item.door.length; j++) {
                 door    = unionMesh(door, setCube(
@@ -70,14 +74,13 @@ function Preview() {
                     (item.door[j].type === 'height') ? item.y + item.door[j].start + 10 : item.y - 4 + (item.door[j].line === 'bottom' ? item.height : 0),
                     (item.door[j].type === 'width') ? item.door[j].end - item.door[j].start - 20 : 8,
                     (item.door[j].type === 'height') ? item.door[j].end - item.door[j].start - 20  : 8,
-                    type.depth - 10,
-                    '#cccccc'
+                    type.depth - 10
                 ));
             }
         }
 
         if (door) wall = subtractMesh(wall, door.toMesh('door', null, _scene));
-        if (wall) wall.toMesh('wall', null, _scene);
+        if (wall) wall.toMesh('wall', null, _scene).material = _materials.wall;
     }
 
     this.setJson = (json) => {
@@ -109,10 +112,13 @@ function Preview() {
         _engine.setSize(width, height);
     };
 
-    _light2.intensity   = 0.5;
-    _scene.clearColor   = new BABYLON.Color3(0.8, 1, 1);
-    _camera1.speed       = 10;
-    _camera2.speed       = 10;
+    _scene.clearColor                   = new BABYLON.Color3(0.8, 1, 1);
+    _materials.flooring.diffuseTexture  = new BABYLON.Texture('/texture/flooring.jpg', _scene);
+    _materials.tatami.diffuseTexture    = new BABYLON.Texture('/texture/tatami.jpg', _scene);
+    _materials.tile.diffuseTexture      = new BABYLON.Texture('/texture/tile.jpg', _scene);
+    _materials.wall.diffuseTexture      = new BABYLON.Texture('/texture/wall.jpg', _scene);
+    _camera1.speed                      = 10;
+    _camera2.speed                      = 10;
     _camera1.attachControl(_canvas, false);
     _camera2.attachControl(_canvas, false);
     _engine.runRenderLoop(() => {
