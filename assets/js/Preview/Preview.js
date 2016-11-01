@@ -1,6 +1,4 @@
 function Preview() {
-    'use strict'
-
     var _canvas     = document.getElementById('preview');
     var _json       = null;
     var _floor      = null;

@@ -1,6 +1,4 @@
 (function () {
-    'use strict'
-
     function Tubo() {
         this.Size_constructor();
         this.name   = 'tubo';

@@ -1,6 +1,4 @@
 (function () {
-    'use strict'
-
     function Door() {
         this.Shape_constructor();
         this.initEventListener();

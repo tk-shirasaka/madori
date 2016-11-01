@@ -1,6 +1,4 @@
 (function () {
-    'use strict'
-
     function Height() {
         this.Size_constructor();
         this.type       = 'y';

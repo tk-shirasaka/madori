@@ -1,6 +1,4 @@
 (function () {
-    'use strict'
-
     function Size() {
         this.Text_constructor();
         this.font   = '15px sans-serif';

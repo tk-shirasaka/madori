@@ -1,6 +1,4 @@
 (function () {
-    'use strict'
-
     function Field() {
         this.Shape_constructor();
         this.initEventListener();

@@ -1,6 +1,4 @@
 (function () {
-    'use strict'
-
     function HorizontalLine(name) {
         this.Line_constructor(name);
         this.type       = 'width';

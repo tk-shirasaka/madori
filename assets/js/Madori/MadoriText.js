@@ -1,6 +1,4 @@
 (function () {
-    'use strict'
-
     function MadoriText() {
         this.Text_constructor();
         this.name   = 'text';

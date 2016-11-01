@@ -1,6 +1,4 @@
 (function () {
-    'use strict'
-
     var _version    = '0.0.2';
     var _defaults   = {
         floor:  1,

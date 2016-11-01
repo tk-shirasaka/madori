@@ -1,6 +1,4 @@
 (function () {
-    'use strict'
-
     function VerticalLine(name) {
         this.Line_constructor(name);
         this.type       = 'height';

@@ -1,6 +1,4 @@
 (function () {
-    'use strict'
-
     function Width() {
         this.Size_constructor();
         this.type   = 'x';

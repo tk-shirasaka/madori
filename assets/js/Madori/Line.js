@@ -1,6 +1,4 @@
 (function () {
-    'use strict'
-
     function Line(name) {
         this.Shape_constructor();
         this.initEventListener();

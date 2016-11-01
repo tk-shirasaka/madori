@@ -1,6 +1,4 @@
 (function () {
-    'use strict'
-
     var _locate = {x: [], y: []};
     var _area   = 0;
     var _hover  = 0;
