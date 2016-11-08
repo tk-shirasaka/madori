@@ -18,15 +18,15 @@
             tile:       'タイル',
         },
         types:  [
-            {name: '洋室', color: '#bcaaa4', rate: 0, depth: 300, material: 'flooring'},
-            {name: '和室', color: '#8bc34a', rate: 0, depth: 300, material: 'tatami'},
-            {name: 'トイレ', color: '#bdbdbd', rate: 0, depth: 300, material: 'flooring'},
-            {name: 'お風呂', color: '#81d4fa', rate: 0, depth: 300, material: 'tile'},
-            {name: '洗面所', color: '#009688', rate: 0, depth: 300, material: 'flooring'},
-            {name: '廊下', color: '#795548', rate: 0, depth: 300, material: 'flooring'},
-            {name: '階段', color: '#ffff8d', rate: 1, depth: 300, material: 'flooring'},
-            {name: '玄関', color: '#ce93d8', rate: 0, depth: 300, material: 'flooring'},
-            {name: 'その他', color: '#f44336', rate: 0, depth: 300, material: 'flooring'},
+            {name: '洋室', color: '#bcaaa4', rate: 0, depth: 300, material: 'flooring', counter: 0},
+            {name: '和室', color: '#8bc34a', rate: 0, depth: 300, material: 'tatami', counter: 0},
+            {name: 'トイレ', color: '#bdbdbd', rate: 0, depth: 300, material: 'flooring', counter: 0},
+            {name: 'お風呂', color: '#81d4fa', rate: 0, depth: 300, material: 'tile', counter: 0},
+            {name: '洗面所', color: '#009688', rate: 0, depth: 300, material: 'flooring', counter: 0},
+            {name: '廊下', color: '#795548', rate: 0, depth: 300, material: 'flooring', counter: 0},
+            {name: '階段', color: '#ffff8d', rate: 1, depth: 300, material: 'flooring', counter: 0},
+            {name: '玄関', color: '#ce93d8', rate: 0, depth: 300, material: 'flooring', counter: 0},
+            {name: 'その他', color: '#f44336', rate: 0, depth: 300, material: 'flooring', counter: 0},
         ]
     };
 

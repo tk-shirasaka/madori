@@ -1,0 +1,44 @@
+madori-settings
+    .mdl-grid
+        div(class=`{ col4 }`)
+            input.mdl-slider.mdl-js-slider(name='width', type='range', min=0, max=50, value=`{ opts.stage.width }`, oninput=`{ oninput }`)
+            span 横 { width.value } m
+    .mdl-grid
+        div(class=`{ col4 }`)
+            input.mdl-slider.mdl-js-slider(name='height', type='range', min=0, max=50, value=`{ opts.stage.height }`, oninput=`{ oninput }`)
+            span 縦 { height.value } m
+    .mdl-grid(each=`{ type, i in opts.stage.types }`)
+        div(class=`{ col2 }`)
+            span { type.name }
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ remove }`, if=`{ type.counter === 0 }`)
+                i.material-icons delete
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(href=`{ '#madori/setting/' + i }`)
+                i.material-icons edit
+    .mdl-grid
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(href='#madori/setting/add')
+                i.material-icons add
+        div(class=`{ col2 }`)
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ submit }`)
+                i.material-icons keyboard_return
+
+    script.
+        this.on('mount', () => {
+            componentHandler.upgradeDom();
+        });
+        this.mixin('grid');
+
+        this.oninput   = () => {
+            this.update();
+        };
+        this.submit   = () => {
+            this.opts.stage.width    = parseInt(this.width.value);
+            this.opts.stage.height   = parseInt(this.height.value);
+            riot.route('/madori');
+        };
+        this.remove = (e) => {
+            this.opts.stage.types.splice(this.opts.stage.types.indexOf(e.item.type), 1);
+        };

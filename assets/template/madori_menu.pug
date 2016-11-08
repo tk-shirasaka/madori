@@ -1,0 +1,91 @@
+madori-menu
+    .mdl-grid
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ zoomOut }`, if=`{ Math.round(opts.stage.scaleX * 100) !== 10 }`)
+                i.material-icons zoom_out
+        div(class=`{ col2 }`)
+            span { Math.round(opts.stage.scaleX * 100) } %
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ zoomIn }`)
+                i.material-icons zoom_in
+    .mdl-grid
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ floorDown }`, if=`{ opts.stage.floor !== 1 }`)
+                i.material-icons remove
+        div(class=`{ col2 }`)
+            span { opts.stage.floor } 階
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ floorUp }`)
+                i.material-icons add
+    .mdl-grid
+        div(class=`{ col1 }`)
+            .mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored
+                i.material-icons folder
+                input(type='file', name='import', onchange=`{ onchange }`, style='opacity: 0')
+        div(class=`{ col3 }`)
+            span { filename }
+    .mdl-grid
+        div(class=`{ col1 }`)
+        div(class=`{ col2 }`)
+            span 基本設定
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(href='#madori/settings')
+                i.material-icons chevron_right
+    .mdl-grid
+        div(class=`{ col1 }`)
+        div(class=`{ col2 }`)
+            span 間取設定
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(href='#madori/edit/add')
+                i.material-icons chevron_right
+    .mdl-grid
+        div(class=`{ col1 }`)
+        div(class=`{ col2 }`)
+            span ドア設定
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(href='#door')
+                i.material-icons chevron_right
+    .mdl-grid
+        div(class=`{ col1 }`)
+        div(class=`{ col2 }`)
+            span プレビュー
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(href='#preview')
+                i.material-icons chevron_right
+    .mdl-grid
+        div(class=`{ col4 }`)
+            a.mdl-button.mdl-js-button.mdl-button--raised.mdl-button--colored(href='#madori/export') エクスポート
+
+    script.
+        this.mixin('grid');
+        this.mixin('madoriEvents');
+        var resetMadori = () => {
+            opts.stage.loopByName('madori', (madori) => (madori.redraw()));
+            opts.stage.update();
+        };
+
+        this.zoomOut    = () => {
+            opts.stage.scaleX = opts.stage.scaleY -= 0.1;
+            opts.stage.update();
+        };
+        this.zoomIn     = () => {
+            opts.stage.scaleX = opts.stage.scaleY += 0.1;
+            opts.stage.update();
+        };
+        this.floorDown  = () => {
+            opts.stage.floor--;
+            resetMadori();
+        };
+        this.floorUp    = () => {
+            opts.stage.floor++;
+            resetMadori();
+        };
+        this.onchange   = () => {
+            var file        = new FileReader();
+            this.filename   = this.import.files[0].name;
+
+            file.readAsText(this.import.files[0]);
+            file.onload = () => {
+                opts.stage.setMadoriJson(file.result, (madori) => (this.setMadoriEvents(madori)));
+            };
+        };

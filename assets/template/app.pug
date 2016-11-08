@@ -1,0 +1,91 @@
+app
+    .mdl-layout
+        header.mdl-layout__header(name='header')
+            .mdl-layout__header-row
+                span.mdl-layout-title 間取り
+        .mdl-layout__drawer(class=`{ (side) ? 'is-visible' : ''}`)
+            content.mdl-typography--text-center
+        .mdl-layout__drawer-button(if=`{ mode === 'madori'}`)
+            a(href='#madori')
+                i.material-icons menu
+        .mdl-layout__drawer-button(if=`{ mode === 'door'}`)
+            a(href='#door')
+                i.material-icons menu
+        .mdl-layout__drawer-button(if=`{ mode === 'preview'}`)
+            a(href='#preview')
+                i.material-icons menu
+        main.mdl-layout__content
+            .page-content
+                .mdl-grid
+                    canvas.mdl-shadow--2dp(if=`{ mode !== 'preview' }`, name='stage')
+                    canvas.mdl-shadow--2dp(if=`{ mode === 'preview' }`, name='preview')
+        a.mdl-layout__obfuscator(class=`{ (side) ? 'is-visible' : ''}`, href='#')
+
+    script.
+        var stage       = new createjs.MadoriStage(this.stage);
+        var preview     = new Preview(this.preview);
+        var applyRoute  = (mode, type, side, opts) => {
+            this.mode   = stage.mode = mode;
+            this.side   = side;
+
+            if (side) riot.mount('content', `${mode}-${type}`, opts);
+            this.update();
+        };
+        var resize      = () => {
+            var width           = window.innerWidth - 16;
+            var height          = window.innerHeight - this.header.offsetHeight - 24;
+            this.stage.width    = width;
+            this.stage.height   = height;
+            stage.update();
+            preview.setSize(width, height);
+        };
+
+        this.side   = null;
+        this.mode   = 'madori';
+        this.on('mount', () => {
+            componentHandler.upgradeDom();
+            resize();
+            window.addEventListener('resize', resize);
+        });
+
+        riot.route('/madori/export', () => {
+            window.location.href = window.URL.createObjectURL(new Blob([stage.getMadoriJson()], {type: 'application/octet-stream'}));
+            riot.route('/madori');
+        });
+        riot.route('/madori/settings', () => {
+            applyRoute('madori', 'settings', true, {stage: stage});
+        });
+        riot.route('/madori/setting/*', (index) => {
+            if (index === 'add') {
+                index   = stage.types.length;
+                stage.types.push({name: '-', depth: 300, color: '#ffffff', rate: 0, counter: 0});
+            }
+            applyRoute('madori', 'setting', true, {stage: stage, type: stage.types[index]});
+        });
+        riot.route('/madori/edit/*', (type) => {
+            var opts    = {stage: stage, type: type, madori: {size: 1, type: 0, wall: ['top', 'left', 'right', 'bottom']}};
+
+            if (type !== 'add') {
+                stage.loopByName('madori', (madori) => {
+                    if (madori.id == type) opts.madori = madori;
+                })
+            }
+            applyRoute('madori', 'edit', true, opts);
+        });
+        riot.route('/madori', () => {
+            applyRoute('madori', 'menu', true, {stage: stage});
+        });
+        riot.route('/door', () => {
+            applyRoute('door', 'main', true, {stage: stage});
+        });
+        riot.route('/preview', () => {
+            applyRoute('preview', 'main', true, {preview: preview});
+            preview.setFloor(stage.floor);
+            preview.setJson(stage.getMadoriJson());
+        });
+        riot.route('..', () => {
+            applyRoute(this.mode, '', false);
+        });
+        riot.route('/');
+        riot.route.stop();
+        riot.route.start();

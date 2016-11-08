@@ -1,8 +1,7 @@
-function Preview() {
-    var _canvas     = document.getElementById('preview');
+function Preview(canvas) {
     var _json       = null;
     var _floor      = null;
-    var _engine     = new BABYLON.Engine(_canvas, true);
+    var _engine     = new BABYLON.Engine(canvas, true);
     var _scene      = new BABYLON.Scene(_engine);
     var _camera1    = new BABYLON.TouchCamera('camera1', new BABYLON.Vector3(0, 150, 0), _scene);
     var _camera2    = new BABYLON.VRDeviceOrientationFreeCamera('camera2', new BABYLON.Vector3(0, 150, 0), _scene, 0);
@@ -117,8 +116,8 @@ function Preview() {
     _materials.wall.diffuseTexture      = new BABYLON.Texture('/texture/wall.jpg', _scene);
     _camera1.speed                      = 10;
     _camera2.speed                      = 10;
-    _camera1.attachControl(_canvas, false);
-    _camera2.attachControl(_canvas, false);
+    _camera1.attachControl(canvas, false);
+    _camera2.attachControl(canvas, false);
     _engine.runRenderLoop(() => {
         _scene.render();
     });

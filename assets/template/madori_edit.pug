@@ -1,0 +1,81 @@
+madori-edit
+    .mdl-grid
+        div(class=`{ col4 }`)
+            input.mdl-slider.mdl-js-slider(name='size', type='range', min=0.25, max=30, step=0.25, value=`{ opts.madori.size }`, oninput=`{ oninput }`)
+            span { size.value } 畳
+    .mdl-grid
+        div(class=`{ col4 }`)
+            .mdl-textfield.mdl-js-textfield
+                select.mdl-textfield__input(name='type', value=`{ opts.madori.type }`)
+                    option.mdl-list__item(each=`{ type, i in opts.stage.types }`, value=`{ i }`) { type.name }
+    .mdl-grid
+        div(class=`{ col2 }`)
+            label.mdl-switch.mdl-js-switch.mdl-js-ripple-effect
+                input.mdl-switch__input(name='top', type='checkbox', checked=`{ opts.madori.wall.indexOf('top') !== -1 }`)
+                span.mdl-switch__label 上
+        div(class=`{ col2 }`)
+            label.mdl-switch.mdl-js-switch.mdl-js-ripple-effect
+                input.mdl-switch__input(name='bottom', type='checkbox', checked=`{ opts.madori.wall.indexOf('bottom') !== -1 }`)
+                span.mdl-switch__label 下
+    .mdl-grid
+        div(class=`{ col2 }`)
+            label.mdl-switch.mdl-js-switch.mdl-js-ripple-effect
+                input.mdl-switch__input(name='left', type='checkbox', checked=`{ opts.madori.wall.indexOf('left') !== -1 }`)
+                span.mdl-switch__label 左
+        div(class=`{ col2 }`)
+            label.mdl-switch.mdl-js-switch.mdl-js-ripple-effect
+                input.mdl-switch__input(name='right', type='checkbox', checked=`{ opts.madori.wall.indexOf('right') !== -1 }`)
+                span.mdl-switch__label 右
+    .mdl-grid
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(href='#madori', if=`{ opts.type === 'add' }`)
+                i.material-icons keyboard_return
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ remove }`, if=`{ opts.type !== 'add' }`)
+                i.material-icons delete
+        div(class=`{ col2 }`)
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ add }`, if=`{ opts.type === 'add' }`)
+                i.material-icons add
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ change }`, if=`{ opts.type !== 'add' }`)
+                i.material-icons keyboard_return
+
+    script.
+        var action      = null;
+        var submit      = (madori) => {
+            madori.setMadoriProps({
+                size:   parseFloat(this.size.value),
+                width:  parseFloat(this.size.value) * opts.stage.unit * opts.stage.unit / madori.height / 2,
+                wall:   ['top', 'left', 'right', 'bottom'].filter((key) => (this[key].checked)),
+                type:   parseInt(this.type.value),
+            });
+            opts.stage.types[madori.type].counter++;
+            riot.route('/madori');
+        };
+
+        this.on('mount', () => {
+            componentHandler.upgradeDom();
+        });
+        this.mixin('grid');
+        this.mixin('madoriEvents');
+
+        this.add    = () => {
+            var madori  = new createjs.Madori();
+
+            this.setMadoriEvents(madori);
+            madori.set({x: 100 - opts.stage.x, y: 100 - opts.stage.y, height: opts.stage.unit, floor: opts.stage.floor});
+            opts.stage.addChild(madori);
+            submit(madori);
+        };
+        this.change = () => {
+            opts.stage.types[opts.madori.type].counter--;
+            submit(opts.madori);
+        };
+        this.oninput   = () => {
+            this.update();
+        };
+        this.remove     = () => {
+            opts.stage.types[opts.madori.type].counter--;
+            opts.stage.removeChild(opts.madori)
+            opts.stage.update();
+            riot.route('/madori');
+        };

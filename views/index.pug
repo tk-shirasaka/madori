@@ -1,12 +1,39 @@
-extends layout.pug
-block content
-    - var btnDefault = 'waves-effect waves-light btn';
-    - var btnPrimary = 'waves-effect waves-light btn red';
-    include header
-    include sidebar
-    include guide
-    include madori
-    include setting
-    include types
-    canvas#canvas.hide.madori-mode.memo-mode.door-mode.z-depth-2
-    canvas#preview.hide.preview-mode.z-depth-2
+doctype html
+html
+    head
+        meta(http-equiv='Content-Type', content='text/html; charset=UTF-8')
+        meta(name='viewport', content='width=device-width, initial-scale=1.0')
+        link(rel='stylesheet', href='https://fonts.googleapis.com/icon?family=Material+Icons')
+        link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.2.1/material.min.css')
+        title 間取り
+    body
+        script(src='https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.2.1/material.min.js')
+        script(src='https://cdnjs.cloudflare.com/ajax/libs/riot/2.6.5/riot.min.js')
+        script(src='https://cdnjs.cloudflare.com/ajax/libs/babylonjs/2.4.1/babylon.js')
+        script(src='https://cdnjs.cloudflare.com/ajax/libs/handjs/1.3.11/hand.min.js')
+        script(src='https://code.createjs.com/easeljs-0.8.2.min.js')
+        script(src='/js/Madori/MadoriStage.js')
+        script(src='/js/Madori/Field.js')
+        script(src='/js/Madori/MadoriText.js')
+        script(src='/js/Madori/Door.js')
+        script(src='/js/Madori/Line.js')
+        script(src='/js/Madori/Size.js')
+        script(src='/js/Madori/Width.js')
+        script(src='/js/Madori/Height.js')
+        script(src='/js/Madori/Tubo.js')
+        script(src='/js/Madori/HorizontalLine.js')
+        script(src='/js/Madori/VerticalLine.js')
+        script(src='/js/Madori/Madori.js')
+        script(src='/js/Preview/Preview.js')
+        script(src='/template/madori_menu.js')
+        script(src='/template/madori_settings.js')
+        script(src='/template/madori_setting.js')
+        script(src='/template/madori_edit.js')
+        script(src='/template/door_main.js')
+        script(src='/template/preview_main.js')
+        script(src='/template/app.js')
+        script(src='/js/main.js')
+        app
+
+        script.
+            riot.mount('*');
