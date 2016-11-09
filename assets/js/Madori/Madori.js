@@ -110,8 +110,8 @@
 
     Madori.prototype.limitLocate = function() {
         return {
-            x: {min: Math.min(..._locate.x), max: Math.max(..._locate.x)},
-            y: {min: Math.min(..._locate.y), max: Math.max(..._locate.y)}
+            x: {min: _locate.x.length ? Math.min(..._locate.x) : 0, max: _locate.x.length ? Math.max(..._locate.x) : 0},
+            y: {min: _locate.y.length ? Math.min(..._locate.y) : 0, max: _locate.y.length ? Math.max(..._locate.y) : 0}
         };
     };
 
@@ -148,9 +148,7 @@
         this.getChildByName('left').redraw();
         this.getChildByName('right').redraw();
         this.getChildByName('bottom').redraw();
-        this.stage.getChildByName('width').redraw();
-        this.stage.getChildByName('height').redraw();
-        this.stage.getChildByName('tubo').redraw();
+        this.stage.redraw();
         this.stage.update();
     };
 

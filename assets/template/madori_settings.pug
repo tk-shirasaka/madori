@@ -37,8 +37,11 @@ madori-settings
         this.submit   = () => {
             this.opts.stage.width    = parseInt(this.width.value);
             this.opts.stage.height   = parseInt(this.height.value);
+            this.opts.stage.redraw();
             riot.route('/madori');
         };
         this.remove = (e) => {
-            this.opts.stage.types.splice(this.opts.stage.types.indexOf(e.item.type), 1);
+            var index   = this.opts.stage.types.indexOf(e.item.type);
+            this.opts.stage.loopByName('madori', (madori) => {if (madori.type > index)  madori.type--});
+            this.opts.stage.types.splice(index, 1);
         };

@@ -61,16 +61,17 @@ madori-menu
         this.mixin('madoriEvents');
         var resetMadori = () => {
             opts.stage.loopByName('madori', (madori) => (madori.redraw()));
+            opts.stage.redraw();
             opts.stage.update();
         };
 
         this.zoomOut    = () => {
             opts.stage.scaleX = opts.stage.scaleY -= 0.1;
-            opts.stage.update();
+            resetMadori();
         };
         this.zoomIn     = () => {
             opts.stage.scaleX = opts.stage.scaleY += 0.1;
-            opts.stage.update();
+            resetMadori();
         };
         this.floorDown  = () => {
             opts.stage.floor--;
