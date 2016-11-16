@@ -35,7 +35,7 @@
             var type    = (Math.abs(action.x - pointer.x) > Math.abs(action.y - pointer.y)) ? 'x' : 'y'
             var diff    = (type === 'x') ? action.x - pointer.x : pointer.y - action.y;
 
-            if (!action.sign) {
+            if (action.sign === undefined) {
                 action.sign = 1;
                 if (type === 'x' && this.parent.x + this.parent.width / 2 < action.x) action.sign = -1;
                 if (type === 'y' && this.parent.y + this.parent.height / 2 < action.y) action.sign = -1;
@@ -58,9 +58,9 @@
             var pointer = this.stage.getPointer();
 
             document.body.style.cursor = 'move';
-            if (typeof(action.type) === undefined && Math.abs(action.x - pointer.x) < 5 * this.stage.scaleX) return;
-            if (typeof(action.type) === undefined && Math.abs(action.y - pointer.y) < 5 * this.stage.scaleY) return;
-            (action.type !== 'move' && action.start < e.timeStamp - 500) ? resize() : move();
+            if (typeof(action.type) === undefined && Math.abs(action.x - pointer.x) < 10) return;
+            if (typeof(action.type) === undefined && Math.abs(action.y - pointer.y) < 10) return;
+            (action.type !== 'move' && action.start < e.timeStamp - 100) ? resize() : move();
         });
     };
 

@@ -66,6 +66,7 @@ app
             if (type === 'add') {
                 opts.madori = new createjs.Madori();
                 this.setMadoriEvents(opts.madori);
+                stage.types[0].counter++;
                 stage.addChild(opts.madori);
                 opts.madori.set({x: 100 - stage.x, y: 100 - stage.y, floor: stage.floor, type: 0, wall: ['top', 'left', 'right', 'bottom']});
                 opts.madori.setMadoriProps({width: stage.unit / 2, height: stage.unit});

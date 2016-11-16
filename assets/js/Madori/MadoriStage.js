@@ -98,8 +98,9 @@
         this.addEventListener('stagemousedown', () => {
             var action  = this.getPointer();
 
-            if (createjs.Madori.prototype.hovered()) return;
             this.addEventListener('stagemousemove', () => {
+                if (createjs.Madori.prototype.hovered()) return this.removeAllEventListeners('stagemousemove');
+
                 var pointer = this.getPointer();
                 this.x += (pointer.x - action.x) * this.scaleX;
                 this.y += (pointer.y - action.y) * this.scaleY;
