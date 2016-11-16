@@ -1,0 +1,46 @@
+madori-door
+    .mdl-grid
+        div(class=`{ col4 }`)
+            .mdl-textfield.mdl-js-textfield
+                select.mdl-textfield__input(name='line', value=`{ opts.door.line }`, onchange=`{ change }`)
+                    option.mdl-list__item(if=`{ opts.madori.wall.indexOf('top') !== -1 }`, value='top') 上
+                    option.mdl-list__item(if=`{ opts.madori.wall.indexOf('left') !== -1 }`, value='left') 左
+                    option.mdl-list__item(if=`{ opts.madori.wall.indexOf('right') !== -1 }`, value='right') 右
+                    option.mdl-list__item(if=`{ opts.madori.wall.indexOf('bottom') !== -1 }`, value='bottom') 下
+    .mdl-grid
+        div(class=`{ col4 }`)
+            input.mdl-slider.mdl-js-slider(name='start', type='range', min=0, max=`{ Math.min(opts.madori[opts.door.type], opts.door.end - 1) }`, value=`{ opts.door.start }`, oninput=`{ change }`)
+            span 開始 : { start.value }
+    .mdl-grid
+        div(class=`{ col4 }`)
+            input.mdl-slider.mdl-js-slider(name='end', type='range', min=`{ opts.door.start + 1 }`, max=`{ opts.madori[opts.door.type] }`, value=`{ opts.door.end }`, oninput=`{ change }`)
+            span 終了 : { end.value }
+    .mdl-grid
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ remove }`)
+                i.material-icons delete
+        div(class=`{ col2 }`)
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(href=`{ '#madori/edit/' + opts.madori.id }`)
+                i.material-icons keyboard_return
+
+    script.
+        var action      = null;
+
+        this.on('mount', () => {
+            componentHandler.upgradeDom();
+        });
+        this.mixin('grid');
+
+        this.change = () => {
+            opts.door.line  = this.line.value;
+            opts.door.type  = (opts.door.line === 'top' || opts.door.line === 'bottom') ? 'width' : 'height';
+            opts.door.start = parseInt(this.start.value);
+            opts.door.end   = parseInt(this.end.value);
+            opts.door.redraw();
+        };
+        this.remove     = () => {
+            opts.madori.removeChild(opts.door);
+            opts.madori.redraw();
+            riot.route(`/madori/edit/${opts.madori.id}`);
+        };

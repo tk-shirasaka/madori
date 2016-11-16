@@ -11,12 +11,10 @@
     Line.prototype.initEventListener = function() {
         this.addEventListener('mouseover', () => {
             if (!this.parent.inAction() && this.parent.actionable()) document.body.style.cursor = (this.type === 'width') ? 'row-resize' : 'col-resize';
-            else if (this.parent.inDoorAction(this.name)) document.body.style.cursor = 'pointer';
         });
 
         this.addEventListener('mouseout', () => {
             if (!this.parent.inAction() && this.parent.actionable()) document.body.style.cursor = '';
-            else if (this.parent.inDoorAction(this.name)) document.body.style.cursor = '';
         });
 
         this.addEventListener('pressmove', () => {
@@ -27,15 +25,6 @@
 
             if (this.x > 1 || this.y > 1) diff *= -1;
             this.parent.transform(diff);
-        });
-
-        this.addEventListener('pressup', () => {
-            if (!this.parent.inDoorAction(this.name)) return;
-            var axis    = (this.type === 'width') ? 'x' : 'y';
-            var pointer = this.stage.getPointer();
-            var offset  = this.stage.unit / 4;
-            var start   = pointer[axis] - this.parent[axis] - this.stage[axis];
-            this.parent.addDoor(this.name, this.type, start - offset, start + offset);
         });
     };
 

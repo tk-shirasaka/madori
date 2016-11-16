@@ -186,14 +186,12 @@
         this.set(json.setting);
         for (var i = 0; i < json.data.length; i++) {
             var madori = new createjs.Madori();
+            if (json.data[i].door !== undefined) {
+                json.data[i].door.forEach((door) => (madori.addChild(new createjs.Door(door.line, door.type, door.start, door.end))));
+            }
             this.addChild(madori);
 
             madori.setMadoriProps(json.data[i]);
-            if (json.data[i].door !== undefined) {
-                json.data[i].door.forEach((door) => {
-                    madori.addDoor(door.line, door.type, door.start, door.end);
-                });
-            }
             if (callback) callback(madori);
         }
     };

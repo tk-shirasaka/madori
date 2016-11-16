@@ -1,60 +1,16 @@
 (function () {
-    function Door() {
+    function Door(line, type, start, end) {
         this.Shape_constructor();
-        this.initEventListener();
         this.name   = 'door';
-        this.stat   = {hover: false, move: false};
+        this.set({line: line, type: type, start: start, end: end});
     }
     createjs.extend(Door, createjs.Shape);
     createjs.promote(Door, 'Shape');
     createjs.Door = Door;
 
-    Door.prototype.initEventListener = function() {
-        this.addEventListener('mouseover', () => {
-            if (!this.parent.inDoorAction(this.line)) return;
-            this.parent.hoverUp();
-            this.stat.hover             = true;
-            document.body.style.cursor  = 'pointer';
-        });
-
-        this.addEventListener('mouseout', () => {
-            if (!this.parent.inDoorAction(this.line)) return;
-            if (this.stat.hover) this.parent.hoverDown();
-            this.stat.hover            = false;
-            document.body.style.cursor = '';
-        });
-
-        this.addEventListener('pressmove', () => {
-            if (!this.parent.inDoorAction(this.line)) return;
-            var pointer     = this.stage.getPointer();
-            var axis        = (this.type === 'width') ? 'x' : 'y';
-            var point       = (this.stage[axis] + this.parent[axis] + this.start + (this.end - this.start) / 2 > pointer[axis]) ? 'start' : 'end';
-            this[point]     = pointer[axis] - this.parent[axis] - this.stage[axis];
-            this.stat.move  = true;
-
-            this.redraw();
-        });
-
-        this.addEventListener('pressup', (e) => {
-            if (!this.parent.inDoorAction(this.line)) return;
-            if (this.stat.hover) this.parent.hoverDown();
-            if (this.stat.move) {
-                this.stat.hover = this.stat.move = false;
-                return;
-            }
-
-            var stage   = this.stage;
-            this.parent.removeChild(this);
-            this.removeAllEventListeners();
-            e.stopPropagation();
-            stage.update();
-        });
-
-    };
-
     Door.prototype.redraw = function() {
-        this.end   -= Math.min(0, this.start);
-        this.start  = Math.max(0, this.start + this.parent[this.type] - Math.max(this.parent[this.type], this.end));
+        if (this.parent.wall.indexOf(this.line) === -1) return this.parent.removeChild(this);
+
         this.end    = Math.min(this.parent[this.type], this.end);
 
         var color   = 'rgba(0,0,0,0.5)';

@@ -1,17 +1,19 @@
 (function() {
-    var action  = null;
-    var madori  = null;
+    var _action = null;
+    var _madori = null;
 
     riot.mixin('madoriEvents', {
         setMadoriEvents:    (madori) => {
-            madori.addEventListener('mousedown', (e) => {
-                action  = e.timeStamp;
+            _madori = madori;
+            _madori.addEventListener('mousedown', (e) => {
+                _action = e.timeStamp;
             });
-            madori.addEventListener('pressup', (e) => {
-                madori  = e.target.parent;
-                if (madori.actionable() && e.timeStamp - action < 50) riot.route(`/madori/edit/${madori.id}`);
+            _madori.addEventListener('pressup', (e) => {
+                _madori  = e.target.parent;
+                if (_madori.actionable() && e.timeStamp - _action < 50) riot.route(`/madori/edit/${_madori.id}`);
             });
         },
+        getMadori:          () => (_madori),
     });
 
     riot.mixin('grid', {

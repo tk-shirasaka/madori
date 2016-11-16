@@ -82,10 +82,6 @@
         return this.floor === this.stage.floor && this.stage.mode == 'madori';
     };
 
-    Madori.prototype.inDoorAction = function(name) {
-        return this.floor === this.stage.floor && this.stage.mode == 'door' && this.wall.indexOf(name) >= 0;
-    };
-
     Madori.prototype.hoverUp = function() {
         _hover++;
     };
@@ -138,16 +134,13 @@
 
     Madori.prototype.redraw = function() {
         if (this.floor !== this.stage.floor) this.stage.setChildIndex(this, 0);
-        if (this.wall.indexOf('top') < 0) this.setChildIndex(this.getChildByName('top'), 2);
-        if (this.wall.indexOf('left') < 0) this.setChildIndex(this.getChildByName('left'), 2);
-        if (this.wall.indexOf('right') < 0) this.setChildIndex(this.getChildByName('right'), 2);
-        if (this.wall.indexOf('bottom') < 0) this.setChildIndex(this.getChildByName('bottom'), 2);
-        this.getChildByName('text').redraw();
-        this.getChildByName('field').redraw();
-        this.getChildByName('top').redraw();
-        this.getChildByName('left').redraw();
-        this.getChildByName('right').redraw();
-        this.getChildByName('bottom').redraw();
+        ['top', 'left', 'right', 'bottom'].forEach((key) => {
+            if (this.wall.indexOf(key) >= 0) return;
+            this.setChildIndex(this.getChildByName(key), 2);
+        });
+        for (var i = this.children.length - 1; i >= 0; i--) {
+            this.children[i].redraw();
+        }
         this.stage.redraw();
         this.stage.update();
     };
@@ -210,13 +203,5 @@
             action.y    = pointer.y;
             this.setMadoriProps({x: x, y: y, width: width, height: height});
         }
-    };
-
-    Madori.prototype.addDoor = function(line, type, start, end) {
-        var door    = new createjs.Door();
-
-        this.addChild(door);
-        door.set({line: line, type: type, start: start, end: end});
-        door.redraw();
     };
 }());
