@@ -10,7 +10,7 @@
             });
             _madori.addEventListener('pressup', (e) => {
                 _madori  = e.target.parent;
-                if (_madori.actionable() && e.timeStamp - _action < 50) riot.route(`/madori/edit/${_madori.id}`);
+                if (_madori.actionable() && e.timeStamp - _action < 200) riot.route(`/madori/edit/${_madori.id}`);
             });
         },
         getMadori:          () => (_madori),

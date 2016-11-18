@@ -132,17 +132,12 @@
         return result;
     };
 
-    Madori.prototype.redraw = function() {
-        if (this.floor !== this.stage.floor) this.stage.setChildIndex(this, 0);
+    Madori.prototype.draw = function(ctx) {
         ['top', 'left', 'right', 'bottom'].forEach((key) => {
             if (this.wall.indexOf(key) >= 0) return;
             this.setChildIndex(this.getChildByName(key), 2);
         });
-        for (var i = this.children.length - 1; i >= 0; i--) {
-            this.children[i].redraw();
-        }
-        this.stage.redraw();
-        this.stage.update();
+        createjs.Container.prototype.draw.call(this, ctx);
     };
 
     Madori.prototype.setMadoriProps = function(props) {
@@ -160,7 +155,6 @@
         this.getChildByName('bottom').y = this.height - 1;
 
         this.setLocate();
-        this.redraw();
     };
 
     Madori.prototype.shiftWindow = function(vector) {

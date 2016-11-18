@@ -37,10 +37,8 @@ madori-door
             opts.door.type  = (opts.door.line === 'top' || opts.door.line === 'bottom') ? 'width' : 'height';
             opts.door.start = parseInt(this.start.value);
             opts.door.end   = parseInt(this.end.value);
-            opts.door.redraw();
         };
         this.remove     = () => {
             opts.madori.removeChild(opts.door);
-            opts.madori.redraw();
             riot.route(`/madori/edit/${opts.madori.id}`);
         };

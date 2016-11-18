@@ -9,6 +9,15 @@ madori-edit
                 select.mdl-textfield__input(name='type', value=`{ opts.madori.type }`, onchange=`{ change }`)
                     option.mdl-list__item(each=`{ type, i in opts.stage.types }`, value=`{ i }`) { type.name }
     .mdl-grid
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ floorDown }`, if=`{ opts.madori.floor !== 1 }`)
+                i.material-icons remove
+        div(class=`{ col2 }`)
+            span { opts.madori.floor } 階
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ floorUp }`)
+                i.material-icons add
+    .mdl-grid
         div(class=`{ col2 }`)
             label.mdl-switch.mdl-js-switch.mdl-js-ripple-effect
                 input.mdl-switch__input(name='top', type='checkbox', checked=`{ opts.madori.wall.indexOf('top') !== -1 }`, onchange=`{ change }`)
@@ -59,7 +68,9 @@ madori-edit
         });
         this.mixin('grid');
 
-        this.change = () => {
+        this.floorDown  = () => (opts.madori.floor--);
+        this.floorUp    = () => (opts.madori.floor++);
+        this.change     = () => {
             opts.stage.types[opts.madori.type].counter--;
             opts.madori.setMadoriProps({
                 width:  parseFloat(this.size.value) * opts.stage.unit * opts.stage.unit / opts.madori.height / 2,
@@ -71,10 +82,8 @@ madori-edit
         this.remove     = () => {
             opts.stage.types[opts.madori.type].counter--;
             opts.stage.removeChild(opts.madori)
-            opts.stage.redraw();
             riot.route('/madori');
         };
         this.removeDoor = (e) => {
             opts.madori.removeChild(e.item.door);
-            opts.madori.redraw();
         };

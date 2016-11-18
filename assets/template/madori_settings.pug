@@ -1,6 +1,10 @@
 madori-settings
     .mdl-grid
         div(class=`{ col4 }`)
+            input.mdl-slider.mdl-js-slider(name='tubo', type='range', min=0, max=100, value=`{ opts.stage.tubo }`, oninput=`{ oninput }`)
+            span 広さ { tubo.value } 坪
+    .mdl-grid
+        div(class=`{ col4 }`)
             input.mdl-slider.mdl-js-slider(name='width', type='range', min=0, max=50, value=`{ opts.stage.width }`, oninput=`{ oninput }`)
             span 横 { width.value } m
     .mdl-grid
@@ -22,7 +26,7 @@ madori-settings
                 i.material-icons add
         div(class=`{ col2 }`)
         div(class=`{ col1 }`)
-            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ submit }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(href='#madori')
                 i.material-icons keyboard_return
 
     script.
@@ -32,16 +36,13 @@ madori-settings
         this.mixin('grid');
 
         this.oninput   = () => {
-            this.update();
-        };
-        this.submit   = () => {
-            this.opts.stage.width    = parseInt(this.width.value);
-            this.opts.stage.height   = parseInt(this.height.value);
-            this.opts.stage.redraw();
-            riot.route('/madori');
+            opts.stage.tubo     = parseInt(this.tubo.value);
+            opts.stage.width    = parseInt(this.width.value);
+            opts.stage.height   = parseInt(this.height.value);
+            opts.stage.redraw();
         };
         this.remove = (e) => {
             var index   = this.opts.stage.types.indexOf(e.item.type);
-            this.opts.stage.loopByName('madori', (madori) => {if (madori.type > index)  madori.type--});
-            this.opts.stage.types.splice(index, 1);
+            opts.stage.loopByName('madori', (madori) => {if (madori.type > index)  madori.type--});
+            opts.stage.types.splice(index, 1);
         };

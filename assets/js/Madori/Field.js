@@ -3,6 +3,7 @@
         this.Shape_constructor();
         this.initEventListener();
         this.name   = 'field';
+        this.graphics.beginFill().drawRect(0, 0, 0, 0).endFill();
     }
     createjs.extend(Field, createjs.Shape);
     createjs.promote(Field, 'Shape');
@@ -64,12 +65,13 @@
         });
     };
 
-    Field.prototype.redraw = function() {
+    Field.prototype.draw = function(ctx) {
         var color   = this.color || this.stage.types[this.parent.type].color;
         var width   = this.parent.width;
         var height  = this.parent.height;
 
         if (!this.parent.onFloor()) color = 'rgba(0,0,0,0.5)';
         this.graphics.clear().beginFill(color).drawRect(0, 0, width, height).endFill();
+        createjs.Shape.prototype.draw.call(this, ctx);
     };
 }());

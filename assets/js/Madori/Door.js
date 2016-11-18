@@ -3,12 +3,13 @@
         this.Shape_constructor();
         this.name   = 'door';
         this.set({line: line, type: type, start: start, end: end});
+        this.graphics.beginFill().drawRect(0, 0, 0, 0).endFill();
     }
     createjs.extend(Door, createjs.Shape);
     createjs.promote(Door, 'Shape');
     createjs.Door = Door;
 
-    Door.prototype.redraw = function() {
+    Door.prototype.draw = function(ctx) {
         if (this.parent.wall.indexOf(this.line) === -1) return this.parent.removeChild(this);
 
         this.end    = Math.min(this.parent[this.type], this.end);
@@ -27,6 +28,6 @@
         this.graphics.clear().beginStroke(color).setStrokeStyle(2).moveTo(0, 0);
         if (this.type === 'width') this.graphics.lineTo(this.width, 0).endStroke();
         if (this.type === 'height') this.graphics.lineTo(0, this.height).endStroke();
-        this.stage.update();
+        createjs.Shape.prototype.draw.call(this, ctx);
     };
 }());

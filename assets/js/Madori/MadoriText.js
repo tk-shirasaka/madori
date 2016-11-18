@@ -3,6 +3,7 @@
         this.Text_constructor();
         this.name   = 'text';
         this.font   = '15px sans-serif';
+        this.text   = ' ';
         this.x      = 10;
         this.y      = 10;
     }
@@ -10,12 +11,13 @@
     createjs.promote(MadoriText, 'Text');
     createjs.MadoriText = MadoriText;
 
-    MadoriText.prototype.redraw = function() {
+    MadoriText.prototype.draw = function(ctx) {
         if (this.stage.scaleX < 0.5) {
-            this.text   = '';
+            this.text   = ' ';
         } else {
             var size    = Math.round(this.parent.width / this.stage.unit * this.parent.height / this.stage.unit * 2 * 100) / 100;
             this.text   = size + '畳\n' + this.stage.types[this.parent.type].name;
         }
+        createjs.Text.prototype.draw.call(this, ctx);
     };
 }());

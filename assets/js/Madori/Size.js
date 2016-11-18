@@ -2,12 +2,13 @@
     function Size() {
         this.Text_constructor();
         this.font   = '15px sans-serif';
+        this.text   = ' ';
     }
     createjs.extend(Size, createjs.Text);
     createjs.promote(Size, 'Text');
     createjs.Size = Size;
 
-    Size.prototype.redraw = function() {
+    Size.prototype.draw = function(ctx) {
         var locate  = createjs.Madori.prototype.limitLocate();
         var type    = this.type
         var length  = Math.round((locate[type].max - locate[type].min) * 10);
@@ -16,5 +17,6 @@
 
         if (this.stage[this.name] && this.stage[this.name] * 1000 < length) props.color = 'Red';
         this.set(props);
+        createjs.Text.prototype.draw.call(this, ctx);
     };
 }());

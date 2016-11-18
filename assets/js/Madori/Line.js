@@ -3,6 +3,7 @@
         this.Shape_constructor();
         this.initEventListener();
         this.name   = name;
+        this.graphics.beginFill().drawRect(0, 0, 0, 0).endFill();
     }
     createjs.extend(Line, createjs.Shape);
     createjs.promote(Line, 'Shape');
@@ -36,12 +37,13 @@
         return 0;
     };
 
-    Line.prototype.redraw = function() {
+    Line.prototype.draw = function(ctx) {
         var color   = (this.parent.wall.indexOf(this.name) >= 0) ? 'Black' : this.stage.types[this.parent.type].color;
         var height  = this.getHeight();
         var width   = this.getWidth();
 
         if (!this.parent.onFloor()) color = 'rgba(0,0,0,0.5)';
         this.graphics.clear().beginStroke(color).setStrokeStyle(3).moveTo(0, 0).lineTo(width, height).endStroke();
+        createjs.Shape.prototype.draw.call(this, ctx);
     };
 }());

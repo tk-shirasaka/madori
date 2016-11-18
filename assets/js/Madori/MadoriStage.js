@@ -5,6 +5,7 @@
         unit:   182,
         width:  0,
         height: 0,
+        tubo:   0,
         mode:   'madori',
         units:  {
             170: '団地間',
@@ -38,8 +39,8 @@
         this.enableMouseOver(50);
         this.addChild(new createjs.Width(), new createjs.Height(), new createjs.Tubo());
         if (createjs.Touch.isSupported()) createjs.Touch.enable(this);
+        createjs.Ticker.addEventListener('tick', this);
         createjs.Ticker.timingMode = createjs.Ticker.RAF;
-        this.redraw();
     }
     createjs.extend(MadoriStage, createjs.Stage);
     createjs.promote(MadoriStage, 'Stage');
@@ -70,16 +71,6 @@
         }
     };
 
-    MadoriStage.prototype.setChildIndex = function() {
-        for (var i = 0; i < arguments.length; i += 2) {
-            var name    = arguments[i].name;
-            var parent  = this.getChildParentByName(name);
-
-            if (!parent) parent = this.addChildParent(name);
-            parent.setChildIndex(arguments[i], arguments[i + 1]);
-        }
-    };
-
     MadoriStage.prototype.removeChild = function() {
         for (var i = 0; i < arguments.length; i++) {
             var name    = arguments[i].name;
@@ -105,8 +96,6 @@
                 this.x += (pointer.x - action.x) * this.scaleX;
                 this.y += (pointer.y - action.y) * this.scaleY;
                 action  = pointer;
-                this.redraw();
-                this.getChildByName('madori').redraw();
                 this.update();
             });
             document.body.style.cursor = 'move';
@@ -153,6 +142,7 @@
                 unit:       this.unit,
                 width:      this.width,
                 height:     this.height,
+                tubo:       this.tubo,
                 units:      this.units,
                 materials:  this.materials,
                 types:      this.types,
@@ -197,10 +187,14 @@
         }
     };
 
-    MadoriStage.prototype.redraw = function() {
-        this.getChildByName('width').redraw();
-        this.getChildByName('height').redraw();
-        this.getChildByName('tubo').redraw();
+    MadoriStage.prototype.setFloor = function(floor) {
+        this.floor  = floor;
+        this.getChildParentByName('madori').sortChildren((a, b) => {
+            if (a.floor === b.floor) return 0;
+            if (a.floor === this.floor) return 1;
+            if (b.floor === this.floor) return -1;
+            return 0;
+        });
         this.update();
     };
 }());

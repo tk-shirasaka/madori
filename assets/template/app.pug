@@ -33,7 +33,6 @@ app
             var height          = window.innerHeight - this.header.offsetHeight - 24;
             this.stage.width    = width;
             this.stage.height   = height;
-            stage.redraw();
             preview.setSize(width, height);
         };
 
@@ -82,7 +81,6 @@ app
                 else if (opts.madori.wall.indexOf('right') > -1) opts.door = new createjs.Door('right', 'height', 0, stage.unit / 2);
                 else if (opts.madori.wall.indexOf('bottom') > -1) opts.door = new createjs.Door('bottom', 'width', 0, stage.unit / 2);
                 opts.madori.addChild(opts.door);
-                opts.door.redraw()
             } else {
                 for (var i = 0; i < opts.madori.children.length; i++) {
                     if (opts.madori.children[i].id != type) continue;

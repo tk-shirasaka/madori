@@ -52,28 +52,11 @@ madori-menu
     script.
         this.mixin('grid');
         this.mixin('madoriEvents');
-        var resetMadori = () => {
-            opts.stage.loopByName('madori', (madori) => (madori.redraw()));
-            opts.stage.redraw();
-            opts.stage.update();
-        };
 
-        this.zoomOut    = () => {
-            opts.stage.scaleX = opts.stage.scaleY -= 0.1;
-            resetMadori();
-        };
-        this.zoomIn     = () => {
-            opts.stage.scaleX = opts.stage.scaleY += 0.1;
-            resetMadori();
-        };
-        this.floorDown  = () => {
-            opts.stage.floor--;
-            resetMadori();
-        };
-        this.floorUp    = () => {
-            opts.stage.floor++;
-            resetMadori();
-        };
+        this.zoomOut    = () => (opts.stage.set({scaleX: opts.stage.scaleX - 0.1, scaleY: opts.stage.scaleY - 0.1}).update());
+        this.zoomIn     = () => (opts.stage.set({scaleX: opts.stage.scaleX + 0.1, scaleY: opts.stage.scaleY + 0.1}).update());
+        this.floorDown  = () => (opts.stage.setFloor(opts.stage.floor - 1));
+        this.floorUp    = () => (opts.stage.setFloor(opts.stage.floor + 1));
         this.onchange   = () => {
             var file        = new FileReader();
             this.filename   = this.import.files[0].name;
