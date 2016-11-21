@@ -1,8 +1,15 @@
 madori-edit
     .mdl-grid
         div(class=`{ col4 }`)
-            input.mdl-slider.mdl-js-slider(name='size', type='range', min=0.25, max=30, step=0.25, value=`{ opts.madori.width * opts.madori.height / opts.stage.unit / opts.stage.unit * 2 }`, oninput=`{ change }`)
+            input.mdl-slider.mdl-js-slider(name='size', type='range', min=`{ madoriMin }`, max=`{ madoriMax }`, step=0.25, value=`{ madoriSize }`, oninput=`{ change }`)
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ prevSize }`, if=`{ madoriMax !== 5 }`)
+                i.material-icons navigate_before
+        div(class=`{ col2 }`)
             span { size.value } 畳
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ nextSize }`)
+                i.material-icons navigate_next
     .mdl-grid
         div(class=`{ col4 }`)
             .mdl-textfield.mdl-js-textfield
@@ -68,6 +75,17 @@ madori-edit
         });
         this.mixin('grid');
 
+        this.madoriSize = opts.madori.width * opts.madori.height / opts.stage.unit / opts.stage.unit * 2;
+        this.madoriMin  = this.madoriSize - this.madoriSize % 5 + 0.25;
+        this.madoriMax  = this.madoriMin + 5 - 0.25
+
+        this.changeSize = (offset) => {
+            this.size.min   = this.madoriMin += offset;
+            this.size.max   = this.madoriMax += offset;
+            this.change();
+        };
+        this.prevSize   = () => (this.changeSize(-5));
+        this.nextSize   = () => (this.changeSize(5));
         this.floorDown  = () => (opts.madori.floor--);
         this.floorUp    = () => (opts.madori.floor++);
         this.change     = () => {

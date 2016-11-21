@@ -2,26 +2,26 @@ madori-setting
     .mdl-grid
         div(class=`{ col4 }`)
             .mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
-                input.mdl-textfield__input(name='name', type='text', value=`{ opts.type.name }`)
+                input.mdl-textfield__input(name='name', type='text', value=`{ opts.type.name }`, onchange=`{ change }`)
                 label.mdl-textfield__label 名前
     .mdl-grid
         div(class=`{ col4 }`)
-            input.mdl-slider.mdl-js-slider(name='depth', type='range', min=10, max=300, step=10, value=`{ opts.type.depth }`, oninput=`{ oninput }`)
+            input.mdl-slider.mdl-js-slider(name='depth', type='range', min=10, max=300, step=10, value=`{ opts.type.depth }`, oninput=`{ change }`)
             span 高さ（{ depth.value } cm）
     .mdl-grid
         div(class=`{ col4 }`)
             label.mdl-checkbox.mdl-js-checkbox.mdl-js-ripple-effect
-                input.mdl-checkbox__input(name='ignore', type='checkbox', checked=`{ opts.type.ignore }`)
+                input.mdl-checkbox__input(name='ignore', type='checkbox', checked=`{ opts.type.ignore }`, onchange=`{ change }`)
                 span 面積に含めない
     .mdl-grid
         div(class=`{ col4 }`)
             .mdl-textfield.mdl-js-textfield
-                select.mdl-textfield__input(name='material', value=`{ opts.type.material }`)
+                select.mdl-textfield__input(name='material', value=`{ opts.type.material }`, onchange=`{ change }`)
                     option.mdl-list__item(each=`{ i, material in opts.stage.materials }`, value=`{ i }`) { material }
     .mdl-grid
         div(class=`{ col3 }`)
         div(class=`{ col1 }`)
-            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ submit }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(href='#madori/settings')
                 i.material-icons keyboard_return
 
     script.
@@ -30,16 +30,9 @@ madori-setting
         });
         this.mixin('grid');
 
-        this.oninput   = () => {
-            this.update();
-        };
-        this.submit   = () => {
+        this.change    = () => {
             opts.type.name      = this.name.value;
             opts.type.depth     = this.depth.value;
             opts.type.ignore    = this.ignore.checked;
             opts.type.material  = this.material.value;
-            opts.stage.loopByName('madori', (madori) => {
-                madori.redraw();
-            });
-            riot.route('madori/settings');
-        }
+        };
