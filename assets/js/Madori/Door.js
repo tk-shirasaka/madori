@@ -23,6 +23,7 @@
         if (this.type === 'height') props.y = this.start;
         if (this.line === 'right') props.x = this.parent.width - 1;
         if (this.line === 'bottom') props.y = this.parent.height - 1;
+        if (!this.parent.onFloor()) color = 'rgba(0,0,0,0.5)';
 
         this.set(props);
         this.graphics.clear().beginStroke(color).setStrokeStyle(2).moveTo(0, 0);

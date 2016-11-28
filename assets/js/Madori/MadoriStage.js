@@ -182,7 +182,7 @@
             }
             this.addChild(madori);
 
-            madori.setMadoriProps(json.data[i]);
+            madori.set(json.data[i]);
             if (callback) callback(madori);
         }
     };

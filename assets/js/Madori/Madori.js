@@ -1,6 +1,5 @@
 (function () {
     var _locate = {x: [], y: []};
-    var _area   = 0;
     var _hover  = 0;
     var _action = false;
     var _ticker = false;
@@ -57,13 +56,8 @@
         });
 
         this.addEventListener('removed', () => {
-            _area -= (this.width * this.height);
             this.clearLocate();
         });
-    };
-
-    Madori.prototype.area = function() {
-        return _area;
     };
 
     Madori.prototype.hovered = function() {
@@ -114,7 +108,6 @@
     Madori.prototype.nearLocate = function() {
         var result = {};
 
-        this.clearLocate();
         _locate.x.find(function(pos) {
             if (Math.abs(pos - this.x) < 5) result.x = pos;
             else if (Math.abs(pos - this.x - this.width) < 10) result.x = pos - this.width;
@@ -127,30 +120,24 @@
             else return false;
             return true;
         }, this);
-        this.setLocate();
 
         return result;
     };
 
     Madori.prototype.draw = function(ctx) {
+        var type    = this.stage.types[this.type];
         ['top', 'left', 'right', 'bottom'].forEach((key) => {
             if (this.wall.indexOf(key) >= 0) return;
             this.setChildIndex(this.getChildByName(key), 2);
         });
+        this.stage.getChildByName('tubo').area += (type.ignore === true) ? 0 : this.width * this.height * (type.rate + 1);
         createjs.Container.prototype.draw.call(this, ctx);
     };
 
-    Madori.prototype.setMadoriProps = function(props) {
-        var orig    = {
-            width:  this.width,
-            height: this.height,
-            type:   this.type,
-        };
+    Madori.prototype.set = function(props) {
         this.clearLocate();
-        this.set(props);
+        createjs.Container.prototype.set.call(this, props);
 
-        _area += (this.type === undefined || this.stage.types[this.type].ignore === true) ? 0 : this.width * this.height * (this.stage.types[this.type].rate + 1);
-        _area -= (orig.type === undefined || this.stage.types[orig.type].ignore === true) ? 0 : orig.width * orig.height * (this.stage.types[orig.type].rate + 1);
         this.getChildByName('right').x  = this.width - 1;
         this.getChildByName('bottom').y = this.height - 1;
 
@@ -168,7 +155,7 @@
         if (shift.x || shift.y) {
             _ticker = createjs.Ticker.addEventListener('tick', () => {
                 this.stage.set({x: this.stage.x + shift.x * this.stage.scaleX, y: this.stage.y + shift.y * this.stage.scaleY});
-                this.setMadoriProps({x: this.x - shift.x, y: this.y - shift.y});
+                this.set({x: this.x - shift.x, y: this.y - shift.y});
             });
         }
     };
@@ -195,7 +182,7 @@
             var y       = this.y + (this.height - height) / 2;
             action.x    = pointer.x;
             action.y    = pointer.y;
-            this.setMadoriProps({x: x, y: y, width: width, height: height});
+            this.set({x: x, y: y, width: width, height: height});
         }
     };
 }());

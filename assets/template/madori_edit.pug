@@ -3,7 +3,7 @@ madori-edit
         div(class=`{ col4 }`)
             input.mdl-slider.mdl-js-slider(name='size', type='range', min=`{ madoriMin }`, max=`{ madoriMax }`, step=0.25, value=`{ madoriSize }`, oninput=`{ change }`)
         div(class=`{ col1 }`)
-            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ prevSize }`, if=`{ madoriMax !== 5 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ prevSize }`, if=`{ madoriMax !== 1 }`)
                 i.material-icons navigate_before
         div(class=`{ col2 }`)
             span { size.value } 畳
@@ -15,15 +15,6 @@ madori-edit
             .mdl-textfield.mdl-js-textfield
                 select.mdl-textfield__input(name='type', value=`{ opts.madori.type }`, onchange=`{ change }`)
                     option.mdl-list__item(each=`{ type, i in opts.stage.types }`, value=`{ i }`) { type.name }
-    .mdl-grid
-        div(class=`{ col1 }`)
-            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ floorDown }`, if=`{ opts.madori.floor !== 1 }`)
-                i.material-icons remove
-        div(class=`{ col2 }`)
-            span { opts.madori.floor } 階
-        div(class=`{ col1 }`)
-            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ floorUp }`)
-                i.material-icons add
     .mdl-grid
         div(class=`{ col2 }`)
             label.mdl-switch.mdl-js-switch.mdl-js-ripple-effect
@@ -62,6 +53,21 @@ madori-edit
                 i.material-icons edit
     .mdl-grid
         div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ floorDown }`, if=`{ opts.madori.floor !== 1 }`)
+                i.material-icons remove
+        div(class=`{ col2 }`)
+            span { opts.madori.floor } 階
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ floorUp }`)
+                i.material-icons add
+    .mdl-grid
+        div(class=`{ col3 }`)
+            p { opts.stage.types[type.value].name } - 設定変更
+        div(class=`{ col1 }`)
+            a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(href=`{ '#madori/setting/' + type.value }`)
+                i.material-icons edit
+    .mdl-grid
+        div(class=`{ col1 }`)
             a.mdl-button.mdl-js-button.mdl-button--icon.mdl-button--colored(onclick=`{ remove }`)
                 i.material-icons delete
         div(class=`{ col2 }`)
@@ -76,21 +82,21 @@ madori-edit
         this.mixin('grid');
 
         this.madoriSize = opts.madori.width * opts.madori.height / opts.stage.unit / opts.stage.unit * 2;
-        this.madoriMin  = this.madoriSize - this.madoriSize % 5 + 0.25;
-        this.madoriMax  = this.madoriMin + 5 - 0.25
+        this.madoriMin  = (this.madoriSize - 0.25) - (this.madoriSize - 0.25) % 1 + 0.25;
+        this.madoriMax  = (this.madoriSize - 0.25) - (this.madoriSize - 0.25) % 1 + 1;
 
         this.changeSize = (offset) => {
             this.size.min   = this.madoriMin += offset;
             this.size.max   = this.madoriMax += offset;
             this.change();
         };
-        this.prevSize   = () => (this.changeSize(-5));
-        this.nextSize   = () => (this.changeSize(5));
+        this.prevSize   = () => (this.changeSize(-1));
+        this.nextSize   = () => (this.changeSize(1));
         this.floorDown  = () => (opts.madori.floor--);
         this.floorUp    = () => (opts.madori.floor++);
         this.change     = () => {
             opts.stage.types[opts.madori.type].counter--;
-            opts.madori.setMadoriProps({
+            opts.madori.set({
                 width:  parseFloat(this.size.value) * opts.stage.unit * opts.stage.unit / opts.madori.height / 2,
                 wall:   ['top', 'left', 'right', 'bottom'].filter((key) => (this[key].checked)),
                 type:   parseInt(this.type.value),

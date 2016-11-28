@@ -16,13 +16,13 @@
             var x       = pointer.x - action.x + this.parent.x;
             var y       = pointer.y - action.y + this.parent.y;
             var vector  = {x: (this.parent.x < x) ? 1 : -1, y: (this.parent.y < y) ? 1 : -1};
-            this.parent.setMadoriProps({x: x, y: y});
+            this.parent.set({x: x, y: y});
 
             var near    = this.parent.nearLocate();
             if (near.x !== undefined) vector.x = 0;
             if (near.y !== undefined) vector.y = 0;
 
-            this.parent.setMadoriProps(near);
+            this.parent.set(near);
             this.parent.shiftWindow(vector);
 
             action.x    = pointer.x + (near.x || x) - x;

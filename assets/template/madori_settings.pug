@@ -11,6 +11,11 @@ madori-settings
         div(class=`{ col4 }`)
             input.mdl-slider.mdl-js-slider(name='height', type='range', min=0, max=50, value=`{ opts.stage.height }`, oninput=`{ oninput }`)
             span 縦 { height.value } m
+    .mdl-grid
+        div(class=`{ col4 }`)
+            .mdl-textfield.mdl-js-textfield
+                select.mdl-textfield__input(name='unit', value=`{ opts.stage.unit }`, onchange=`{ oninput }`)
+                    option.mdl-list__item(each=`{ i, unit in opts.stage.units }`, value=`{ i }`) { unit }
     .mdl-grid(each=`{ type, i in opts.stage.types }`)
         div(class=`{ col2 }`)
             span { type.name }
@@ -39,6 +44,7 @@ madori-settings
             opts.stage.tubo     = parseInt(this.tubo.value);
             opts.stage.width    = parseInt(this.width.value);
             opts.stage.height   = parseInt(this.height.value);
+            opts.stage.unit     = parseFloat(this.unit.value);
         };
         this.remove = (e) => {
             var index   = this.opts.stage.types.indexOf(e.item.type);
